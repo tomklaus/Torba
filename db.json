@@ -1,0 +1,38 @@
+{
+  "users": [
+    {
+      "id": "1760285743158",
+      "username": "T",
+      "email": "1@1.ua",
+      "password": "$2a$10$oRJasfck.fDrz56vFwlEwuW3QrqKCbQgF3la.2LEphC9Fe72bIGOS",
+      "createdAt": "2025-10-12T16:15:43.158Z"
+    },
+    {
+      "id": "1760285795164",
+      "username": "Y",
+      "email": "1@1.ua",
+      "password": "$2a$10$7G9UlmUAfRy7HVKREtWxZOaNSeHThHBZMdgyF8nfQXZS2J1v7EjgW",
+      "createdAt": "2025-10-12T16:16:35.164Z"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "1760285755622",
+      "userId": "1760285743158",
+      "question1": "1",
+      "question2": "2",
+      "question3": "миша",
+      "createdAt": "2025-10-12T16:15:55.622Z",
+      "updatedAt": "2025-10-12T16:36:30.265Z"
+    },
+    {
+      "id": "1760285818491",
+      "userId": "1760285795164",
+      "question1": "6",
+      "question2": "7",
+      "question3": "8",
+      "createdAt": "2025-10-12T16:16:58.491Z",
+      "updatedAt": "2025-10-12T16:31:01.268Z"
+    }
+  ]
+}
