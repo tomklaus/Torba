@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Торба - Додаток</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <h1>Ласкаво просимо до додатку Торба!</h1>
+      <div class="welcome-message">
+        <p>Будь ласка, увійдіть або зареєструйтеся, щоб продовжити</p>
+        <a href="login.html"><button class="login-btn">Увійти</button></a>
+        <a href="registration.html"><button>Зареєструватися</button></a>
+      </div>
+      <div id="router-outlet"></div>
+    </div>
+  </div>
+
+  <script src="app/services/storage.service.js"></script>
+  <script src="app/auth/auth.component.js"></script>
+  <script src="app/profile.component.js"></script>
+  <script src="app/router.js"></script>
+  <script src="app/app.component.js"></script>
+</body>
+</html>
