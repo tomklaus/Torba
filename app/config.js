@@ -4,7 +4,7 @@ const CONFIG = {
   // To make this work, you need to deploy the backend.js file to a hosting service
   // such as Heroku, Render, Railway, or other Node.js hosting platforms
   USE_LOCAL_AUTH: false, // Set to false to use server API
-  API_BASE_URL: 'https://fabulous-semolina-0999a4.netlify.app/' // Replace with your deployed server URL
+  API_BASE_URL: 'https://torba.onrender.com' // Replace with your deployed server URL
 };
 
 // Helper functions for local authentication
