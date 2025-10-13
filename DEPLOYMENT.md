@@ -6,12 +6,13 @@ To deploy this application to a platform like Railway, Heroku, or similar, follo
 
 1. Create a new project on Railway
 2. Connect your GitHub repository or push your code directly
-3. Add the environment variable in the Railway dashboard:
+3. The DATABASE_URL environment variable should be automatically set by Railway when you attach a PostgreSQL database to your project
+4. If needed, you can manually set it in the Railway dashboard:
    - Go to your project settings
    - Under "Variables", add a new variable:
      - Key: `DATABASE_URL`
-     - Value: `postgresql://postgres:UnbxoeJlIoaxpwAGYTcvVBfrQEROzOQN@centerbeam.proxy.rlwy.net:32328/railway`
-4. Deploy the application
+     - Value: The connection string provided by Railway (should be available in your Railway dashboard under the PostgreSQL database settings)
+5. Deploy the application
 
 ## Environment Variables
 

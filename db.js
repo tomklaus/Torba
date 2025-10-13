@@ -4,28 +4,47 @@ const { Pool } = require('pg');
 // Log the DATABASE_URL to debug
 console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'Exists' : 'Missing');
 if (process.env.DATABASE_URL) {
-  console.log('DATABASE_URL contains:', process.env.DATABASE_URL.substring(0, 30) + '...');
+ console.log('DATABASE_URL contains:', process.env.DATABASE_URL.substring(0, 30) + '...');
 }
 
-// Database connection pool
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false // SSL only for production
-});
+// For Railway deployment, the DATABASE_URL is automatically set
+// For local development, it comes from the .env file
+let connectionString = process.env.DATABASE_URL;
 
 // Add error handling for when DATABASE_URL is not set
-if (!process.env.DATABASE_URL) {
+if (!connectionString) {
   console.error('ERROR: DATABASE_URL environment variable is not set!');
-  console.error('Please set the DATABASE_URL environment variable to your Railway PostgreSQL connection string.');
+  console.error('Please set the DATABASE_URL environment variable to your PostgreSQL connection string.');
+  // Provide a fallback for development if needed
+ if (process.env.NODE_ENV !== 'production') {
+    console.warn('Using fallback connection string for development. This will not work in deployment.');
+  }
 }
+
+// Database connection pool with better Railway support
+const pool = new Pool({
+  connectionString: connectionString,
+  ssl: 
+    process.env.NODE_ENV === 'production' 
+      ? { 
+          rejectUnauthorized: false // Required for Railway
+        } 
+      : false, // SSL only for production
+  // Additional settings for stability
+ connectionTimeoutMillis: 10000, // 10 seconds
+  idleTimeoutMillis: 30000,      // 30 seconds
+ max: 10 // Maximum number of clients in the pool
+});
 
 // Test the connection
 pool.on('connect', () => {
-  console.log('Connected to PostgreSQL database');
+ console.log('Connected to PostgreSQL database');
 });
 
+// Handle connection errors gracefully
 pool.on('error', (err) => {
   console.error('PostgreSQL connection error:', err);
+  // Don't exit the process on connection errors, as the pool can recover
 });
 
 // Function to initialize the database tables
