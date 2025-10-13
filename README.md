@@ -49,10 +49,10 @@ This is a full-stack web application for user registration, authentication, and 
 ## Deployment
 
 ### Frontend Deployment (Netlify)
-Deploy the entire project directory (except backend.js) to Netlify.
+Deploy the frontend files to Netlify (index.html, login.html, profile.html, registration.html, styles.css, app/ folder).
 
 ### Backend Deployment (Railway)
-For production deployment of the backend to Railway, follow the instructions in DEPLOY_INSTRUCTIONS.md
+For production deployment of the backend API to Railway, follow the instructions in DEPLOY_INSTRUCTIONS.md
 
 ## API Endpoints
 
