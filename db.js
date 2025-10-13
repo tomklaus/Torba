@@ -27,13 +27,13 @@ const pool = new Pool({
   ssl: 
     process.env.NODE_ENV === 'production' 
       ? { 
-          rejectUnauthorized: false // Required for Railway
+          rejectUnauthorized: false // Required for Railway and other cloud providers
         } 
       : false, // SSL only for production
   // Additional settings for stability
- connectionTimeoutMillis: 10000, // 10 seconds
+  connectionTimeoutMillis: 10000, // 10 seconds
   idleTimeoutMillis: 30000,      // 30 seconds
- max: 10 // Maximum number of clients in the pool
+  max: 10 // Maximum number of clients in the pool
 });
 
 // Test the connection

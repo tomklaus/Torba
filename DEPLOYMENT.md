@@ -14,6 +14,10 @@ To deploy this application to a platform like Railway, Heroku, or similar, follo
      - Value: The connection string provided by Railway (should be available in your Railway dashboard under the PostgreSQL database settings)
 5. Deploy the application
 
+## SSL Configuration
+
+The application is configured to use SSL connections in production environments, which is required by Railway and other cloud providers. The database connection automatically enables SSL when NODE_ENV is set to 'production' (which is the default in Railway).
+
 ## Environment Variables
 
 Make sure to set the following environment variable in your deployment platform:
