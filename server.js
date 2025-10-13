@@ -13,9 +13,6 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('.')); // Serve static files from root folder
 
-// Initialize the database with default data
-db.initializeDB();
-
 // Authentication routes
 // Register a new user
 app.post('/api/register', async (req, res) => {
@@ -157,7 +154,7 @@ app.put('/api/profiles/:id', async (req, res) => {
     }
     
     res.json({ profile: result.rows[0], message: 'Профіль успішно оновлено' });
-  } catch (error) {
+ } catch (error) {
     console.error('Помилка оновлення профілю:', error);
     res.status(500).json({ error: 'Помилка сервера' });
   }
@@ -189,6 +186,20 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.listen(port, () => {
-  console.log(`Сервер запущено на http://localhost:${port}`);
-});
+// Initialize the database with default data before starting the server
+async function startServer() {
+  try {
+    await db.initializeDB();
+    console.log('Database initialized successfully');
+    
+    // Start the server after database initialization
+    app.listen(port, () => {
+      console.log(`Сервер запущено на http://localhost:${port}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+startServer();

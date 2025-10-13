@@ -14,9 +14,6 @@ app.use(cors({
 }));
 app.use(bodyParser.json());
 
-// Initialize the database with default data
-db.initializeDB();
-
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
@@ -195,15 +192,29 @@ app.get('/', (req, res) => {
   res.json({ message: 'Profile API Server is running!', version: '1.0' });
 });
 
-app.listen(port, () => {
-  console.log(`Сервер запущено на порті ${port}`);
-  console.log(`Доступні endpoints:`);
-  console.log(`  POST   /api/register - реєстрація користувача`);
-  console.log(`  POST   /api/login - вхід користувача`);
-  console.log(`  GET    /api/profiles/:userId - отримання профілів користувача`);
-  console.log(`  POST   /api/profiles - створення профілю`);
-  console.log(`  PUT    /api/profiles/:id - оновлення профілю`);
-  console.log(`  DELETE /api/profiles/:id - видалення профілю`);
-});
+// Initialize the database with default data before starting the server
+async function startServer() {
+  try {
+    await db.initializeDB();
+    console.log('Database initialized successfully');
+    
+    // Start the server after database initialization
+    app.listen(port, () => {
+      console.log(`Сервер запущено на порті ${port}`);
+      console.log(`Доступні endpoints:`);
+      console.log(`  POST   /api/register - реєстрація користувача`);
+      console.log(`  POST   /api/login - вхід користувача`);
+      console.log(`  GET    /api/profiles/:userId - отримання профілів користувача`);
+      console.log(`  POST   /api/profiles - створення профілю`);
+      console.log(`  PUT    /api/profiles/:id - оновлення профілю`);
+      console.log(`  DELETE /api/profiles/:id - видалення профілю`);
+    });
+ } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+startServer();
 
 module.exports = app;
