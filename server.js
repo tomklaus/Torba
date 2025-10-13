@@ -3,39 +3,23 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 const bcrypt = require('bcryptjs');
-const { Low } = require('lowdb');
-const { JSONFile } = require('lowdb/node');
+const db = require('./db');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('.')); // Serve static files from root folder
 
-// DB setup
-const file = path.join(__dirname, 'db.json');
-const adapter = new JSONFile(file);
-const db = new Low(adapter, { users: [], profiles: [] });
-
 // Initialize the database with default data
-const initializeDB = async () => {
-  await db.read();
-  if (db.data === null) {
-    db.data = { users: [], profiles: [] };
-  }
-  await db.write();
-};
-
-initializeDB();
+db.initializeDB();
 
 // Authentication routes
 // Register a new user
 app.post('/api/register', async (req, res) => {
   try {
-    await db.read();
-    
     const { username, email, password } = req.body;
     
     // Validate required fields
@@ -44,8 +28,12 @@ app.post('/api/register', async (req, res) => {
     }
     
     // Check if user already exists
-    const existingUser = db.data.users.find(u => u.username === username);
-    if (existingUser) {
+    const existingUserCheck = await db.query(
+      'SELECT id FROM users WHERE username = $1 OR email = $2', 
+      [username, email]
+    );
+    
+    if (existingUserCheck.rows.length > 0) {
       return res.status(409).json({ error: 'Користувач з таким ім\'ям вже існує' });
     }
     
@@ -53,22 +41,14 @@ app.post('/api/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     
     // Create new user
-    const newUser = {
-      id: Date.now().toString(),
-      username,
-      email,
-      password: hashedPassword,
-      createdAt: new Date().toISOString()
-    };
+    const result = await db.query(
+      'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id, username, email, created_at',
+      [username, email, hashedPassword]
+    );
     
-    db.data.users.push(newUser);
-    await db.write();
+    const newUser = result.rows[0];
     
-    // Return user without password
-    const userResponse = { ...newUser };
-    delete userResponse.password;
-    
-    res.status(201).json({ user: userResponse, message: 'Користувач успішно зареєстрований' });
+    res.status(201).json({ user: newUser, message: 'Користувач успішно зареєстрований' });
   } catch (error) {
     console.error('Помилка реєстрації:', error);
     res.status(500).json({ error: 'Помилка сервера під час реєстрації' });
@@ -78,8 +58,6 @@ app.post('/api/register', async (req, res) => {
 // Login
 app.post('/api/login', async (req, res) => {
   try {
-    await db.read();
-    
     const { username, password } = req.body;
     
     // Validate required fields
@@ -88,10 +66,16 @@ app.post('/api/login', async (req, res) => {
     }
     
     // Find user by username
-    const user = db.data.users.find(u => u.username === username);
-    if (!user) {
+    const userResult = await db.query(
+      'SELECT id, username, email, password, created_at FROM users WHERE username = $1',
+      [username]
+    );
+    
+    if (userResult.rows.length === 0) {
       return res.status(401).json({ error: 'Неправильне ім\'я користувача або пароль' });
     }
+    
+    const user = userResult.rows[0];
     
     // Check password
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -114,17 +98,18 @@ app.post('/api/login', async (req, res) => {
 // Get all profiles for a user
 app.get('/api/profiles/:userId', async (req, res) => {
   try {
-    await db.read();
-    
     const { userId } = req.params;
     
     if (!userId) {
       return res.status(400).json({ error: 'ID користувача обов\'язковий' });
     }
     
-    const userProfiles = db.data.profiles.filter(profile => profile.userId == userId);
+    const result = await db.query(
+      'SELECT id, user_id, question1, question2, question3, created_at, updated_at FROM profiles WHERE user_id = $1 ORDER BY created_at DESC',
+      [userId]
+    );
     
-    res.json({ profiles: userProfiles });
+    res.json({ profiles: result.rows });
   } catch (error) {
     console.error('Помилка отримання профілів:', error);
     res.status(500).json({ error: 'Помилка сервера' });
@@ -134,28 +119,18 @@ app.get('/api/profiles/:userId', async (req, res) => {
 // Create a new profile
 app.post('/api/profiles', async (req, res) => {
   try {
-    await db.read();
-    
     const { userId, question1, question2, question3 } = req.body;
     
     if (!userId || !question1 || !question2 || !question3) {
       return res.status(400).json({ error: 'Всі поля обов\'язкові для заповнення' });
     }
     
-    const newProfile = {
-      id: Date.now().toString(),
-      userId: userId,
-      question1,
-      question2,
-      question3,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    const result = await db.query(
+      'INSERT INTO profiles (user_id, question1, question2, question3) VALUES ($1, $2, $3, $4) RETURNING *',
+      [userId, question1, question2, question3]
+    );
     
-    db.data.profiles.push(newProfile);
-    await db.write();
-    
-    res.status(201).json({ profile: newProfile, message: 'Профіль успішно збережено' });
+    res.status(201).json({ profile: result.rows[0], message: 'Профіль успішно збережено' });
   } catch (error) {
     console.error('Помилка збереження профілю:', error);
     res.status(500).json({ error: 'Помилка сервера' });
@@ -165,8 +140,6 @@ app.post('/api/profiles', async (req, res) => {
 // Update a profile
 app.put('/api/profiles/:id', async (req, res) => {
   try {
-    await db.read();
-    
     const profileId = req.params.id;
     const { userId, question1, question2, question3 } = req.body;
     
@@ -174,25 +147,16 @@ app.put('/api/profiles/:id', async (req, res) => {
       return res.status(400).json({ error: 'Всі поля обов\'язкові для заповнення' });
     }
     
-    const profileIndex = db.data.profiles.findIndex(p => p.id == profileId);
+    const result = await db.query(
+      'UPDATE profiles SET user_id = $1, question1 = $2, question2 = $3, question3 = $4, updated_at = CURRENT_TIMESTAMP WHERE id = $5 RETURNING *',
+      [userId, question1, question2, question3, profileId]
+    );
     
-    if (profileIndex === -1) {
+    if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Профіль не знайдено' });
     }
     
-    // Update the profile
-    db.data.profiles[profileIndex] = {
-      ...db.data.profiles[profileIndex],
-      userId,
-      question1,
-      question2,
-      question3,
-      updatedAt: new Date().toISOString()
-    };
-    
-    await db.write();
-    
-    res.json({ profile: db.data.profiles[profileIndex], message: 'Профіль успішно оновлено' });
+    res.json({ profile: result.rows[0], message: 'Профіль успішно оновлено' });
   } catch (error) {
     console.error('Помилка оновлення профілю:', error);
     res.status(500).json({ error: 'Помилка сервера' });
@@ -202,16 +166,16 @@ app.put('/api/profiles/:id', async (req, res) => {
 // Delete a profile
 app.delete('/api/profiles/:id', async (req, res) => {
   try {
-    await db.read();
+    const profileId = req.params.id;
     
-    const profileIndex = db.data.profiles.findIndex(p => p.id === req.params.id);
+    const result = await db.query(
+      'DELETE FROM profiles WHERE id = $1 RETURNING id',
+      [profileId]
+    );
     
-    if (profileIndex === -1) {
+    if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Профіль не знайдено' });
     }
-    
-    db.data.profiles.splice(profileIndex, 1);
-    await db.write();
     
     res.status(204).send(); // No content
   } catch (error) {
