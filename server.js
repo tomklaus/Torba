@@ -187,16 +187,21 @@ app.get('/', (req, res) => {
 });
 
 // Initialize the database with default data before starting the server
+// ПРАВИЛЬНО (для хостингу та локальної розробки)
 async function startServer() {
   try {
     await db.initializeDB();
     console.log('Database initialized successfully');
-    
+
+    // Вказуємо хост, який буде доступний ззовні
+    const HOST = '0.0.0.0';
+
     // Start the server after database initialization
-    const server = app.listen(port, () => {
-      console.log(`Сервер запущено на http://localhost:${port}`);
+    const server = app.listen(port, HOST, () => {
+      // Логуємо реальний порт, але для доступу використовуємо надане посилання
+      console.log(`Сервер запущено та слухає на хості ${HOST} та порту ${port}`);
     });
-    
+
     // Handle graceful shutdown
     process.on('SIGTERM', () => {
       console.log('SIGTERM received, shutting down gracefully');
@@ -204,7 +209,7 @@ async function startServer() {
         console.log('Process terminated');
       });
     });
-    
+
     process.on('SIGINT', () => {
       console.log('SIGINT received, shutting down gracefully');
       server.close(() => {
