@@ -1,7 +1,7 @@
 {
   "name": "profile-app",
   "version": "1.0.0",
-  "description": "Profile management application with PostgreSQL database",
+  "description": "Profile management application optimized for Railway deployment with PostgreSQL database",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -19,5 +19,8 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }

@@ -4,7 +4,7 @@ const CONFIG = {
   // To make this work, you need to deploy the backend.js file to a hosting service
   // such as Heroku, Render, Railway, or other Node.js hosting platforms
   USE_LOCAL_AUTH: false, // Set to false to use server API
-  API_BASE_URL: 'https://torba.onrender.com' // Your deployed backend URL
+  API_BASE_URL: process.env.API_BASE_URL || 'https://torba-production.up.railway.app' // Your Railway backend URL, defaults to Railway for production
 };
 
 // Helper functions for local authentication
