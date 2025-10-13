@@ -199,7 +199,7 @@ async function startServer() {
     console.log('Database initialized successfully');
     
     // Start the server after database initialization
-    app.listen(port, () => {
+    const server = app.listen(port, () => {
       console.log(`Сервер запущено на порті ${port}`);
       console.log(`Доступні endpoints:`);
       console.log(`  POST   /api/register - реєстрація користувача`);
@@ -208,6 +208,21 @@ async function startServer() {
       console.log(`  POST   /api/profiles - створення профілю`);
       console.log(`  PUT    /api/profiles/:id - оновлення профілю`);
       console.log(`  DELETE /api/profiles/:id - видалення профілю`);
+    });
+    
+    // Handle graceful shutdown
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM received, shutting down gracefully');
+      server.close(() => {
+        console.log('Process terminated');
+      });
+    });
+    
+    process.on('SIGINT', () => {
+      console.log('SIGINT received, shutting down gracefully');
+      server.close(() => {
+        console.log('Process terminated');
+      });
     });
  } catch (error) {
     console.error('Failed to start server:', error);

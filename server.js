@@ -193,8 +193,23 @@ async function startServer() {
     console.log('Database initialized successfully');
     
     // Start the server after database initialization
-    app.listen(port, () => {
+    const server = app.listen(port, () => {
       console.log(`Сервер запущено на http://localhost:${port}`);
+    });
+    
+    // Handle graceful shutdown
+    process.on('SIGTERM', () => {
+      console.log('SIGTERM received, shutting down gracefully');
+      server.close(() => {
+        console.log('Process terminated');
+      });
+    });
+    
+    process.on('SIGINT', () => {
+      console.log('SIGINT received, shutting down gracefully');
+      server.close(() => {
+        console.log('Process terminated');
+      });
     });
   } catch (error) {
     console.error('Failed to start server:', error);
