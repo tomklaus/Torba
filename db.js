@@ -1,13 +1,23 @@
 require('dotenv').config();
 const { Pool } = require('pg');
 
+// Log the DATABASE_URL to debug
+console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'Exists' : 'Missing');
+if (process.env.DATABASE_URL) {
+  console.log('DATABASE_URL contains:', process.env.DATABASE_URL.substring(0, 30) + '...');
+}
+
 // Database connection pool
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false // This is often needed for Railway connections
-  }
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false // SSL only for production
 });
+
+// Add error handling for when DATABASE_URL is not set
+if (!process.env.DATABASE_URL) {
+  console.error('ERROR: DATABASE_URL environment variable is not set!');
+  console.error('Please set the DATABASE_URL environment variable to your Railway PostgreSQL connection string.');
+}
 
 // Test the connection
 pool.on('connect', () => {
