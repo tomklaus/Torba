@@ -1,5 +1,40 @@
 # Torba Text Storage App
 
+## Enhanced with Modern UI Animations
+
+This application has been enhanced with smooth animations and transitions using Framer Motion and shadcn-inspired components, demonstrating modern UI/UX principles.
+
+### New Animation Features
+
+- **Entrance Animations**: Cards, buttons, and content fade in with staggered timing
+- **Interactive Animations**: Buttons have hover and tap effects, cards lift on hover
+- **Form Animations**: Textarea has focus animations, submission feedback is animated
+- **List Animations**: Text entries appear with smooth transitions when added or removed
+- **Loading Animations**: Enhanced skeleton screens with improved visual feedback
+- **Success/Error Animations**: Feedback messages have subtle entrance and exit animations
+- **Accessibility Support**: Reduced motion preferences are respected
+
+### Technologies Used
+
+- **Framer Motion**: For advanced animations and motion effects
+- **Tailwind CSS**: For styling with custom animation utilities
+- **Custom Animation Utilities**: Reusable animation variants and components
+
+### Components with Animations
+
+- `AnimatedButton`: Enhanced button with hover and tap animations
+- `AnimatedCard`: Card component with hover effects
+- `AnimatedTextarea`: Textarea with focus animations
+- `FadeIn` and `SlideIn`: Wrapper components for entrance animations
+- `AnimatedSkeleton`: Enhanced loading state animations
+- `Fireworks`: Spectacular fireworks animation for successful actions
+- Dissolve animation for deleted items
+- Custom CSS animation utilities for various effects
+
+The animations are designed to enhance user experience without being distracting, following shadcn UI principles with added visual polish.
+
+
+
 A Next.js application that allows users to save and retrieve text entries using PostgreSQL database.
 
 ## Features
