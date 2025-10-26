@@ -8,6 +8,7 @@ import { Form } from "@/components/ui/form";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight, Check, Loader2 } from "lucide-react";
 import { z } from "zod";
+import type { PhotoWithNsfw } from "@shared/schema";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
@@ -58,9 +59,23 @@ const registrationSchema = z.object({
   paymentMethods: z.array(z.string()).optional(),
   transportCosts: z.string().optional(),
   
-  // Крок 7
-  publicPhotos: z.array(z.string()).min(1, "Додайте хоча б 1 фото"),
-  privatePhotos: z.array(z.string()).default([]),
+  // Крок 7 - PhotoWithNsfw objects (url + NSFW scores)
+  publicPhotos: z.array(z.object({
+    url: z.string(),
+    drawingScore: z.number(),
+    hentaiScore: z.number(),
+    neutralScore: z.number(),
+    pornScore: z.number(),
+    sexyScore: z.number(),
+  })).min(1, "Додайте хоча б 1 фото"),
+  privatePhotos: z.array(z.object({
+    url: z.string(),
+    drawingScore: z.number(),
+    hentaiScore: z.number(),
+    neutralScore: z.number(),
+    pornScore: z.number(),
+    sexyScore: z.number(),
+  })).default([]),
 });
 
 type RegistrationData = z.infer<typeof registrationSchema>;

@@ -1,8 +1,10 @@
 import { UseFormReturn } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Upload, X, Image as ImageIcon, Sparkles, Lock } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Sparkles, Lock, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import type { PhotoWithNsfw } from "@shared/schema";
 
 interface Step7Props {
   form: UseFormReturn<any>;
@@ -12,12 +14,16 @@ export default function Step7({ form }: Step7Props) {
   const { toast } = useToast();
   const publicPhotos = form.watch("publicPhotos") || [];
   const privatePhotos = form.watch("privatePhotos") || [];
+  const [uploadingPublic, setUploadingPublic] = useState(false);
+  const [uploadingPrivate, setUploadingPrivate] = useState(false);
 
-  const handleFileSelect = (
+  const handleFileSelect = async (
     e: React.ChangeEvent<HTMLInputElement>,
     type: "public" | "private"
   ) => {
     const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+
     const currentPhotos = form.getValues(type === "public" ? "publicPhotos" : "privatePhotos") || [];
     
     if (currentPhotos.length + files.length > 6) {
@@ -29,15 +35,60 @@ export default function Step7({ form }: Step7Props) {
       return;
     }
 
-    // Mock: В продакшені тут буде API upload
-    // Зараз створюємо mock URLs для демонстрації
-    const mockUrls = files.map((file, index) => {
-      const timestamp = Date.now();
-      return `/uploads/${type}/${timestamp}_${currentPhotos.length + index}_${file.name}`;
-    });
+    // Set uploading state
+    if (type === "public") {
+      setUploadingPublic(true);
+    } else {
+      setUploadingPrivate(true);
+    }
 
-    const fieldName = type === "public" ? "publicPhotos" : "privatePhotos";
-    form.setValue(fieldName, [...currentPhotos, ...mockUrls]);
+    try {
+      // Upload each file to /api/upload
+      const uploadPromises = files.map(async (file) => {
+        const formData = new FormData();
+        formData.append("photo", file);
+
+        const response = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || "Помилка завантаження");
+        }
+
+        const photoData: PhotoWithNsfw = await response.json();
+        return photoData;
+      });
+
+      const uploadedPhotos = await Promise.all(uploadPromises);
+
+      // Add to form
+      const fieldName = type === "public" ? "publicPhotos" : "privatePhotos";
+      form.setValue(fieldName, [...currentPhotos, ...uploadedPhotos]);
+
+      toast({
+        title: "Фото завантажено",
+        description: `Успішно завантажено ${uploadedPhotos.length} фото`,
+      });
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      toast({
+        title: "Помилка завантаження",
+        description: error.message || "Не вдалося завантажити фото",
+        variant: "destructive",
+      });
+    } finally {
+      // Clear uploading state
+      if (type === "public") {
+        setUploadingPublic(false);
+      } else {
+        setUploadingPrivate(false);
+      }
+      // Clear input
+      e.target.value = "";
+    }
   };
 
   const removePhoto = (index: number, type: "public" | "private") => {
@@ -91,14 +142,13 @@ export default function Step7({ form }: Step7Props) {
             {/* Превью фото */}
             {publicPhotos.length > 0 && (
               <div className="grid grid-cols-3 gap-3 mb-4">
-                {publicPhotos.map((photoUrl: string, index: number) => (
-                  <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-border group bg-muted">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <ImageIcon className="h-12 w-12 text-muted-foreground" />
-                    </div>
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                      <span className="text-xs text-white text-center px-2">{photoUrl.split('/').pop()}</span>
-                    </div>
+                {publicPhotos.map((photo: PhotoWithNsfw, index: number) => (
+                  <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-border group">
+                    <img
+                      src={photo.url}
+                      alt={`Public photo ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
                     <Button
                       type="button"
                       size="icon"
@@ -116,15 +166,26 @@ export default function Step7({ form }: Step7Props) {
 
             {publicPhotos.length < 6 && (
               <FormControl>
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover-elevate transition-all">
+                <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg ${uploadingPublic ? 'cursor-wait' : 'cursor-pointer hover-elevate'} transition-all`}>
                   <div className="flex flex-col items-center gap-2">
-                    <Upload className="h-8 w-8 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
-                      Натисніть для завантаження фото
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {publicPhotos.length}/6 фото
-                    </span>
+                    {uploadingPublic ? (
+                      <>
+                        <Loader2 className="h-8 w-8 text-purple-400 animate-spin" />
+                        <span className="text-sm text-muted-foreground">
+                          Завантаження...
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-8 w-8 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">
+                          Натисніть для завантаження фото
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {publicPhotos.length}/6 фото
+                        </span>
+                      </>
+                    )}
                   </div>
                   <input
                     type="file"
@@ -132,6 +193,7 @@ export default function Step7({ form }: Step7Props) {
                     multiple
                     className="hidden"
                     onChange={(e) => handleFileSelect(e, "public")}
+                    disabled={uploadingPublic}
                     data-testid="input-public-photos"
                   />
                 </label>
@@ -158,12 +220,14 @@ export default function Step7({ form }: Step7Props) {
             {/* Превью фото */}
             {privatePhotos.length > 0 && (
               <div className="grid grid-cols-3 gap-3 mb-4">
-                {privatePhotos.map((photoUrl: string, index: number) => (
-                  <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-border group bg-muted">
-                    <div className="w-full h-full flex items-center justify-center blur-sm group-hover:blur-none transition-all">
-                      <ImageIcon className="h-12 w-12 text-muted-foreground" />
-                    </div>
-                    <div className="absolute inset-0 bg-black/30 group-hover:bg-transparent transition-all flex items-center justify-center">
+                {privatePhotos.map((photo: PhotoWithNsfw, index: number) => (
+                  <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-border group">
+                    <img
+                      src={photo.url}
+                      alt={`Private photo ${index + 1}`}
+                      className="w-full h-full object-cover blur-sm group-hover:blur-none transition-all"
+                    />
+                    <div className="absolute inset-0 bg-black/30 group-hover:bg-transparent transition-all flex items-center justify-center pointer-events-none">
                       <Lock className="h-6 w-6 text-white group-hover:opacity-0 transition-opacity" />
                     </div>
                     <Button
@@ -183,15 +247,26 @@ export default function Step7({ form }: Step7Props) {
 
             {privatePhotos.length < 6 && (
               <FormControl>
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover-elevate transition-all">
+                <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg ${uploadingPrivate ? 'cursor-wait' : 'cursor-pointer hover-elevate'} transition-all`}>
                   <div className="flex flex-col items-center gap-2">
-                    <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
-                      Натисніть для завантаження приватних фото
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {privatePhotos.length}/6 фото
-                    </span>
+                    {uploadingPrivate ? (
+                      <>
+                        <Loader2 className="h-8 w-8 text-purple-400 animate-spin" />
+                        <span className="text-sm text-muted-foreground">
+                          Завантаження...
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">
+                          Натисніть для завантаження приватних фото
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {privatePhotos.length}/6 фото
+                        </span>
+                      </>
+                    )}
                   </div>
                   <input
                     type="file"
@@ -199,6 +274,7 @@ export default function Step7({ form }: Step7Props) {
                     multiple
                     className="hidden"
                     onChange={(e) => handleFileSelect(e, "private")}
+                    disabled={uploadingPrivate}
                     data-testid="input-private-photos"
                   />
                 </label>
