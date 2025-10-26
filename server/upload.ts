@@ -66,12 +66,21 @@ async function uploadToImgbb(buffer: Buffer, mimeType: string): Promise<string> 
     throw new Error("IMGBB_API_KEY not configured");
   }
 
-  const formData = new FormData();
-  formData.append("image", buffer.toString("base64"));
+  console.log(`[ImgBB] Uploading image, buffer size: ${buffer.length} bytes, mimeType: ${mimeType}`);
+
+  // ImgBB accepts base64 string in the "image" parameter
+  const base64Image = buffer.toString("base64");
+
+  // Use URLSearchParams for application/x-www-form-urlencoded
+  const params = new URLSearchParams();
+  params.append("image", base64Image);
   
   const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
     method: "POST",
-    body: formData,
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: params.toString(),
   });
 
   if (!response.ok) {
@@ -83,6 +92,7 @@ async function uploadToImgbb(buffer: Buffer, mimeType: string): Promise<string> 
   const data = await response.json() as any;
   
   if (!data.success || !data.data?.url) {
+    console.error("[ImgBB] Invalid response:", data);
     throw new Error("ImgBB response invalid");
   }
 
