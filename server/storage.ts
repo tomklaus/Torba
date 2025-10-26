@@ -38,13 +38,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProfile(profile: Omit<InsertProfile, "id">): Promise<Profile> {
-    const result = await db.insert(profiles).values(profile as InsertProfile).returning();
+    const result = await db.insert(profiles).values(profile as any).returning();
     return result[0];
   }
 
   async updateProfile(userId: string, profileUpdate: Partial<InsertProfile>): Promise<Profile | undefined> {
     const result = await db.update(profiles)
-      .set({ ...profileUpdate, updatedAt: new Date() })
+      .set({ ...profileUpdate, updatedAt: new Date() } as any)
       .where(eq(profiles.userId, userId))
       .returning();
     return result[0];

@@ -3,6 +3,16 @@ import { pgTable, text, varchar, integer, date, boolean, jsonb, timestamp } from
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Type для фото з NSFW модерацією
+export type PhotoWithNsfw = {
+  url: string;
+  drawingScore: number;
+  hentaiScore: number;
+  neutralScore: number;
+  pornScore: number;
+  sexyScore: number;
+};
+
 // Users table - для авторізації
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -59,9 +69,9 @@ export const profiles = pgTable("profiles", {
   paymentMethods: jsonb("payment_methods").notNull().default(sql`'[]'`).$type<string[]>(),
   transportCosts: text("transport_costs"),
   
-  // Крок 7: Фото галереї (URLs на uploaded файли, не base64)
-  publicPhotos: jsonb("public_photos").notNull().default(sql`'[]'`).$type<string[]>(),
-  privatePhotos: jsonb("private_photos").notNull().default(sql`'[]'`).$type<string[]>(),
+  // Крок 7: Фото галереї (URLs + NSFW теги)
+  publicPhotos: jsonb("public_photos").notNull().default(sql`'[]'`).$type<PhotoWithNsfw[]>(),
+  privatePhotos: jsonb("private_photos").notNull().default(sql`'[]'`).$type<PhotoWithNsfw[]>(),
   
   // Додаткові поля
   isComplete: boolean("is_complete").notNull().default(false), // Чи завершена реєстрація
@@ -76,8 +86,6 @@ export const insertUserSchema = createInsertSchema(users).pick({
 
 export const insertProfileSchema = createInsertSchema(profiles).omit({
   id: true,
-  userId: true,
-  createdAt: true,
   updatedAt: true,
   isComplete: true,
   currentStep: true,

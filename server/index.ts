@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { initializeUpload } from "./upload";
 import fs from "fs";
 import path from "path";
 
@@ -63,6 +64,11 @@ app.get(['/sw-dev.js', '/service-worker.js'], (req, res, next) => {
 });
 
 (async () => {
+  // Initialize upload module (preload NSFW model)
+  initializeUpload().catch(err => {
+    console.error("[Init] Failed to initialize upload module:", err);
+  });
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

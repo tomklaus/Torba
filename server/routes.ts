@@ -1,7 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import multer from "multer";
 import { storage } from "./storage";
 import { insertUserSchema, insertProfileSchema } from "@shared/schema";
+import { uploadPhoto } from "./upload";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -68,12 +70,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Користувача не знайдено" });
       }
 
-      // Create profile
+      // Create profile (isComplete and currentStep have defaults in schema)
       const profile = await storage.createProfile({
         userId,
         ...profileData,
-        isComplete: true,
-        currentStep: 7,
       });
 
       return res.status(201).json(profile);
@@ -110,12 +110,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Невірний формат userId" });
       }
 
-      // Validate update data (partial profile schema, excluding immutable fields)
-      const updateProfileSchema = insertProfileSchema
-        .omit({ 
-          userId: true, // Cannot change user relationship
-        })
-        .partial();
+      // Validate update data (partial profile schema)
+      const updateProfileSchema = insertProfileSchema.partial();
       
       const validation = updateProfileSchema.safeParse(req.body);
       if (!validation.success) {
@@ -138,19 +134,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Photo upload endpoint (mock for now - real implementation in future)
-  app.post("/api/upload", async (req, res) => {
+  // Photo upload endpoint with compression, imgbb upload, and NSFW moderation
+  const upload = multer({ storage: multer.memoryStorage() });
+  
+  app.post("/api/upload", upload.single("photo"), async (req, res) => {
     try {
-      // TODO: Implement real file upload with multer + cloud storage
-      // For now, return mock URLs
-      const { type } = req.body; // "public" or "private"
-      const timestamp = Date.now();
-      const mockUrl = `/uploads/${type}/${timestamp}_mock.jpg`;
-      
-      return res.json({ url: mockUrl });
+      if (!req.file) {
+        return res.status(400).json({ message: "Файл не надіслано" });
+      }
+
+      const { buffer, mimetype } = req.file;
+
+      // Validate file type
+      if (!mimetype.startsWith("image/")) {
+        return res.status(400).json({ message: "Тільки зображення дозволені" });
+      }
+
+      // Upload with compression, imgbb storage, and NSFW moderation
+      const photoData = await uploadPhoto(buffer, mimetype);
+
+      console.log("[API] Upload successful:", photoData.url);
+      return res.json(photoData);
     } catch (error: any) {
-      console.error("Upload error:", error);
-      return res.status(500).json({ message: "Помилка завантаження фото" });
+      console.error("[API] Upload error:", error);
+      return res.status(500).json({ 
+        message: error.message || "Помилка завантаження фото" 
+      });
     }
   });
 
