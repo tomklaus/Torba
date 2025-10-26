@@ -1,11 +1,25 @@
 import sharp from "sharp";
 import FormData from "form-data";
 import { fetch } from "undici";
+import * as tf from "@tensorflow/tfjs-node";
+import { createRequire } from "module";
 import type { PhotoWithNsfw } from "@shared/schema";
 
-// TODO: Enable NSFW moderation when nsfwjs ESM issue is resolved
-// For now, returning placeholder scores
-const NSFW_ENABLED = false;
+// Use createRequire for nsfwjs (CommonJS module in ESM context)
+const require = createRequire(import.meta.url);
+const nsfwjs = require("nsfwjs");
+
+// NSFW model instance
+let nsfwModel: any | null = null;
+
+async function loadNsfwModel() {
+  if (!nsfwModel) {
+    console.log("[NSFW] Loading model...");
+    nsfwModel = await nsfwjs.load();
+    console.log("[NSFW] Model loaded successfully");
+  }
+  return nsfwModel;
+}
 
 // Compress image to max 800px on longest side
 async function compressImage(buffer: Buffer, mimeType: string): Promise<Buffer> {
@@ -78,31 +92,34 @@ async function uploadToImgbb(buffer: Buffer, mimeType: string): Promise<string> 
 
 // Moderate image with NSFW detection
 async function moderateImage(buffer: Buffer): Promise<Omit<PhotoWithNsfw, "url">> {
-  if (!NSFW_ENABLED) {
-    // Return placeholder scores until NSFW moderation is enabled
-    console.log("[NSFW] Moderation disabled - returning placeholder scores");
-    return {
-      drawingScore: 0,
-      hentaiScore: 0,
-      neutralScore: 1.0, // Assume neutral by default
-      pornScore: 0,
-      sexyScore: 0,
-    };
+  const model = await loadNsfwModel();
+  
+  // Convert buffer to tensor
+  let image = await tf.node.decodeImage(buffer, 3);
+  
+  // NSFW.js expects Tensor3D, but decodeImage might return Tensor4D
+  // If it's a batch (4D), squeeze to 3D
+  if (image.shape.length === 4) {
+    image = tf.squeeze(image, [0]) as tf.Tensor3D;
+  }
+  
+  const predictions = await model.classify(image as tf.Tensor3D);
+  image.dispose();
+
+  // Convert predictions array to scores object
+  const scores: Record<string, number> = {};
+  for (const pred of predictions) {
+    scores[pred.className] = pred.probability;
   }
 
-  // TODO: Implement NSFW detection when nsfwjs ESM compatibility is fixed
-  // Original implementation:
-  // 1. Load nsfwjs model
-  // 2. Decode buffer to tensor
-  // 3. Classify with model.classify()
-  // 4. Return scores
-  
+  console.log("[NSFW] Moderation results:", scores);
+
   return {
-    drawingScore: 0,
-    hentaiScore: 0,
-    neutralScore: 1.0,
-    pornScore: 0,
-    sexyScore: 0,
+    drawingScore: scores.Drawing || 0,
+    hentaiScore: scores.Hentai || 0,
+    neutralScore: scores.Neutral || 0,
+    pornScore: scores.Porn || 0,
+    sexyScore: scores.Sexy || 0,
   };
 }
 
@@ -128,13 +145,13 @@ export async function uploadPhoto(
   };
 }
 
-// Initialize upload module
+// Initialize upload module (preload NSFW model)
 export async function initializeUpload() {
-  if (NSFW_ENABLED) {
-    console.log("[Upload] NSFW moderation will be enabled");
-    // TODO: Preload NSFW model when implemented
-  } else {
-    console.log("[Upload] NSFW moderation disabled - using placeholder scores");
+  try {
+    await loadNsfwModel();
+    console.log("[Upload] Module initialized with NSFW moderation");
+  } catch (error) {
+    console.error("[Upload] Failed to initialize:", error);
+    throw error;
   }
-  console.log("[Upload] Module initialized");
 }
