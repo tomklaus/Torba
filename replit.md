@@ -4,16 +4,22 @@
 Progressive Web Application для LGBTQ+ спільноти України з фокусом на гей-знакомства. Додаток об'єднує функціонал популярних платформ (Grindr, Hornet) з безкоштовним доступом до преміум функцій.
 
 ## Поточний стан
-**Етап:** MVP Development - Task 1 (Schema & Frontend) готово до review
+**Етап:** MVP Development - ✅ COMPLETED (Tasks 1-3)
 **Дата останнього оновлення:** 26 жовтня 2025
 
-**Task 1 Status:**
-- ✅ Database schema (shared/schema.ts) - complete with proper defaults
-- ✅ All 7 registration steps with conditional commerce logic
-- ✅ PWA setup (manifest, Service Worker registration via Express middleware)
-- ✅ 45 data-testid attributes for testing
-- ✅ Dark theme, Ukrainian UI, responsive design
-- ⏳ Mock code in login (timeout redirect) and Step7 (photo URLs) - will connect to backend in Task 2
+**Completed Tasks:**
+- ✅ Task 1: Schema & Frontend - Complete with PWA, dark theme, Ukrainian UI
+- ✅ Task 2: Backend - PostgreSQL + Drizzle ORM, full API with Zod validation
+- ✅ Task 3: Integration & Testing - End-to-end flow tested and working
+
+**What Works:**
+- ✅ Email-only authentication (creates user in DB)
+- ✅ 7-step registration with conditional commerce logic
+- ✅ Full API integration (auth/check, profiles CRUD)
+- ✅ Data persistence to PostgreSQL
+- ✅ Error handling and loading states throughout
+- ✅ PWA manifest and service worker
+- ✅ Responsive design (mobile + desktop)
 
 ## Технічний стек
 
@@ -65,15 +71,34 @@ Progressive Web Application для LGBTQ+ спільноти України з �
 - ✅ Всі емоджі замінені на Lucide іконки
 - ✅ Database schema з правильними defaults для JSONB масивів
 
-## Наступні кроки (Task 2 - Backend)
-- [ ] Створити server/db.ts для підключення до PostgreSQL
-- [ ] Оновити server/storage.ts на DatabaseStorage
-- [ ] Реалізувати API endpoints:
-  - POST /api/auth/check - перевірка email
-  - POST /api/profiles - створення профілю
-  - GET /api/profiles/:id - отримання профілю
-  - POST /api/upload - завантаження фото
-- [ ] Виконати `npm run db:push` для міграції схеми
+## Implemented Features
+
+### Backend (✅ Complete)
+- ✅ PostgreSQL database via Neon with Drizzle ORM
+- ✅ DatabaseStorage with full CRUD operations
+- ✅ API Endpoints:
+  - POST /api/auth/check - Email verification + user creation
+  - POST /api/profiles - Create profile (with full Zod validation)
+  - GET /api/profiles/:userId - Get profile
+  - PATCH /api/profiles/:userId - Update profile (userId immutable)
+  - POST /api/upload - Mock photo upload endpoint
+- ✅ Zod validation on all endpoints
+- ✅ Database schema migrated via `npm run db:push`
+
+### Frontend (✅ Complete)
+- ✅ LoginPage connected to POST /api/auth/check
+- ✅ RegistrationFlow connected to POST /api/profiles
+- ✅ Proper async flow (awaits API before navigation)
+- ✅ Full error handling with UI display
+- ✅ Loading states with spinners
+- ✅ localStorage for userId/email persistence
+- ✅ Success page after registration
+
+### Testing (✅ Complete)
+- ✅ End-to-end playwright tests passing
+- ✅ Full user flow verified (login → register → profile)
+- ✅ Database persistence confirmed
+- ✅ Commerce logic tested (commerceType = "no" skips steps 3-6)
 
 ## Методологія розробки
 Розробка ведеться **строго поетапно та послідовно**:
@@ -125,3 +150,17 @@ Environment variables:
 - Production: service-worker.js with full offline caching
 - Registration happens in client/src/main.tsx
 - Browser logs confirm successful registration: "[SW] Service Worker registered successfully"
+
+## Known Limitations (MVP)
+- Photo upload uses mock URLs (real file storage in future)
+- Profile page shows placeholder UI (full profile view in future)
+- No user session management yet (localStorage only)
+- No profile editing after creation (PATCH endpoint ready, UI pending)
+
+## Next Steps (Future)
+- [ ] Real photo upload with file storage
+- [ ] Full profile view and editing
+- [ ] User discovery/search functionality
+- [ ] Messaging system
+- [ ] Match/like system
+- [ ] Production deployment configuration
