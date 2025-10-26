@@ -1,38 +1,54 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
-
-// modify the interface with any CRUD methods
-// you might need
+import { type User, type InsertUser, type Profile, type InsertProfile, users, profiles } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
+  // User methods
+  getUserById(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  
+  // Profile methods
+  getProfileByUserId(userId: string): Promise<Profile | undefined>;
+  createProfile(profile: Omit<InsertProfile, "id">): Promise<Profile>;
+  updateProfile(userId: string, profile: Partial<InsertProfile>): Promise<Profile | undefined>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-
-  constructor() {
-    this.users = new Map();
+export class DatabaseStorage implements IStorage {
+  // User methods
+  async getUserById(id: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0];
   }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+    return result[0];
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+  async createUser(user: InsertUser): Promise<User> {
+    const result = await db.insert(users).values(user).returning();
+    return result[0];
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+  // Profile methods
+  async getProfileByUserId(userId: string): Promise<Profile | undefined> {
+    const result = await db.select().from(profiles).where(eq(profiles.userId, userId)).limit(1);
+    return result[0];
+  }
+
+  async createProfile(profile: Omit<InsertProfile, "id">): Promise<Profile> {
+    const result = await db.insert(profiles).values(profile as InsertProfile).returning();
+    return result[0];
+  }
+
+  async updateProfile(userId: string, profileUpdate: Partial<InsertProfile>): Promise<Profile | undefined> {
+    const result = await db.update(profiles)
+      .set({ ...profileUpdate, updatedAt: new Date() })
+      .where(eq(profiles.userId, userId))
+      .returning();
+    return result[0];
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
