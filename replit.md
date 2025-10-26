@@ -4,8 +4,16 @@
 Progressive Web Application для LGBTQ+ спільноти України з фокусом на гей-знакомства. Додаток об'єднує функціонал популярних платформ (Grindr, Hornet) з безкоштовним доступом до преміум функцій.
 
 ## Поточний стан
-**Етап:** MVP Development - Task 1 completed (Schema & Frontend)
+**Етап:** MVP Development - Task 1 (Schema & Frontend) готово до review
 **Дата останнього оновлення:** 26 жовтня 2025
+
+**Task 1 Status:**
+- ✅ Database schema (shared/schema.ts) - complete with proper defaults
+- ✅ All 7 registration steps with conditional commerce logic
+- ✅ PWA setup (manifest, Service Worker registration via Express middleware)
+- ✅ 45 data-testid attributes for testing
+- ✅ Dark theme, Ukrainian UI, responsive design
+- ⏳ Mock code in login (timeout redirect) and Step7 (photo URLs) - will connect to backend in Task 2
 
 ## Технічний стек
 
@@ -50,7 +58,7 @@ Progressive Web Application для LGBTQ+ спільноти України з �
 - ✅ Умовна логіка для комерційних налаштувань (кроки 3-6 показуються тільки якщо commerceType = "yes" або "commerce_only")
 - ✅ Завантаження фото з preview (mock URLs для демонстрації, справжнє завантаження в Task 2)
 - ✅ Валідація форм через Zod (з z.coerce.number() для правильної конвертації)
-- ✅ PWA manifest, іконки та service worker (реєструється тільки в production builds)
+- ✅ PWA manifest, іконки та service worker (працює в dev mode через Express middleware fix)
 - ✅ Темна тема Material Design
 - ✅ Український інтерфейс
 - ✅ data-testid на всіх interactive елементах
@@ -105,3 +113,15 @@ Environment variables:
 - Комерційні поля показуються умовно (commerceType)
 - Мінімум 1 публічне фото обов'язкове
 - Максимум 6 фото в кожній галереї
+
+### Schema Alignment
+- Frontend uses `registrationSchema` in RegistrationFlow.tsx for client-side validation
+- Backend will use `step1Schema`...`step7Schema` from shared/schema.ts for API validation
+- Schemas are aligned but duplicated (by design - client validation separate from API validation)
+- Integration happens in Task 2
+
+### Service Worker Setup
+- Development: sw-dev.js served via Express middleware (server/index.ts) with correct MIME type
+- Production: service-worker.js with full offline caching
+- Registration happens in client/src/main.tsx
+- Browser logs confirm successful registration: "[SW] Service Worker registered successfully"

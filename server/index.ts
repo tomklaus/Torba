@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import fs from "fs";
+import path from "path";
 
 const app = express();
 
@@ -44,6 +46,20 @@ app.use((req, res, next) => {
   });
 
   next();
+});
+
+// Middleware to serve Service Worker files with correct MIME type
+app.get(['/sw-dev.js', '/service-worker.js'], (req, res, next) => {
+  const filename = req.path.substring(1); // Remove leading slash
+  const filepath = path.join(process.cwd(), 'public', filename);
+  
+  if (fs.existsSync(filepath)) {
+    res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+    res.setHeader('Service-Worker-Allowed', '/');
+    fs.createReadStream(filepath).pipe(res);
+  } else {
+    next();
+  }
 });
 
 (async () => {
