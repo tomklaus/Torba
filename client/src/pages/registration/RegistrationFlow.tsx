@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { Progress } from "@/components/ui/progress";
-import { ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { ChevronLeft, ChevronRight, Check, Loader2 } from "lucide-react";
 import { z } from "zod";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
@@ -68,6 +68,8 @@ type RegistrationData = z.infer<typeof registrationSchema>;
 export default function RegistrationFlow() {
   const [, setLocation] = useLocation();
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const form = useForm<RegistrationData>({
     resolver: zodResolver(registrationSchema),
@@ -158,10 +160,75 @@ export default function RegistrationFlow() {
     }
   };
 
-  const handleSubmit = (data: RegistrationData) => {
-    console.log("Registration data:", data);
-    // TODO: В Task 2 підключимо до API
-    setLocation("/profile");
+  const handleSubmit = async (data: RegistrationData) => {
+    const userId = localStorage.getItem("userId");
+    
+    if (!userId) {
+      setSubmitError("Помилка: не знайдено userId. Поверніться на сторінку входу.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError("");
+
+    try {
+      // Підготовка даних для API
+      const profileData = {
+        userId,
+        name: data.name,
+        birthDate: data.birthDate,
+        city: data.city === "Інше" && data.customCity ? data.customCity : data.city,
+        height: data.height,
+        weight: data.weight,
+        penisSize: data.penisSize,
+        sexRole: data.sexRole,
+        datingGoals: data.datingGoals,
+        commerceType: data.commerceType,
+        
+        // Комерційні поля (якщо застосовується)
+        serviceFormats: data.serviceFormats || [],
+        commerceSexRole: data.commerceSexRole || null,
+        locationFormats: data.locationFormats || [],
+        travelGeography: data.travelGeography || [],
+        availability: data.availability || [],
+        minNotice: data.minNotice || null,
+        minDuration: data.minDuration === "custom" ? data.customDuration : data.minDuration,
+        meetingConditions: data.meetingConditions || [],
+        healthSafety: data.healthSafety || [],
+        lastStdTest: data.lastStdTest || null,
+        photoVideoConsent: data.photoVideoConsent || null,
+        myLimits: data.myLimits || null,
+        comfortConditions: data.comfortConditions || null,
+        rate1h: data.rate1h || null,
+        rate2h: data.rate2h || null,
+        rateNight: data.rateNight || null,
+        travelFee: data.travelFee || null,
+        cancellationFee: data.cancellationFee || null,
+        paymentMethods: data.paymentMethods || [],
+        transportCosts: data.transportCosts || null,
+        
+        // Фото
+        publicPhotos: data.publicPhotos,
+        privatePhotos: data.privatePhotos || [],
+      };
+
+      const response = await fetch("/api/profiles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profileData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Помилка створення профілю");
+      }
+
+      // Успішно створено профіль
+      setLocation("/profile");
+    } catch (err: any) {
+      setSubmitError(err.message || "Помилка з'єднання з сервером");
+      setIsSubmitting(false);
+    }
   };
 
   const progress = ((currentStep / totalSteps) * 100);
@@ -198,40 +265,63 @@ export default function RegistrationFlow() {
             </Form>
           </CardContent>
 
-          <CardFooter className="flex gap-3 justify-between border-t pt-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handlePrev}
-              disabled={currentStep === 1}
-              className="min-w-32"
-              data-testid="button-prev"
-            >
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Назад
-            </Button>
-
-            {currentStep < totalSteps ? (
-              <Button
-                type="button"
-                onClick={handleNext}
-                className="min-w-32 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                data-testid="button-next"
-              >
-                Далі
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            ) : (
-              <Button
-                type="button"
-                onClick={form.handleSubmit(handleSubmit)}
-                className="min-w-32 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                data-testid="button-complete"
-              >
-                <Check className="mr-2 h-4 w-4" />
-                Завершити
-              </Button>
+          <CardFooter className="flex flex-col gap-4 border-t pt-6">
+            {submitError && (
+              <div className="w-full p-3 bg-destructive/10 border border-destructive/30 rounded-md">
+                <p className="text-sm text-destructive text-center" data-testid="text-submit-error">
+                  {submitError}
+                </p>
+              </div>
             )}
+            
+            <div className="w-full flex gap-3 justify-between">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handlePrev}
+                disabled={currentStep === 1 || isSubmitting}
+                className="min-w-32"
+                data-testid="button-prev"
+              >
+                <ChevronLeft className="mr-2 h-4 w-4" />
+                Назад
+              </Button>
+
+              {currentStep < totalSteps ? (
+                <Button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={isSubmitting}
+                  className="min-w-32 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  data-testid="button-next"
+                >
+                  Далі
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={async () => {
+                    await form.handleSubmit(handleSubmit)();
+                  }}
+                  disabled={isSubmitting}
+                  className="min-w-32 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                  data-testid="button-complete"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Збереження...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="mr-2 h-4 w-4" />
+                      Завершити
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
           </CardFooter>
         </Card>
       </div>

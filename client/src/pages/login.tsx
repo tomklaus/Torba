@@ -24,11 +24,35 @@ export default function LoginPage() {
 
     setLoading(true);
 
-    // TODO: В Task 2 підключимо до API
-    // Тимчасово перенаправляємо на реєстрацію
-    setTimeout(() => {
-      setLocation("/register");
-    }, 500);
+    try {
+      const response = await fetch("/api/auth/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || "Помилка авторізації");
+      }
+
+      const data = await response.json();
+      
+      // Зберігаємо userId і email в localStorage
+      localStorage.setItem("userId", data.userId);
+      localStorage.setItem("userEmail", email);
+
+      // Якщо профіль завершений - редірект на профіль
+      if (data.profileComplete) {
+        setLocation("/profile");
+      } else {
+        // Якщо профіль не завершений - редірект на реєстрацію
+        setLocation("/register");
+      }
+    } catch (err: any) {
+      setError(err.message || "Помилка з'єднання з сервером");
+      setLoading(false);
+    }
   };
 
   return (
