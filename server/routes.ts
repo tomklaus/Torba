@@ -46,6 +46,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/auth/logout", async (req, res) => {
+    try {
+      // Destroy session if exists
+      if ((req as any).session) {
+        (req as any).session.destroy((err: any) => {
+          if (err) {
+            console.error("Session destroy error:", err);
+          }
+        });
+      }
+      return res.json({ success: true });
+    } catch (error: any) {
+      console.error("Logout error:", error);
+      return res.status(500).json({ message: "Помилка виходу" });
+    }
+  });
+
   // Profile endpoints
   app.post("/api/profiles", async (req, res) => {
     try {
