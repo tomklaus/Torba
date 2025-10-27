@@ -242,7 +242,7 @@ export default function ProfilePage() {
         animate="visible"
       >
         {/* Header */}
-        <motion.div variants={cardVariants} className="mb-6">
+        <motion.div variants={cardVariants} className="mb-6 space-y-3">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
               {profile.name}, {age}
@@ -258,6 +258,49 @@ export default function ProfilePage() {
                 </Badge>
               )}
             </div>
+          </div>
+          
+          {/* Main Info Line */}
+          <div className="flex items-center flex-wrap gap-2 text-sm md:text-base">
+            {/* City */}
+            {(profile.city || profile.customCity) && (
+              <Badge variant="outline" className="gap-1.5">
+                <MapPin className="h-3.5 w-3.5" />
+                {profile.customCity ? `${profile.city} (${profile.customCity})` : profile.city}
+              </Badge>
+            )}
+            
+            {/* Height & Weight */}
+            {(profile.height || profile.weight) && (
+              <Badge variant="outline" className="gap-1.5">
+                <Ruler className="h-3.5 w-3.5" />
+                {profile.height && `${profile.height} см`}
+                {profile.height && profile.weight && " / "}
+                {profile.weight && `${profile.weight} кг`}
+              </Badge>
+            )}
+            
+            {/* Penis Size */}
+            {profile.penisSize && (
+              <Badge variant="outline" className="gap-1.5">
+                <Activity className="h-3.5 w-3.5" />
+                {profile.penisSize} см
+              </Badge>
+            )}
+            
+            {/* Body Type */}
+            {profile.bodyType && (
+              <Badge variant="outline">
+                {valuesToLabels("bodyType", [profile.bodyType])[0]}
+              </Badge>
+            )}
+            
+            {/* Sex Role */}
+            {profile.sexRole && (
+              <Badge variant="outline">
+                {profile.sexRole}
+              </Badge>
+            )}
           </div>
         </motion.div>
 
@@ -505,93 +548,6 @@ export default function ProfilePage() {
               )}
             </Card>
 
-            {/* Basic Info Card */}
-            <Card className="border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <User className="h-6 w-6 text-primary" />
-                  Основна інформація
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center gap-2 text-base">
-                  <MapPin className="h-5 w-5 text-muted-foreground" />
-                  <EditableText
-                    value={profile.customCity ? `${profile.city} (${profile.customCity})` : (profile.city || "")}
-                    onSave={(value) => handleFieldSave("customCity", value)}
-                    isEditing={isEditing}
-                    placeholder="Місто"
-                  />
-                </div>
-                <div className="flex items-center gap-2 text-base">
-                  <Calendar className="h-5 w-5 text-muted-foreground" />
-                  <span>{new Date(profile.birthDate).toLocaleDateString('uk-UA')}</span>
-                </div>
-                <Separator />
-                <div className="grid grid-cols-2 gap-3 text-base">
-                  <div className="flex items-center gap-2">
-                    <Ruler className="h-5 w-5 text-muted-foreground" />
-                    <EditableNumber
-                      value={profile.height || 0}
-                      onSave={(value) => handleFieldSave("height", value)}
-                      isEditing={isEditing}
-                      placeholder="Зріст"
-                      min={100}
-                      max={250}
-                      unit="см"
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Weight className="h-5 w-5 text-muted-foreground" />
-                    <EditableNumber
-                      value={profile.weight || 0}
-                      onSave={(value) => handleFieldSave("weight", value)}
-                      isEditing={isEditing}
-                      placeholder="Вага"
-                      min={40}
-                      max={200}
-                      unit="кг"
-                    />
-                  </div>
-                  <div className="col-span-2 flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-muted-foreground" />
-                    <EditableNumber
-                      value={profile.penisSize || 0}
-                      onSave={(value) => handleFieldSave("penisSize", value)}
-                      isEditing={isEditing}
-                      placeholder="Розмір"
-                      min={5}
-                      max={40}
-                      unit="см"
-                    />
-                  </div>
-                </div>
-                <Separator />
-                <div className="space-y-2">
-                  <div className="text-base text-muted-foreground">Тип тіла:</div>
-                  <EditableBadgeList
-                    values={profile.bodyType ? valuesToLabels("bodyType", [profile.bodyType]) : []}
-                    onSave={(values) => handleFieldSave("bodyType", labelsToValues("bodyType", values)[0] || "")}
-                    isEditing={isEditing}
-                    options={getAllLabels("bodyType")}
-                    label="Тип тіла"
-                    multiSelect={false}
-                  />
-                </div>
-                <Separator />
-                <div className="space-y-2">
-                  <div className="text-base text-muted-foreground">Роль:</div>
-                  <EditableBadgeList
-                    values={profile.sexRole ? [profile.sexRole] : []}
-                    onSave={(values) => handleFieldSave("sexRole", values[0] || "")}
-                    isEditing={isEditing}
-                    options={["Актив", "Пасив", "Універсал", "Сайд"]}
-                    label="Сексуальна роль"
-                    multiSelect={false}
-                  />
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Relationship & Lifestyle */}
             <Card className="border-primary/20">
@@ -672,46 +628,129 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
 
-            {/* About & Looking For */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="border-primary/20">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-xl">
-                    <Info className="h-5 w-5 text-primary" />
-                    Про себе
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <EditableText
-                    value={profile.aboutMe || ""}
-                    onSave={(value) => handleFieldSave("aboutMe", value)}
-                    isEditing={isEditing}
-                    multiline={true}
-                    placeholder="Розкажіть про себе..."
-                    maxLength={500}
-                  />
-                </CardContent>
-              </Card>
+            {/* About Me - Extended */}
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Info className="h-5 w-5 text-primary" />
+                  Про себе
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Main info fields for editing */}
+                {isEditing && (
+                  <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-base">
+                        <MapPin className="h-5 w-5 text-muted-foreground" />
+                        <EditableText
+                          value={profile.customCity || ""}
+                          onSave={(value) => handleFieldSave("customCity", value)}
+                          isEditing={isEditing}
+                          placeholder="Додаткове місто"
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-3 text-base">
+                        <div className="flex items-center gap-2">
+                          <Ruler className="h-5 w-5 text-muted-foreground" />
+                          <EditableNumber
+                            value={profile.height || 0}
+                            onSave={(value) => handleFieldSave("height", value)}
+                            isEditing={isEditing}
+                            placeholder="Зріст"
+                            min={100}
+                            max={250}
+                            unit="см"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Weight className="h-5 w-5 text-muted-foreground" />
+                          <EditableNumber
+                            value={profile.weight || 0}
+                            onSave={(value) => handleFieldSave("weight", value)}
+                            isEditing={isEditing}
+                            placeholder="Вага"
+                            min={40}
+                            max={200}
+                            unit="кг"
+                          />
+                        </div>
+                        <div className="col-span-2 flex items-center gap-2">
+                          <Activity className="h-5 w-5 text-muted-foreground" />
+                          <EditableNumber
+                            value={profile.penisSize || 0}
+                            onSave={(value) => handleFieldSave("penisSize", value)}
+                            isEditing={isEditing}
+                            placeholder="Розмір"
+                            min={5}
+                            max={40}
+                            unit="см"
+                          />
+                        </div>
+                      </div>
+                      
+                      <Separator />
+                      
+                      <div className="space-y-2">
+                        <div className="text-base text-muted-foreground">Тип тіла:</div>
+                        <EditableBadgeList
+                          values={profile.bodyType ? valuesToLabels("bodyType", [profile.bodyType]) : []}
+                          onSave={(values) => handleFieldSave("bodyType", labelsToValues("bodyType", values)[0] || "")}
+                          isEditing={isEditing}
+                          options={getAllLabels("bodyType")}
+                          label="Тип тіла"
+                          multiSelect={false}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="text-base text-muted-foreground">Роль:</div>
+                        <EditableBadgeList
+                          values={profile.sexRole ? [profile.sexRole] : []}
+                          onSave={(values) => handleFieldSave("sexRole", values[0] || "")}
+                          isEditing={isEditing}
+                          options={["Актив", "Пасив", "Універсал", "Сайд"]}
+                          label="Сексуальна роль"
+                          multiSelect={false}
+                        />
+                      </div>
+                    </div>
+                    
+                    <Separator />
+                  </div>
+                )}
+                
+                <EditableText
+                  value={profile.aboutMe || ""}
+                  onSave={(value) => handleFieldSave("aboutMe", value)}
+                  isEditing={isEditing}
+                  multiline={true}
+                  placeholder="Розкажіть про себе..."
+                  maxLength={500}
+                />
+              </CardContent>
+            </Card>
 
-              <Card className="border-primary/20">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-xl">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                    Шукаю
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <EditableText
-                    value={profile.lookingFor || ""}
-                    onSave={(value) => handleFieldSave("lookingFor", value)}
-                    isEditing={isEditing}
-                    multiline={true}
-                    placeholder="Кого ви шукаєте..."
-                    maxLength={500}
-                  />
-                </CardContent>
-              </Card>
-            </div>
+            {/* Looking For */}
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  Шукаю
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <EditableText
+                  value={profile.lookingFor || ""}
+                  onSave={(value) => handleFieldSave("lookingFor", value)}
+                  isEditing={isEditing}
+                  multiline={true}
+                  placeholder="Кого ви шукаєте..."
+                  maxLength={500}
+                />
+              </CardContent>
+            </Card>
 
             {/* Interests & Languages */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
