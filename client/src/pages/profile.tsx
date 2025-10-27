@@ -11,7 +11,8 @@ import {
   User, Heart, MapPin, Ruler, Weight, Calendar,
   Edit2, LogOut, ChevronLeft, ChevronRight, X,
   Camera, Info, Phone, Globe, DollarSign, Shield,
-  Sparkles, Activity, Languages, Mail, Clock, Save
+  Sparkles, Activity, Languages, Mail, Clock, Save,
+  Trash2, ImagePlus, Lock
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { EditableText, EditableNumber, EditableBadgeList } from "@/components/EditableField";
@@ -23,6 +24,8 @@ export default function ProfilePage() {
   const { toast } = useToast();
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
+  const [uploadingPrivatePhotos, setUploadingPrivatePhotos] = useState(false);
 
   // Check authentication
   const userId = localStorage.getItem("userId");
@@ -274,6 +277,35 @@ export default function ProfilePage() {
                       />
                     </AnimatePresence>
 
+                    {/* Delete Photo Button (in edit mode) */}
+                    {isEditing && (
+                      <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        className="absolute top-2 right-2 bg-red-500/90 backdrop-blur-sm rounded-full p-2 text-white hover:bg-red-600"
+                        onClick={() => {
+                          const currentPhoto = allPhotos[currentPhotoIndex];
+                          const confirmDelete = window.confirm(`Видалити це фото?`);
+                          if (confirmDelete) {
+                            // Remove from appropriate array
+                            if (currentPhoto.isPrivate) {
+                              const newPrivate = (profile.privatePhotos || []).filter(p => p !== currentPhoto.url);
+                              handleFieldSave("privatePhotos", newPrivate);
+                            } else {
+                              const newPublic = (profile.publicPhotos || []).filter(p => p !== currentPhoto.url);
+                              handleFieldSave("publicPhotos", newPublic);
+                            }
+                            // Reset index if needed
+                            if (currentPhotoIndex >= allPhotos.length - 1) {
+                              setCurrentPhotoIndex(Math.max(0, allPhotos.length - 2));
+                            }
+                          }
+                        }}
+                        data-testid="button-delete-photo"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </motion.button>
+                    )}
+
                     {allPhotos.length > 1 && (
                       <>
                         {currentPhotoIndex > 0 && (
@@ -300,6 +332,9 @@ export default function ProfilePage() {
                         
                         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full text-white text-sm">
                           {currentPhotoIndex + 1} / {allPhotos.length}
+                          {isEditing && allPhotos[currentPhotoIndex].isPrivate && (
+                            <span className="ml-2 text-pink-300">🔒</span>
+                          )}
                         </div>
                       </>
                     )}
@@ -310,6 +345,113 @@ export default function ProfilePage() {
                   </div>
                 )}
               </CardContent>
+
+              {/* Add Photo Button (in edit mode) */}
+              {isEditing && (
+                <div className="p-4 space-y-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    id="photo-upload-input"
+                    data-testid="input-photo-upload"
+                    onChange={async (e) => {
+                      const files = e.target.files;
+                      if (!files || files.length === 0) return;
+
+                      // Upload photos
+                      const formData = new FormData();
+                      Array.from(files).forEach(file => formData.append("photos", file));
+                      formData.append("isPrivate", "false"); // Default to public
+
+                      try {
+                        setUploadingPhotos(true);
+                        const response = await fetch("/api/upload", {
+                          method: "POST",
+                          body: formData,
+                        });
+                        
+                        if (!response.ok) throw new Error("Upload failed");
+                        
+                        const data = await response.json();
+                        const newPhotoUrls = data.urls;
+
+                        // Add to publicPhotos
+                        const updatedPublic = [...(profile.publicPhotos || []), ...newPhotoUrls];
+                        await handleFieldSave("publicPhotos", updatedPublic);
+                        
+                        setUploadingPhotos(false);
+                        e.target.value = ""; // Reset input
+                      } catch (error) {
+                        console.error("Photo upload failed:", error);
+                        setUploadingPhotos(false);
+                        alert("Помилка завантаження фото");
+                      }
+                    }}
+                  />
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => document.getElementById("photo-upload-input")?.click()}
+                    disabled={uploadingPhotos}
+                    data-testid="button-add-photo"
+                  >
+                    <ImagePlus className="h-4 w-4 mr-2" />
+                    {uploadingPhotos ? "Завантаження..." : "Додати публічні фото"}
+                  </Button>
+                  
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    id="private-photo-upload-input"
+                    data-testid="input-private-photo-upload"
+                    onChange={async (e) => {
+                      const files = e.target.files;
+                      if (!files || files.length === 0) return;
+
+                      const formData = new FormData();
+                      Array.from(files).forEach(file => formData.append("photos", file));
+                      formData.append("isPrivate", "true");
+
+                      try {
+                        setUploadingPrivatePhotos(true);
+                        const response = await fetch("/api/upload", {
+                          method: "POST",
+                          body: formData,
+                        });
+                        
+                        if (!response.ok) throw new Error("Upload failed");
+                        
+                        const data = await response.json();
+                        const newPhotoUrls = data.urls;
+
+                        const updatedPrivate = [...(profile.privatePhotos || []), ...newPhotoUrls];
+                        await handleFieldSave("privatePhotos", updatedPrivate);
+                        
+                        setUploadingPrivatePhotos(false);
+                        e.target.value = "";
+                      } catch (error) {
+                        console.error("Private photo upload failed:", error);
+                        setUploadingPrivatePhotos(false);
+                        alert("Помилка завантаження приватних фото");
+                      }
+                    }}
+                  />
+                  <Button
+                    variant="outline"
+                    className="w-full border-pink-500/50 text-pink-400"
+                    onClick={() => document.getElementById("private-photo-upload-input")?.click()}
+                    disabled={uploadingPrivatePhotos}
+                    data-testid="button-add-private-photo"
+                  >
+                    <Lock className="h-4 w-4 mr-2" />
+                    {uploadingPrivatePhotos ? "Завантаження..." : "Додати приватні фото"}
+                  </Button>
+                </div>
+              )}
             </Card>
 
             {/* Basic Info Card */}
