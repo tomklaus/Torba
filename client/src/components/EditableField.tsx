@@ -188,7 +188,7 @@ export function EditableBadgeList({ values, onSave, isEditing, options, label, m
     return (
       <div className="flex gap-2 flex-wrap">
         {values.map((val, i) => (
-          <Badge key={i} variant="outline" className="text-base">
+          <Badge key={i} variant="outline" className="text-sm md:text-base">
             {val}
           </Badge>
         ))}
@@ -202,7 +202,7 @@ export function EditableBadgeList({ values, onSave, isEditing, options, label, m
         {values.length > 0 ? (
           <div className="flex gap-2 flex-wrap">
             {values.map((val, i) => (
-              <Badge key={i} variant="outline" className="text-base">
+              <Badge key={i} variant="outline" className="text-sm md:text-base">
                 {val}
               </Badge>
             ))}
@@ -245,7 +245,7 @@ export function EditableBadgeList({ values, onSave, isEditing, options, label, m
           <Badge
             key={option}
             variant={selectedValues.includes(option) ? "default" : "outline"}
-            className="cursor-pointer text-base hover-elevate"
+            className="cursor-pointer text-sm md:text-base hover-elevate"
             onClick={() => toggleValue(option)}
             data-testid={`badge-option-${option.toLowerCase().replace(/\s/g, '-')}`}
           >

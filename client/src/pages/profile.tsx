@@ -236,11 +236,11 @@ export default function ProfilePage() {
               {profile.name}, {age}
             </h1>
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-base">
+              <Badge variant="secondary" className="text-sm md:text-base">
                 {userEmail}
               </Badge>
               {isCommerce && (
-                <Badge variant="default" className="text-base bg-gradient-to-r from-purple-500 to-blue-500">
+                <Badge variant="default" className="text-sm md:text-base bg-gradient-to-r from-purple-500 to-blue-500">
                   <DollarSign className="h-4 w-4 mr-1" />
                   Комерційний профіль
                 </Badge>
@@ -931,7 +931,7 @@ export default function ProfilePage() {
                               <p className="text-base text-muted-foreground mb-2">Здоров'я та безпека:</p>
                               <div className="flex gap-2 flex-wrap">
                                 {profile.healthSafety.map((item: string, i: number) => (
-                                  <Badge key={i} variant="secondary">
+                                  <Badge key={i} variant="secondary" className="text-sm md:text-base">
                                     {item}
                                   </Badge>
                                 ))}
@@ -947,7 +947,7 @@ export default function ProfilePage() {
                           {profile.photoVideoConsent && (
                             <div className="text-base">
                               <span className="text-muted-foreground">Фото/відео: </span>
-                              <Badge variant="outline">{valueToLabel("photoVideoConsent", profile.photoVideoConsent)}</Badge>
+                              <Badge variant="outline" className="text-sm md:text-base">{valueToLabel("photoVideoConsent", profile.photoVideoConsent)}</Badge>
                             </div>
                           )}
                           {profile.myLimits && (
@@ -979,7 +979,7 @@ export default function ProfilePage() {
                               <p className="text-base text-muted-foreground mb-2">Способи оплати:</p>
                               <div className="flex gap-2 flex-wrap">
                                 {profile.paymentMethods.map((method: string, i: number) => (
-                                  <Badge key={i} variant="secondary">
+                                  <Badge key={i} variant="secondary" className="text-sm md:text-base">
                                     {valueToLabel("paymentMethods", method)}
                                   </Badge>
                                 ))}
