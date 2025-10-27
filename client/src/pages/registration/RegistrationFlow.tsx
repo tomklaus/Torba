@@ -267,7 +267,8 @@ export default function RegistrationFlow() {
         userId,
         name: data.name,
         birthDate: data.birthDate,
-        city: data.city === "Інше" && data.customCity ? data.customCity : data.city,
+        city: data.city, // Місто з довідника (для фільтрації)
+        customCity: data.customCity || null, // Точна назва міста (опціонально)
         height: data.height,
         weight: data.weight,
         penisSize: data.penisSize,

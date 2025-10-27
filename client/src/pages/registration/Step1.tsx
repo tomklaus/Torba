@@ -11,8 +11,6 @@ interface Step1Props {
 }
 
 export default function Step1({ form }: Step1Props) {
-  const showCustomCity = form.watch("city") === "Інше";
-
   return (
     <div className="space-y-8">
       {/* Заголовок */}
@@ -87,7 +85,7 @@ export default function Step1({ form }: Step1Props) {
                 Де тебе шукати?
               </FormLabel>
               <FormDescription>
-                Твоє місто допоможе знайти людей поруч.
+                Оберіть найближче до вас місто з довідника
               </FormDescription>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
@@ -108,29 +106,28 @@ export default function Step1({ form }: Step1Props) {
           )}
         />
 
-        {/* Своє місто (якщо обрано "Інше") */}
-        {showCustomCity && (
-          <FormField
-            control={form.control}
-            name="customCity"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-base font-medium">
-                  Не знайшов? Напиши назву свого міста
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Назва міста"
-                    {...field}
-                    className="h-12 text-base"
-                    data-testid="input-custom-city"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
+        {/* Точна назва міста */}
+        <FormField
+          control={form.control}
+          name="customCity"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-base font-medium">
+                Не знайшов? Вибери найближче до тебе, а тут напиши як називається твоє
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Назва твого міста"
+                  {...field}
+                  className="h-12 text-base"
+                  data-testid="input-custom-city"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      
 
         {/* Статура */}
         <div className="space-y-4">
