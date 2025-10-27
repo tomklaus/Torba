@@ -150,8 +150,8 @@ export default function Step1({ form }: Step1Props) {
                     <Input
                       type="number"
                       placeholder="175"
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                      value={field.value ?? ""}
+                      onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseInt(e.target.value))}
                       className="h-12 text-base"
                       data-testid="input-height"
                     />
@@ -172,8 +172,8 @@ export default function Step1({ form }: Step1Props) {
                     <Input
                       type="number"
                       placeholder="70"
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                      value={field.value ?? ""}
+                      onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseInt(e.target.value))}
                       className="h-12 text-base"
                       data-testid="input-weight"
                     />
@@ -201,8 +201,8 @@ export default function Step1({ form }: Step1Props) {
                 <Input
                   type="number"
                   placeholder="15"
-                  {...field}
-                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value === "" ? undefined : parseInt(e.target.value))}
                   className="h-12 text-base max-w-xs"
                   data-testid="input-penis-size"
                 />

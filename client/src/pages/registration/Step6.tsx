@@ -43,7 +43,7 @@ export default function Step6({ form }: Step6Props) {
                   <Input
                     type="number"
                     placeholder="1000"
-                    {...field}
+                    value={field.value ?? ""}
                     onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
                     className="h-12 text-base"
                     data-testid="input-rate-1h"
@@ -64,7 +64,7 @@ export default function Step6({ form }: Step6Props) {
                   <Input
                     type="number"
                     placeholder="1800"
-                    {...field}
+                    value={field.value ?? ""}
                     onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
                     className="h-12 text-base"
                     data-testid="input-rate-2h"
@@ -85,7 +85,7 @@ export default function Step6({ form }: Step6Props) {
                   <Input
                     type="number"
                     placeholder="5000"
-                    {...field}
+                    value={field.value ?? ""}
                     onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
                     className="h-12 text-base"
                     data-testid="input-rate-night"
@@ -106,7 +106,7 @@ export default function Step6({ form }: Step6Props) {
                   <Input
                     type="number"
                     placeholder="500"
-                    {...field}
+                    value={field.value ?? ""}
                     onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
                     className="h-12 text-base"
                     data-testid="input-travel-fee"
@@ -135,7 +135,7 @@ export default function Step6({ form }: Step6Props) {
               <Input
                 type="number"
                 placeholder="300"
-                {...field}
+                value={field.value ?? ""}
                 onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
                 className="h-12 text-base max-w-xs"
                 data-testid="input-cancellation-fee"
