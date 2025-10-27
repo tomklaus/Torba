@@ -423,33 +423,38 @@ export default function ProfilePage() {
                       const files = e.target.files;
                       if (!files || files.length === 0) return;
 
-                      // Upload photos
-                      const formData = new FormData();
-                      Array.from(files).forEach(file => formData.append("photos", file));
-                      formData.append("isPrivate", "false"); // Default to public
-
                       try {
                         setUploadingPhotos(true);
-                        const response = await fetch("/api/upload", {
-                          method: "POST",
-                          body: formData,
-                        });
-                        
-                        if (!response.ok) throw new Error("Upload failed");
-                        
-                        const data = await response.json();
-                        const newPhotoUrls = data.urls;
+                        const uploadedPhotos = [];
 
-                        // Add to publicPhotos
-                        const updatedPublic = [...(profile.publicPhotos || []), ...newPhotoUrls];
+                        for (const file of Array.from(files)) {
+                          const formData = new FormData();
+                          formData.append("photo", file);
+
+                          const response = await fetch("/api/upload", {
+                            method: "POST",
+                            body: formData,
+                          });
+                          
+                          if (!response.ok) throw new Error("Upload failed");
+                          
+                          const photoData = await response.json();
+                          uploadedPhotos.push(photoData);
+                        }
+
+                        const updatedPublic = [...(profile.publicPhotos || []), ...uploadedPhotos];
                         await handleFieldSave("publicPhotos", updatedPublic);
                         
                         setUploadingPhotos(false);
-                        e.target.value = ""; // Reset input
+                        e.target.value = "";
                       } catch (error) {
                         console.error("Photo upload failed:", error);
                         setUploadingPhotos(false);
-                        alert("Помилка завантаження фото");
+                        toast({
+                          title: "Помилка",
+                          description: "Не вдалося завантажити фото",
+                          variant: "destructive",
+                        });
                       }
                     }}
                   />
@@ -544,23 +549,26 @@ export default function ProfilePage() {
                       const files = e.target.files;
                       if (!files || files.length === 0) return;
 
-                      const formData = new FormData();
-                      Array.from(files).forEach(file => formData.append("photos", file));
-                      formData.append("isPrivate", "true");
-
                       try {
                         setUploadingPrivatePhotos(true);
-                        const response = await fetch("/api/upload", {
-                          method: "POST",
-                          body: formData,
-                        });
-                        
-                        if (!response.ok) throw new Error("Upload failed");
-                        
-                        const data = await response.json();
-                        const newPhotoUrls = data.urls;
+                        const uploadedPhotos = [];
 
-                        const updatedPrivate = [...(profile.privatePhotos || []), ...newPhotoUrls];
+                        for (const file of Array.from(files)) {
+                          const formData = new FormData();
+                          formData.append("photo", file);
+
+                          const response = await fetch("/api/upload", {
+                            method: "POST",
+                            body: formData,
+                          });
+                          
+                          if (!response.ok) throw new Error("Upload failed");
+                          
+                          const photoData = await response.json();
+                          uploadedPhotos.push(photoData);
+                        }
+
+                        const updatedPrivate = [...(profile.privatePhotos || []), ...uploadedPhotos];
                         await handleFieldSave("privatePhotos", updatedPrivate);
                         
                         setUploadingPrivatePhotos(false);
@@ -568,7 +576,11 @@ export default function ProfilePage() {
                       } catch (error) {
                         console.error("Private photo upload failed:", error);
                         setUploadingPrivatePhotos(false);
-                        alert("Помилка завантаження приватних фото");
+                        toast({
+                          title: "Помилка",
+                          description: "Не вдалося завантажити приватні фото",
+                          variant: "destructive",
+                        });
                       }
                     }}
                   />
