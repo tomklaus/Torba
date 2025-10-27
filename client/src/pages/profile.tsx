@@ -252,7 +252,7 @@ export default function ProfilePage() {
         {/* Desktop 2-column / Mobile 1-column layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column: Photos + Basic Info */}
-          <motion.div variants={cardVariants} className="lg:col-span-1 space-y-6">
+          <motion.div variants={cardVariants} className="lg:col-span-1 space-y-4">
             {/* Photo Gallery */}
             <Card className="overflow-hidden border-2 border-primary/20 shadow-lg shadow-primary/10">
               <CardContent className="p-4">
@@ -424,14 +424,14 @@ export default function ProfilePage() {
             {/* Basic Info Card */}
             <Card className="border-primary/20">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="h-5 w-5 text-primary" />
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <User className="h-6 w-6 text-primary" />
                   Основна інформація
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-2 text-base">
+                  <MapPin className="h-5 w-5 text-muted-foreground" />
                   <EditableText
                     value={profile.customCity || profile.city || ""}
                     onSave={(value) => handleFieldSave("customCity", value)}
@@ -439,14 +439,14 @@ export default function ProfilePage() {
                     placeholder="Місто"
                   />
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-2 text-base">
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
                   <span>{new Date(profile.birthDate).toLocaleDateString('uk-UA')}</span>
                 </div>
                 <Separator />
-                <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="grid grid-cols-2 gap-3 text-base">
                   <div className="flex items-center gap-2">
-                    <Ruler className="h-4 w-4 text-muted-foreground" />
+                    <Ruler className="h-5 w-5 text-muted-foreground" />
                     <EditableNumber
                       value={profile.height || 0}
                       onSave={(value) => handleFieldSave("height", value)}
@@ -458,7 +458,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <Weight className="h-4 w-4 text-muted-foreground" />
+                    <Weight className="h-5 w-5 text-muted-foreground" />
                     <EditableNumber
                       value={profile.weight || 0}
                       onSave={(value) => handleFieldSave("weight", value)}
@@ -470,7 +470,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div className="col-span-2 flex items-center gap-2">
-                    <Activity className="h-4 w-4 text-muted-foreground" />
+                    <Activity className="h-5 w-5 text-muted-foreground" />
                     <EditableNumber
                       value={profile.penisSize || 0}
                       onSave={(value) => handleFieldSave("penisSize", value)}
@@ -484,7 +484,7 @@ export default function ProfilePage() {
                 </div>
                 <Separator />
                 <div className="space-y-2">
-                  <div className="text-sm text-muted-foreground">Тип тіла:</div>
+                  <div className="text-base text-muted-foreground">Тип тіла:</div>
                   <EditableBadgeList
                     values={profile.bodyType ? valuesToLabels("bodyType", [profile.bodyType]) : []}
                     onSave={(values) => handleFieldSave("bodyType", labelsToValues("bodyType", values)[0] || "")}
@@ -496,7 +496,7 @@ export default function ProfilePage() {
                 </div>
                 <Separator />
                 <div className="space-y-2">
-                  <div className="text-sm text-muted-foreground">Роль:</div>
+                  <div className="text-base text-muted-foreground">Роль:</div>
                   <EditableBadgeList
                     values={profile.sexRole ? [profile.sexRole] : []}
                     onSave={(values) => handleFieldSave("sexRole", values[0] || "")}
@@ -512,14 +512,14 @@ export default function ProfilePage() {
             {/* Relationship & Lifestyle */}
             <Card className="border-primary/20">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Heart className="h-5 w-5 text-primary" />
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Heart className="h-6 w-6 text-primary" />
                   Стиль життя
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div>
-                  <span className="text-sm text-muted-foreground">Статус стосунків:</span>
+                  <span className="text-base text-muted-foreground">Статус стосунків:</span>
                   <EditableBadgeList
                     values={profile.relationshipStatus ? valuesToLabels("relationshipStatus", [profile.relationshipStatus]) : []}
                     onSave={(values) => handleFieldSave("relationshipStatus", labelsToValues("relationshipStatus", values)[0] || "")}
@@ -530,7 +530,7 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div>
-                  <span className="text-sm text-muted-foreground">ВІЛ-статус:</span>
+                  <span className="text-base text-muted-foreground">ВІЛ-статус:</span>
                   <EditableBadgeList
                     values={profile.hivStatus ? valuesToLabels("hivStatus", [profile.hivStatus]) : []}
                     onSave={(values) => handleFieldSave("hivStatus", labelsToValues("hivStatus", values)[0] || "")}
@@ -541,7 +541,7 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div>
-                  <span className="text-sm text-muted-foreground">Алкоголь:</span>
+                  <span className="text-base text-muted-foreground">Алкоголь:</span>
                   <EditableBadgeList
                     values={profile.alcoholUse ? valuesToLabels("alcoholUse", [profile.alcoholUse]) : []}
                     onSave={(values) => handleFieldSave("alcoholUse", labelsToValues("alcoholUse", values)[0] || "")}
@@ -552,7 +552,7 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div>
-                  <span className="text-sm text-muted-foreground">Куріння:</span>
+                  <span className="text-base text-muted-foreground">Куріння:</span>
                   <EditableBadgeList
                     values={profile.smoking ? valuesToLabels("smoking", [profile.smoking]) : []}
                     onSave={(values) => handleFieldSave("smoking", labelsToValues("smoking", values)[0] || "")}
@@ -567,11 +567,11 @@ export default function ProfilePage() {
           </motion.div>
 
           {/* Right Column: Additional Info */}
-          <motion.div variants={cardVariants} className="lg:col-span-2 space-y-6">
+          <motion.div variants={cardVariants} className="lg:col-span-2 space-y-4">
             {/* Dating Goals */}
             <Card className="border-primary/20">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-xl">
                   <Heart className="h-5 w-5 text-primary" />
                   Цілі знайомства
                 </CardTitle>
@@ -592,7 +592,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="border-primary/20">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-xl">
                     <Info className="h-5 w-5 text-primary" />
                     Про себе
                   </CardTitle>
@@ -611,7 +611,7 @@ export default function ProfilePage() {
 
               <Card className="border-primary/20">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-xl">
                     <Sparkles className="h-5 w-5 text-primary" />
                     Шукаю
                   </CardTitle>
@@ -633,7 +633,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="border-primary/20">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-xl">
                     <Sparkles className="h-5 w-5 text-primary" />
                     Інтереси
                   </CardTitle>
@@ -652,7 +652,7 @@ export default function ProfilePage() {
 
               <Card className="border-primary/20">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-xl">
                     <Languages className="h-5 w-5 text-primary" />
                     Мови
                   </CardTitle>
@@ -673,7 +673,7 @@ export default function ProfilePage() {
             {/* Contact Info */}
             <Card className="border-primary/20">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-xl">
                   <Phone className="h-5 w-5 text-primary" />
                   Контакти
                 </CardTitle>
@@ -752,64 +752,65 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
 
-            {/* Commerce Settings */}
+            {/* Commerce Settings - Unified */}
             {isCommerce && (
-              <>
-                {/* Financial */}
-                <Card className="border-primary/20 bg-gradient-to-br from-purple-500/5 to-blue-500/5">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <DollarSign className="h-5 w-5 text-primary" />
-                      Тарифи
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="text-center p-3 bg-card rounded-lg border">
-                      <p className="text-sm text-muted-foreground mb-1">1 година</p>
-                      <EditableNumber
-                        value={profile.rate1h || 0}
-                        onSave={(value) => handleFieldSave("rate1h", value)}
-                        isEditing={isEditing}
-                        placeholder="0"
-                        min={0}
-                        max={50000}
-                        unit="₴"
-                      />
+              <Card className="border-primary/20 bg-gradient-to-br from-purple-500/5 to-blue-500/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-xl">
+                    <DollarSign className="h-6 w-6 text-primary" />
+                    Комерційна інформація
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Pricing */}
+                  <div>
+                    <h3 className="text-base font-medium mb-3">Тарифи</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div className="text-center p-3 bg-card rounded-lg border">
+                        <p className="text-base text-muted-foreground mb-1">1 година</p>
+                        <EditableNumber
+                          value={profile.rate1h || 0}
+                          onSave={(value) => handleFieldSave("rate1h", value)}
+                          isEditing={isEditing}
+                          placeholder="0"
+                          min={0}
+                          max={50000}
+                          unit="₴"
+                        />
+                      </div>
+                      <div className="text-center p-3 bg-card rounded-lg border">
+                        <p className="text-base text-muted-foreground mb-1">2 години</p>
+                        <EditableNumber
+                          value={profile.rate2h || 0}
+                          onSave={(value) => handleFieldSave("rate2h", value)}
+                          isEditing={isEditing}
+                          placeholder="0"
+                          min={0}
+                          max={50000}
+                          unit="₴"
+                        />
+                      </div>
+                      <div className="text-center p-3 bg-card rounded-lg border">
+                        <p className="text-base text-muted-foreground mb-1">Ніч</p>
+                        <EditableNumber
+                          value={profile.rateNight || 0}
+                          onSave={(value) => handleFieldSave("rateNight", value)}
+                          isEditing={isEditing}
+                          placeholder="0"
+                          min={0}
+                          max={50000}
+                          unit="₴"
+                        />
+                      </div>
                     </div>
-                    <div className="text-center p-3 bg-card rounded-lg border">
-                      <p className="text-sm text-muted-foreground mb-1">2 години</p>
-                      <EditableNumber
-                        value={profile.rate2h || 0}
-                        onSave={(value) => handleFieldSave("rate2h", value)}
-                        isEditing={isEditing}
-                        placeholder="0"
-                        min={0}
-                        max={50000}
-                        unit="₴"
-                      />
-                    </div>
-                    <div className="text-center p-3 bg-card rounded-lg border">
-                      <p className="text-sm text-muted-foreground mb-1">Ніч</p>
-                      <EditableNumber
-                        value={profile.rateNight || 0}
-                        onSave={(value) => handleFieldSave("rateNight", value)}
-                        isEditing={isEditing}
-                        placeholder="0"
-                        min={0}
-                        max={50000}
-                        unit="₴"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                  </div>
 
-                {/* Service Details & Commerce Role */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card className="border-primary/20">
-                    <CardHeader>
-                      <CardTitle className="text-base">Формати послуг</CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                  <Separator />
+
+                  {/* Service Formats & Commerce Role */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <h3 className="text-base font-medium mb-2">Формати послуг</h3>
                       <EditableBadgeList
                         values={profile.serviceFormats || []}
                         onSave={(values) => handleFieldSave("serviceFormats", values)}
@@ -818,14 +819,9 @@ export default function ProfilePage() {
                         label="Формати послуг"
                         multiSelect={true}
                       />
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-primary/20">
-                    <CardHeader>
-                      <CardTitle className="text-base">Комерційна роль</CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                    </div>
+                    <div>
+                      <h3 className="text-base font-medium mb-2">Комерційна роль</h3>
                       <EditableBadgeList
                         values={profile.commerceSexRole ? [profile.commerceSexRole] : []}
                         onSave={(values) => handleFieldSave("commerceSexRole", values[0] || "")}
@@ -834,17 +830,15 @@ export default function ProfilePage() {
                         label="Роль"
                         multiSelect={false}
                       />
-                    </CardContent>
-                  </Card>
-                </div>
+                    </div>
+                  </div>
 
-                {/* Location Formats & Travel */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card className="border-primary/20">
-                    <CardHeader>
-                      <CardTitle className="text-base">Формати локації</CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                  <Separator />
+
+                  {/* Location & Travel */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <h3 className="text-base font-medium mb-2">Формати локації</h3>
                       <EditableBadgeList
                         values={valuesToLabels("locationFormats", profile.locationFormats || [])}
                         onSave={(values) => handleFieldSave("locationFormats", labelsToValues("locationFormats", values))}
@@ -853,14 +847,9 @@ export default function ProfilePage() {
                         label="Локація"
                         multiSelect={true}
                       />
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border-primary/20">
-                    <CardHeader>
-                      <CardTitle className="text-base">Географія поїздок</CardTitle>
-                    </CardHeader>
-                    <CardContent>
+                    </div>
+                    <div>
+                      <h3 className="text-base font-medium mb-2">Географія поїздок</h3>
                       <EditableBadgeList
                         values={valuesToLabels("travelGeography", profile.travelGeography || [])}
                         onSave={(values) => handleFieldSave("travelGeography", labelsToValues("travelGeography", values))}
@@ -869,160 +858,158 @@ export default function ProfilePage() {
                         label="Поїздки"
                         multiSelect={true}
                       />
-                    </CardContent>
-                  </Card>
-                </div>
+                    </div>
+                  </div>
 
-                {/* Availability & Conditions */}
-                <Card className="border-primary/20">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Clock className="h-5 w-5 text-primary" />
-                      Графік та умови
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Доступність:</p>
-                      <EditableBadgeList
-                        values={valuesToLabels("availability", profile.availability || [])}
-                        onSave={(values) => handleFieldSave("availability", labelsToValues("availability", values))}
-                        isEditing={isEditing}
-                        options={getAllLabels("availability")}
-                        label="Доступність"
-                        multiSelect={true}
-                      />
-                    </div>
-                    <div>
-                      <span className="text-sm text-muted-foreground">Мінімальне попередження:</span>
-                      <EditableBadgeList
-                        values={profile.minNotice ? valuesToLabels("minNotice", [profile.minNotice]) : []}
-                        onSave={(values) => handleFieldSave("minNotice", labelsToValues("minNotice", values)[0] || "")}
-                        isEditing={isEditing}
-                        options={getAllLabels("minNotice")}
-                        label="Попередження"
-                        multiSelect={false}
-                      />
-                    </div>
-                    <div>
-                      <span className="text-sm text-muted-foreground">Мінімальна тривалість:</span>
-                      <EditableBadgeList
-                        values={profile.minDuration ? valuesToLabels("minDuration", [profile.minDuration]) : []}
-                        onSave={(values) => handleFieldSave("minDuration", labelsToValues("minDuration", values)[0] || "")}
-                        isEditing={isEditing}
-                        options={getAllLabels("minDuration")}
-                        label="Тривалість"
-                        multiSelect={false}
-                      />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Умови зустрічі:</p>
-                      <EditableBadgeList
-                        values={profile.meetingConditions || []}
-                        onSave={(values) => handleFieldSave("meetingConditions", values)}
-                        isEditing={isEditing}
-                        options={["Передоплата", "Готівка", "Переказ", "Верифікація", "Рекомендації"]}
-                        label="Умови"
-                        multiSelect={true}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+                  <Separator />
 
-                {/* Safety & Health */}
-                {(profile.healthSafety?.length || profile.lastStdTest || profile.myLimits || profile.photoVideoConsent || profile.comfortConditions) && (
-                  <Card className="border-primary/20">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Shield className="h-5 w-5 text-primary" />
-                        Безпека і здоров'я
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      {profile.healthSafety && profile.healthSafety.length > 0 && (
+                  {/* Schedule & Conditions */}
+                  <div>
+                    <h3 className="text-base font-medium mb-3">Графік та умови</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-base text-muted-foreground mb-2">Доступність:</p>
+                        <EditableBadgeList
+                          values={valuesToLabels("availability", profile.availability || [])}
+                          onSave={(values) => handleFieldSave("availability", labelsToValues("availability", values))}
+                          isEditing={isEditing}
+                          options={getAllLabels("availability")}
+                          label="Доступність"
+                          multiSelect={true}
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div>
-                          <p className="text-sm text-muted-foreground mb-2">Здоров'я та безпека:</p>
-                          <div className="flex gap-2 flex-wrap">
-                            {profile.healthSafety.map((item: string, i: number) => (
-                              <Badge key={i} variant="secondary" className="text-xs">
-                                {item}
-                              </Badge>
-                            ))}
-                          </div>
+                          <span className="text-base text-muted-foreground">Мінімальне попередження:</span>
+                          <EditableBadgeList
+                            values={profile.minNotice ? valuesToLabels("minNotice", [profile.minNotice]) : []}
+                            onSave={(values) => handleFieldSave("minNotice", labelsToValues("minNotice", values)[0] || "")}
+                            isEditing={isEditing}
+                            options={getAllLabels("minNotice")}
+                            label="Попередження"
+                            multiSelect={false}
+                          />
                         </div>
-                      )}
-                      {profile.lastStdTest && (
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Останнє тестування: </span>
-                          <span>{profile.lastStdTest}</span>
-                        </div>
-                      )}
-                      {profile.photoVideoConsent && (
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Фото/відео: </span>
-                          <Badge variant="outline" className="text-xs">{valueToLabel("photoVideoConsent", profile.photoVideoConsent)}</Badge>
-                        </div>
-                      )}
-                      {profile.myLimits && (
                         <div>
-                          <p className="text-sm text-muted-foreground mb-1">Мої межі:</p>
-                          <p className="text-sm whitespace-pre-wrap">{profile.myLimits}</p>
+                          <span className="text-base text-muted-foreground">Мінімальна тривалість:</span>
+                          <EditableBadgeList
+                            values={profile.minDuration ? valuesToLabels("minDuration", [profile.minDuration]) : []}
+                            onSave={(values) => handleFieldSave("minDuration", labelsToValues("minDuration", values)[0] || "")}
+                            isEditing={isEditing}
+                            options={getAllLabels("minDuration")}
+                            label="Тривалість"
+                            multiSelect={false}
+                          />
                         </div>
-                      )}
-                      {profile.comfortConditions && (
-                        <div>
-                          <p className="text-sm text-muted-foreground mb-1">Умови комфорту:</p>
-                          <p className="text-sm whitespace-pre-wrap">{profile.comfortConditions}</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
+                      </div>
+                      <div>
+                        <p className="text-base text-muted-foreground mb-2">Умови зустрічі:</p>
+                        <EditableBadgeList
+                          values={profile.meetingConditions || []}
+                          onSave={(values) => handleFieldSave("meetingConditions", values)}
+                          isEditing={isEditing}
+                          options={["Передоплата", "Готівка", "Переказ", "Верифікація", "Рекомендації"]}
+                          label="Умови"
+                          multiSelect={true}
+                        />
+                      </div>
+                    </div>
+                  </div>
 
-                {/* Payment & Fees */}
-                {(profile.paymentMethods?.length || profile.travelFee || profile.cancellationFee || profile.transportCosts) && (
-                  <Card className="border-primary/20">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <DollarSign className="h-5 w-5 text-primary" />
-                        Оплата та додаткові збори
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      {profile.paymentMethods && profile.paymentMethods.length > 0 && (
-                        <div>
-                          <p className="text-sm text-muted-foreground mb-2">Способи оплати:</p>
-                          <div className="flex gap-2 flex-wrap">
-                            {profile.paymentMethods.map((method: string, i: number) => (
-                              <Badge key={i} variant="secondary" className="text-xs">
-                                {valueToLabel("paymentMethods", method)}
-                              </Badge>
-                            ))}
-                          </div>
+                  {/* Safety & Health */}
+                  {(profile.healthSafety?.length || profile.lastStdTest || profile.myLimits || profile.photoVideoConsent || profile.comfortConditions) && (
+                    <>
+                      <Separator />
+                      <div>
+                        <h3 className="text-base font-medium mb-3 flex items-center gap-2">
+                          <Shield className="h-5 w-5 text-primary" />
+                          Безпека і здоров'я
+                        </h3>
+                        <div className="space-y-2">
+                          {profile.healthSafety && profile.healthSafety.length > 0 && (
+                            <div>
+                              <p className="text-base text-muted-foreground mb-2">Здоров'я та безпека:</p>
+                              <div className="flex gap-2 flex-wrap">
+                                {profile.healthSafety.map((item: string, i: number) => (
+                                  <Badge key={i} variant="secondary">
+                                    {item}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {profile.lastStdTest && (
+                            <div className="text-base">
+                              <span className="text-muted-foreground">Останнє тестування: </span>
+                              <span>{profile.lastStdTest}</span>
+                            </div>
+                          )}
+                          {profile.photoVideoConsent && (
+                            <div className="text-base">
+                              <span className="text-muted-foreground">Фото/відео: </span>
+                              <Badge variant="outline">{valueToLabel("photoVideoConsent", profile.photoVideoConsent)}</Badge>
+                            </div>
+                          )}
+                          {profile.myLimits && (
+                            <div>
+                              <p className="text-base text-muted-foreground mb-1">Мої межі:</p>
+                              <p className="text-base whitespace-pre-wrap">{profile.myLimits}</p>
+                            </div>
+                          )}
+                          {profile.comfortConditions && (
+                            <div>
+                              <p className="text-base text-muted-foreground mb-1">Умови комфорту:</p>
+                              <p className="text-base whitespace-pre-wrap">{profile.comfortConditions}</p>
+                            </div>
+                          )}
                         </div>
-                      )}
-                      {profile.travelFee && (
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Вартість виїзду: </span>
-                          <span className="font-medium">{profile.travelFee} ₴</span>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Payment & Fees */}
+                  {(profile.paymentMethods?.length || profile.travelFee || profile.cancellationFee || profile.transportCosts) && (
+                    <>
+                      <Separator />
+                      <div>
+                        <h3 className="text-base font-medium mb-3">Оплата та додаткові збори</h3>
+                        <div className="space-y-2">
+                          {profile.paymentMethods && profile.paymentMethods.length > 0 && (
+                            <div>
+                              <p className="text-base text-muted-foreground mb-2">Способи оплати:</p>
+                              <div className="flex gap-2 flex-wrap">
+                                {profile.paymentMethods.map((method: string, i: number) => (
+                                  <Badge key={i} variant="secondary">
+                                    {valueToLabel("paymentMethods", method)}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {profile.travelFee && (
+                            <div className="text-base">
+                              <span className="text-muted-foreground">Вартість виїзду: </span>
+                              <span className="font-medium">{profile.travelFee} ₴</span>
+                            </div>
+                          )}
+                          {profile.cancellationFee && (
+                            <div className="text-base">
+                              <span className="text-muted-foreground">Штраф за скасування: </span>
+                              <span className="font-medium">{profile.cancellationFee} ₴</span>
+                            </div>
+                          )}
+                          {profile.transportCosts && (
+                            <div className="text-base">
+                              <span className="text-muted-foreground">Транспортні витрати: </span>
+                              <span>{valueToLabel("transportCosts", profile.transportCosts)}</span>
+                            </div>
+                          )}
                         </div>
-                      )}
-                      {profile.cancellationFee && (
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Штраф за скасування: </span>
-                          <span className="font-medium">{profile.cancellationFee} ₴</span>
-                        </div>
-                      )}
-                      {profile.transportCosts && (
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Транспортні витрати: </span>
-                          <span>{valueToLabel("transportCosts", profile.transportCosts)}</span>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
-              </>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
             )}
 
             {/* Sexual Profile */}
@@ -1030,7 +1017,7 @@ export default function ProfilePage() {
               profile.toysAccessories?.length || profile.fetishes?.length || profile.bdsmRoles?.length) && (
               <Card className="border-primary/20 bg-gradient-to-br from-pink-500/5 to-purple-500/5">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-xl">
                     <Heart className="h-5 w-5 text-primary" />
                     Сексуальний профіль
                   </CardTitle>
@@ -1039,7 +1026,7 @@ export default function ProfilePage() {
                   {/* Experience & Preferences */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">Досвід:</p>
+                      <p className="text-base text-muted-foreground mb-2">Досвід:</p>
                       <EditableBadgeList
                         values={profile.sexExperience ? [profile.sexExperience] : []}
                         onSave={(values) => handleFieldSave("sexExperience", values[0] || "")}
@@ -1050,7 +1037,7 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">Презервативи:</p>
+                      <p className="text-base text-muted-foreground mb-2">Презервативи:</p>
                       <EditableBadgeList
                         values={profile.condomAttitude ? [profile.condomAttitude] : []}
                         onSave={(values) => handleFieldSave("condomAttitude", values[0] || "")}
@@ -1061,7 +1048,7 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">Обрізання:</p>
+                      <p className="text-base text-muted-foreground mb-2">Обрізання:</p>
                       <EditableBadgeList
                         values={profile.circumcision ? [profile.circumcision] : []}
                         onSave={(values) => handleFieldSave("circumcision", values[0] || "")}
@@ -1072,7 +1059,7 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">Бажана частота:</p>
+                      <p className="text-base text-muted-foreground mb-2">Бажана частота:</p>
                       <EditableBadgeList
                         values={profile.sexFrequency ? [profile.sexFrequency] : []}
                         onSave={(values) => handleFieldSave("sexFrequency", values[0] || "")}
@@ -1083,7 +1070,7 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">Груповий секс:</p>
+                      <p className="text-base text-muted-foreground mb-2">Груповий секс:</p>
                       <EditableBadgeList
                         values={profile.groupSex ? [profile.groupSex] : []}
                         onSave={(values) => handleFieldSave("groupSex", values[0] || "")}
@@ -1094,7 +1081,7 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">Речовини:</p>
+                      <p className="text-base text-muted-foreground mb-2">Речовини:</p>
                       <EditableBadgeList
                         values={profile.substancesAttitude ? [profile.substancesAttitude] : []}
                         onSave={(values) => handleFieldSave("substancesAttitude", values[0] || "")}
@@ -1110,7 +1097,7 @@ export default function ProfilePage() {
 
                   {/* Multi-select fields */}
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">Улюблені пози:</p>
+                    <p className="text-base text-muted-foreground mb-2">Улюблені пози:</p>
                     <EditableBadgeList
                       values={profile.favoritePositions || []}
                       onSave={(values) => handleFieldSave("favoritePositions", values)}
@@ -1122,7 +1109,7 @@ export default function ProfilePage() {
                   </div>
 
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">Улюблені активності:</p>
+                    <p className="text-base text-muted-foreground mb-2">Улюблені активності:</p>
                     <EditableBadgeList
                       values={profile.favoriteActivities || []}
                       onSave={(values) => handleFieldSave("favoriteActivities", values)}
@@ -1134,7 +1121,7 @@ export default function ProfilePage() {
                   </div>
 
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">Іграшки/Аксесуари:</p>
+                    <p className="text-base text-muted-foreground mb-2">Іграшки/Аксесуари:</p>
                     <EditableBadgeList
                       values={profile.toysAccessories || []}
                       onSave={(values) => handleFieldSave("toysAccessories", values)}
@@ -1146,7 +1133,7 @@ export default function ProfilePage() {
                   </div>
 
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">Місце зустрічі:</p>
+                    <p className="text-base text-muted-foreground mb-2">Місце зустрічі:</p>
                     <EditableBadgeList
                       values={profile.meetingPlaces || []}
                       onSave={(values) => handleFieldSave("meetingPlaces", values)}
@@ -1158,7 +1145,7 @@ export default function ProfilePage() {
                   </div>
 
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">Після сексу:</p>
+                    <p className="text-base text-muted-foreground mb-2">Після сексу:</p>
                     <EditableBadgeList
                       values={profile.afterSex || []}
                       onSave={(values) => handleFieldSave("afterSex", values)}
@@ -1170,7 +1157,7 @@ export default function ProfilePage() {
                   </div>
 
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">Фетиші/вподобання:</p>
+                    <p className="text-base text-muted-foreground mb-2">Фетиші/вподобання:</p>
                     <EditableBadgeList
                       values={profile.fetishes || []}
                       onSave={(values) => handleFieldSave("fetishes", values)}
@@ -1182,7 +1169,7 @@ export default function ProfilePage() {
                   </div>
 
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">Роль у BDSM:</p>
+                    <p className="text-base text-muted-foreground mb-2">Роль у BDSM:</p>
                     <EditableBadgeList
                       values={profile.bdsmRoles || []}
                       onSave={(values) => handleFieldSave("bdsmRoles", values)}
