@@ -647,154 +647,178 @@ export default function ProfilePage() {
             {isCommerce && (
               <>
                 {/* Financial */}
-                {(profile.rate1h || profile.rate2h || profile.rateNight) && (
-                  <Card className="border-primary/20 bg-gradient-to-br from-purple-500/5 to-blue-500/5">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <DollarSign className="h-5 w-5 text-primary" />
-                        Тарифи
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {profile.rate1h && (
-                        <div className="text-center p-3 bg-card rounded-lg border">
-                          <p className="text-sm text-muted-foreground mb-1">1 година</p>
-                          <p className="text-2xl font-bold text-primary">{profile.rate1h} ₴</p>
-                        </div>
-                      )}
-                      {profile.rate2h && (
-                        <div className="text-center p-3 bg-card rounded-lg border">
-                          <p className="text-sm text-muted-foreground mb-1">2 години</p>
-                          <p className="text-2xl font-bold text-primary">{profile.rate2h} ₴</p>
-                        </div>
-                      )}
-                      {profile.rateNight && (
-                        <div className="text-center p-3 bg-card rounded-lg border">
-                          <p className="text-sm text-muted-foreground mb-1">Ніч</p>
-                          <p className="text-2xl font-bold text-primary">{profile.rateNight} ₴</p>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
+                <Card className="border-primary/20 bg-gradient-to-br from-purple-500/5 to-blue-500/5">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <DollarSign className="h-5 w-5 text-primary" />
+                      Тарифи
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center p-3 bg-card rounded-lg border">
+                      <p className="text-sm text-muted-foreground mb-1">1 година</p>
+                      <EditableNumber
+                        value={profile.rate1h || 0}
+                        onSave={(value) => handleFieldSave("rate1h", value)}
+                        isEditing={isEditing}
+                        placeholder="0"
+                        min={0}
+                        max={50000}
+                        unit="₴"
+                      />
+                    </div>
+                    <div className="text-center p-3 bg-card rounded-lg border">
+                      <p className="text-sm text-muted-foreground mb-1">2 години</p>
+                      <EditableNumber
+                        value={profile.rate2h || 0}
+                        onSave={(value) => handleFieldSave("rate2h", value)}
+                        isEditing={isEditing}
+                        placeholder="0"
+                        min={0}
+                        max={50000}
+                        unit="₴"
+                      />
+                    </div>
+                    <div className="text-center p-3 bg-card rounded-lg border">
+                      <p className="text-sm text-muted-foreground mb-1">Ніч</p>
+                      <EditableNumber
+                        value={profile.rateNight || 0}
+                        onSave={(value) => handleFieldSave("rateNight", value)}
+                        isEditing={isEditing}
+                        placeholder="0"
+                        min={0}
+                        max={50000}
+                        unit="₴"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
 
                 {/* Service Details & Commerce Role */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {profile.serviceFormats && profile.serviceFormats.length > 0 && (
-                    <Card className="border-primary/20">
-                      <CardHeader>
-                        <CardTitle className="text-base">Формати послуг</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex gap-2 flex-wrap">
-                          {profile.serviceFormats.map((format: string, i: number) => (
-                            <Badge key={i} variant="outline" className="text-xs">
-                              {format}
-                            </Badge>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
+                  <Card className="border-primary/20">
+                    <CardHeader>
+                      <CardTitle className="text-base">Формати послуг</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <EditableBadgeList
+                        values={profile.serviceFormats || []}
+                        onSave={(values) => handleFieldSave("serviceFormats", values)}
+                        isEditing={isEditing}
+                        options={["Онлайн", "Офлайн", "Супровід", "Масаж", "Фотосесії", "Відеоконтент"]}
+                        label="Формати послуг"
+                        multiSelect={true}
+                      />
+                    </CardContent>
+                  </Card>
 
-                  {profile.commerceSexRole && (
-                    <Card className="border-primary/20">
-                      <CardHeader>
-                        <CardTitle className="text-base">Комерційна роль</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <Badge variant="default">{profile.commerceSexRole}</Badge>
-                      </CardContent>
-                    </Card>
-                  )}
+                  <Card className="border-primary/20">
+                    <CardHeader>
+                      <CardTitle className="text-base">Комерційна роль</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <EditableBadgeList
+                        values={profile.commerceSexRole ? [profile.commerceSexRole] : []}
+                        onSave={(values) => handleFieldSave("commerceSexRole", values[0] || "")}
+                        isEditing={isEditing}
+                        options={["Актив", "Пасив", "Універсал", "Сайд"]}
+                        label="Роль"
+                        multiSelect={false}
+                      />
+                    </CardContent>
+                  </Card>
                 </div>
 
                 {/* Location Formats & Travel */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {profile.locationFormats && profile.locationFormats.length > 0 && (
-                    <Card className="border-primary/20">
-                      <CardHeader>
-                        <CardTitle className="text-base">Формати локації</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex gap-2 flex-wrap">
-                          {profile.locationFormats.map((loc: string, i: number) => (
-                            <Badge key={i} variant="outline" className="text-xs">
-                              {loc}
-                            </Badge>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
+                  <Card className="border-primary/20">
+                    <CardHeader>
+                      <CardTitle className="text-base">Формати локації</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <EditableBadgeList
+                        values={profile.locationFormats || []}
+                        onSave={(values) => handleFieldSave("locationFormats", values)}
+                        isEditing={isEditing}
+                        options={["У мене", "У клієнта", "Готель", "Інше"]}
+                        label="Локація"
+                        multiSelect={true}
+                      />
+                    </CardContent>
+                  </Card>
 
-                  {profile.travelGeography && profile.travelGeography.length > 0 && (
-                    <Card className="border-primary/20">
-                      <CardHeader>
-                        <CardTitle className="text-base">Географія поїздок</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex gap-2 flex-wrap">
-                          {profile.travelGeography.map((place: string, i: number) => (
-                            <Badge key={i} variant="outline" className="text-xs">
-                              {place}
-                            </Badge>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
+                  <Card className="border-primary/20">
+                    <CardHeader>
+                      <CardTitle className="text-base">Географія поїздок</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <EditableBadgeList
+                        values={profile.travelGeography || []}
+                        onSave={(values) => handleFieldSave("travelGeography", values)}
+                        isEditing={isEditing}
+                        options={["Місто", "Область", "Україна", "Європа", "Світ"]}
+                        label="Поїздки"
+                        multiSelect={true}
+                      />
+                    </CardContent>
+                  </Card>
                 </div>
 
                 {/* Availability & Conditions */}
-                {(profile.availability?.length || profile.minNotice || profile.meetingConditions?.length) && (
-                  <Card className="border-primary/20">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Clock className="h-5 w-5 text-primary" />
-                        Графік та умови
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      {profile.availability && profile.availability.length > 0 && (
-                        <div>
-                          <p className="text-sm text-muted-foreground mb-2">Доступність:</p>
-                          <div className="flex gap-2 flex-wrap">
-                            {profile.availability.map((time: string, i: number) => (
-                              <Badge key={i} variant="secondary" className="text-xs">
-                                {time}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {profile.minNotice && (
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Мінімальне попередження: </span>
-                          <span>{profile.minNotice}</span>
-                        </div>
-                      )}
-                      {profile.minDuration && (
-                        <div className="text-sm">
-                          <span className="text-muted-foreground">Мінімальна тривалість: </span>
-                          <span>{profile.minDuration}</span>
-                        </div>
-                      )}
-                      {profile.meetingConditions && profile.meetingConditions.length > 0 && (
-                        <div>
-                          <p className="text-sm text-muted-foreground mb-2">Умови зустрічі:</p>
-                          <div className="flex gap-2 flex-wrap">
-                            {profile.meetingConditions.map((cond: string, i: number) => (
-                              <Badge key={i} variant="outline" className="text-xs">
-                                {cond}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
+                <Card className="border-primary/20">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-primary" />
+                      Графік та умови
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Доступність:</p>
+                      <EditableBadgeList
+                        values={profile.availability || []}
+                        onSave={(values) => handleFieldSave("availability", values)}
+                        isEditing={isEditing}
+                        options={["Ранок", "День", "Вечір", "Ніч", "Вихідні", "Будні"]}
+                        label="Доступність"
+                        multiSelect={true}
+                      />
+                    </div>
+                    <div>
+                      <span className="text-sm text-muted-foreground">Мінімальне попередження:</span>
+                      <EditableBadgeList
+                        values={profile.minNotice ? [profile.minNotice] : []}
+                        onSave={(values) => handleFieldSave("minNotice", values[0] || "")}
+                        isEditing={isEditing}
+                        options={["30 хв", "1 година", "2 години", "3 години", "День"]}
+                        label="Попередження"
+                        multiSelect={false}
+                      />
+                    </div>
+                    <div>
+                      <span className="text-sm text-muted-foreground">Мінімальна тривалість:</span>
+                      <EditableBadgeList
+                        values={profile.minDuration ? [profile.minDuration] : []}
+                        onSave={(values) => handleFieldSave("minDuration", values[0] || "")}
+                        isEditing={isEditing}
+                        options={["30 хв", "1 година", "2 години", "3 години", "Ніч"]}
+                        label="Тривалість"
+                        multiSelect={false}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Умови зустрічі:</p>
+                      <EditableBadgeList
+                        values={profile.meetingConditions || []}
+                        onSave={(values) => handleFieldSave("meetingConditions", values)}
+                        isEditing={isEditing}
+                        options={["Передоплата", "Готівка", "Переказ", "Верифікація", "Рекомендації"]}
+                        label="Умови"
+                        multiSelect={true}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
 
                 {/* Safety & Health */}
                 {(profile.healthSafety?.length || profile.lastStdTest || profile.myLimits || profile.photoVideoConsent || profile.comfortConditions) && (
@@ -905,137 +929,160 @@ export default function ProfilePage() {
                 <CardContent className="space-y-4">
                   {/* Experience & Preferences */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {profile.sexExperience && (
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-2">Досвід:</p>
-                        <Badge variant="secondary">{profile.sexExperience}</Badge>
-                      </div>
-                    )}
-                    {profile.condomAttitude && (
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-2">Презервативи:</p>
-                        <Badge variant="secondary">{profile.condomAttitude}</Badge>
-                      </div>
-                    )}
-                    {profile.circumcision && (
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-2">Обрізання:</p>
-                        <Badge variant="secondary">{profile.circumcision}</Badge>
-                      </div>
-                    )}
-                    {profile.sexFrequency && (
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-2">Бажана частота:</p>
-                        <Badge variant="secondary">{profile.sexFrequency}</Badge>
-                      </div>
-                    )}
-                    {profile.groupSex && (
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-2">Груповий секс:</p>
-                        <Badge variant="secondary">{profile.groupSex}</Badge>
-                      </div>
-                    )}
-                    {profile.substancesAttitude && (
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-2">Речовини:</p>
-                        <Badge variant="secondary">{profile.substancesAttitude}</Badge>
-                      </div>
-                    )}
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Досвід:</p>
+                      <EditableBadgeList
+                        values={profile.sexExperience ? [profile.sexExperience] : []}
+                        onSave={(values) => handleFieldSave("sexExperience", values[0] || "")}
+                        isEditing={isEditing}
+                        options={["Початківець", "Середній", "Досвідчений", "Експерт"]}
+                        label="Досвід"
+                        multiSelect={false}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Презервативи:</p>
+                      <EditableBadgeList
+                        values={profile.condomAttitude ? [profile.condomAttitude] : []}
+                        onSave={(values) => handleFieldSave("condomAttitude", values[0] || "")}
+                        isEditing={isEditing}
+                        options={["Завжди", "Зазвичай", "Іноді", "Ніколи"]}
+                        label="Презервативи"
+                        multiSelect={false}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Обрізання:</p>
+                      <EditableBadgeList
+                        values={profile.circumcision ? [profile.circumcision] : []}
+                        onSave={(values) => handleFieldSave("circumcision", values[0] || "")}
+                        isEditing={isEditing}
+                        options={["Обрізаний", "Необрізаний"]}
+                        label="Обрізання"
+                        multiSelect={false}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Бажана частота:</p>
+                      <EditableBadgeList
+                        values={profile.sexFrequency ? [profile.sexFrequency] : []}
+                        onSave={(values) => handleFieldSave("sexFrequency", values[0] || "")}
+                        isEditing={isEditing}
+                        options={["Щоденно", "Кілька разів на тиждень", "Раз на тиждень", "Кілька разів на місяць", "Раз на місяць"]}
+                        label="Частота"
+                        multiSelect={false}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Груповий секс:</p>
+                      <EditableBadgeList
+                        values={profile.groupSex ? [profile.groupSex] : []}
+                        onSave={(values) => handleFieldSave("groupSex", values[0] || "")}
+                        isEditing={isEditing}
+                        options={["Люблю", "Іноді", "Ні", "Хочу але ще не робив", "Спостерігач"]}
+                        label="Груповий секс"
+                        multiSelect={false}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Речовини:</p>
+                      <EditableBadgeList
+                        values={profile.substancesAttitude ? [profile.substancesAttitude] : []}
+                        onSave={(values) => handleFieldSave("substancesAttitude", values[0] || "")}
+                        isEditing={isEditing}
+                        options={["Ні (тверезий)", "Іноді (легкі поперси)", "Так (сильніші)"]}
+                        label="Речовини"
+                        multiSelect={false}
+                      />
+                    </div>
                   </div>
 
                   <Separator />
 
                   {/* Multi-select fields */}
-                  {profile.favoritePositions && profile.favoritePositions.length > 0 && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Улюблені пози:</p>
-                      <div className="flex gap-2 flex-wrap">
-                        {profile.favoritePositions.map((pos: string, i: number) => (
-                          <Badge key={i} variant="outline" className="text-xs">
-                            {pos}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Улюблені пози:</p>
+                    <EditableBadgeList
+                      values={profile.favoritePositions || []}
+                      onSave={(values) => handleFieldSave("favoritePositions", values)}
+                      isEditing={isEditing}
+                      options={["Місіонерська", "Ззаду", "Наїзник", "На боці", "Стоячи"]}
+                      label="Пози"
+                      multiSelect={true}
+                    />
+                  </div>
 
-                  {profile.favoriteActivities && profile.favoriteActivities.length > 0 && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Улюблені активності:</p>
-                      <div className="flex gap-2 flex-wrap">
-                        {profile.favoriteActivities.map((act: string, i: number) => (
-                          <Badge key={i} variant="outline" className="text-xs">
-                            {act}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Улюблені активності:</p>
+                    <EditableBadgeList
+                      values={profile.favoriteActivities || []}
+                      onSave={(values) => handleFieldSave("favoriteActivities", values)}
+                      isEditing={isEditing}
+                      options={["Оральний", "Анальний", "Лизання ануса", "69", "Фістинг", "Масаж простати", "Стимуляція сосків", "Ручна стимуляція", "Секс з іграшками", "Легке зв'язування"]}
+                      label="Активності"
+                      multiSelect={true}
+                    />
+                  </div>
 
-                  {profile.toysAccessories && profile.toysAccessories.length > 0 && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Іграшки/Аксесуари:</p>
-                      <div className="flex gap-2 flex-wrap">
-                        {profile.toysAccessories.map((toy: string, i: number) => (
-                          <Badge key={i} variant="outline" className="text-xs">
-                            {toy}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Іграшки/Аксесуари:</p>
+                    <EditableBadgeList
+                      values={profile.toysAccessories || []}
+                      onSave={(values) => handleFieldSave("toysAccessories", values)}
+                      isEditing={isEditing}
+                      options={["Вібратори", "Анальні пробки", "Наручники", "Мотузки", "Підвіс", "Анальні намиста", "Фалоімітатори", "Масажери простати", "Кільця для пеніса", "Маски/Пов'язки"]}
+                      label="Іграшки"
+                      multiSelect={true}
+                    />
+                  </div>
 
-                  {profile.meetingPlaces && profile.meetingPlaces.length > 0 && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Місце зустрічі:</p>
-                      <div className="flex gap-2 flex-wrap">
-                        {profile.meetingPlaces.map((place: string, i: number) => (
-                          <Badge key={i} variant="outline" className="text-xs">
-                            {place}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Місце зустрічі:</p>
+                    <EditableBadgeList
+                      values={profile.meetingPlaces || []}
+                      onSave={(values) => handleFieldSave("meetingPlaces", values)}
+                      isEditing={isEditing}
+                      options={["Дома", "Готель", "Сауна/Клуб", "Природа"]}
+                      label="Місця"
+                      multiSelect={true}
+                    />
+                  </div>
 
-                  {profile.afterSex && profile.afterSex.length > 0 && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Після сексу:</p>
-                      <div className="flex gap-2 flex-wrap">
-                        {profile.afterSex.map((after: string, i: number) => (
-                          <Badge key={i} variant="outline" className="text-xs">
-                            {after}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Після сексу:</p>
+                    <EditableBadgeList
+                      values={profile.afterSex || []}
+                      onSave={(values) => handleFieldSave("afterSex", values)}
+                      isEditing={isEditing}
+                      options={["Обійми/Розмова", "Швидкий душ", "Ніч разом", "Нічого"]}
+                      label="Після сексу"
+                      multiSelect={true}
+                    />
+                  </div>
 
-                  {profile.fetishes && profile.fetishes.length > 0 && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Фетиші/вподобання:</p>
-                      <div className="flex gap-2 flex-wrap">
-                        {profile.fetishes.map((fetish: string, i: number) => (
-                          <Badge key={i} variant="default" className="text-xs bg-gradient-to-r from-purple-500 to-pink-500">
-                            {fetish}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Фетиші/вподобання:</p>
+                    <EditableBadgeList
+                      values={profile.fetishes || []}
+                      onSave={(values) => handleFieldSave("fetishes", values)}
+                      isEditing={isEditing}
+                      options={["Bears", "Leather", "Uniform", "Sportswear", "Daddies", "Jocks", "Twinks", "BDSM", "Cruising", "Foot Fetish", "Group Sex", "Latex/Rubber", "Underwear Fetish", "Voyeurism", "Exhibitionism"]}
+                      label="Фетиші"
+                      multiSelect={true}
+                    />
+                  </div>
 
-                  {profile.bdsmRoles && profile.bdsmRoles.length > 0 && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Роль у BDSM:</p>
-                      <div className="flex gap-2 flex-wrap">
-                        {profile.bdsmRoles.map((role: string, i: number) => (
-                          <Badge key={i} variant="default" className="text-xs bg-gradient-to-r from-purple-600 to-blue-600">
-                            {role}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Роль у BDSM:</p>
+                    <EditableBadgeList
+                      values={profile.bdsmRoles || []}
+                      onSave={(values) => handleFieldSave("bdsmRoles", values)}
+                      isEditing={isEditing}
+                      options={["Dom", "Master", "Sadist", "Sub", "Slave", "Masochist", "Switch", "Kinky/Experimental", "Curious/Learning"]}
+                      label="BDSM"
+                      multiSelect={true}
+                    />
+                  </div>
                 </CardContent>
               </Card>
             )}
