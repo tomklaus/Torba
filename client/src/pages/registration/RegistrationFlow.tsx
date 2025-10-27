@@ -16,6 +16,9 @@ import Step4 from "./Step4";
 import Step5 from "./Step5";
 import Step6 from "./Step6";
 import Step7 from "./Step7";
+import Step8 from "./Step8";
+import Step9 from "./Step9";
+import Step10 from "./Step10";
 
 // Схема валідації для всієї реєстрації
 const registrationSchema = z.object({
@@ -76,6 +79,34 @@ const registrationSchema = z.object({
     pornScore: z.number(),
     sexyScore: z.number(),
   })).default([]),
+  
+  // Крок 8: Додаткові опціональні поля
+  aboutMe: z.string().max(500, "Максимум 500 символів").optional(),
+  lookingFor: z.string().max(500, "Максимум 500 символів").optional(),
+  bodyType: z.string().optional(),
+  relationshipStatus: z.string().optional(),
+  interests: z.array(z.string()).optional(),
+  hivStatus: z.string().optional(),
+  alcoholUse: z.string().optional(),
+  smoking: z.string().optional(),
+  languages: z.array(z.string()).optional(),
+  
+  // Крок 9: Контактна інформація
+  instagram: z.string().optional(),
+  spotify: z.string().optional(),
+  tiktok: z.string().optional(),
+  telegram: z.string().optional(),
+  twitter: z.string().optional(),
+  contactEmail: z.string().email("Невірний формат email").or(z.literal("")).optional(),
+  phoneNumber: z.string().optional(),
+  
+  // Крок 10: Сексуальний профіль
+  sexExperience: z.string().optional(),
+  condomAttitude: z.string().optional(),
+  circumcision: z.string().optional(),
+  favoritePositions: z.array(z.string()).optional(),
+  drugsAttitude: z.string().optional(),
+  favoriteActivities: z.array(z.string()).optional(),
 });
 
 type RegistrationData = z.infer<typeof registrationSchema>;
@@ -117,6 +148,31 @@ export default function RegistrationFlow() {
       transportCosts: "",
       publicPhotos: [],
       privatePhotos: [],
+      // Крок 8
+      aboutMe: "",
+      lookingFor: "",
+      bodyType: "",
+      relationshipStatus: "",
+      interests: [],
+      hivStatus: "",
+      alcoholUse: "",
+      smoking: "",
+      languages: [],
+      // Крок 9
+      instagram: "",
+      spotify: "",
+      tiktok: "",
+      telegram: "",
+      twitter: "",
+      contactEmail: "",
+      phoneNumber: "",
+      // Крок 10
+      sexExperience: "",
+      condomAttitude: "",
+      circumcision: "",
+      favoritePositions: [],
+      drugsAttitude: "",
+      favoriteActivities: [],
     },
     mode: "onChange",
   });
@@ -124,22 +180,31 @@ export default function RegistrationFlow() {
   const commerceType = form.watch("commerceType");
   const isCommerce = commerceType === "yes" || commerceType === "commerce_only";
 
-  // Визначаємо загальну кількість кроків
-  const totalSteps = isCommerce ? 7 : 3; // 1, 2, 7 якщо немає комерції; 1, 2, 3, 4, 5, 6, 7 якщо є
+  // Визначаємо загальну кількість кроків: 1, 2, (3-6 якщо комерція), 7, 8, 9, 10
+  const totalSteps = isCommerce ? 10 : 6; // 1, 2, 7, 8, 9, 10 якщо немає комерції; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 якщо є
 
   // Функція для отримання номеру наступного кроку
   const getNextStep = (current: number) => {
     if (!isCommerce) {
-      // Якщо не комерція: 1 -> 2 -> 7
+      // Якщо не комерція: 1 -> 2 -> 7 -> 8 -> 9 -> 10
       if (current === 1) return 2;
       if (current === 2) return 7;
+      if (current === 7) return 8;
+      if (current === 8) return 9;
+      if (current === 9) return 10;
     }
+    // Якщо комерція: послідовно 1-10
     return current + 1;
   };
 
   // Функція для отримання номеру попереднього кроку
   const getPrevStep = (current: number) => {
-    if (!isCommerce && current === 7) return 2;
+    if (!isCommerce) {
+      if (current === 7) return 2;
+      if (current === 8) return 7;
+      if (current === 9) return 8;
+      if (current === 10) return 9;
+    }
     return current - 1;
   };
 
@@ -155,13 +220,23 @@ export default function RegistrationFlow() {
     } else if (currentStep === 7) {
       isValid = await form.trigger("publicPhotos");
     }
+    // Кроки 8, 9, 10 - всі поля опціональні, валідація не потрібна
 
     if (!isValid) {
       return;
     }
 
     const nextStep = getNextStep(currentStep);
-    if (nextStep <= 7) {
+    if (nextStep <= 10) {
+      setCurrentStep(nextStep);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleSkip = () => {
+    // Пропустити опціональний крок (8, 9, 10)
+    const nextStep = getNextStep(currentStep);
+    if (nextStep <= 10) {
       setCurrentStep(nextStep);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -225,6 +300,34 @@ export default function RegistrationFlow() {
         // Фото
         publicPhotos: data.publicPhotos,
         privatePhotos: data.privatePhotos || [],
+        
+        // Крок 8: Додаткові поля
+        aboutMe: data.aboutMe || null,
+        lookingFor: data.lookingFor || null,
+        bodyType: data.bodyType || null,
+        relationshipStatus: data.relationshipStatus || null,
+        interests: data.interests || [],
+        hivStatus: data.hivStatus || null,
+        alcoholUse: data.alcoholUse || null,
+        smoking: data.smoking || null,
+        languages: data.languages || [],
+        
+        // Крок 9: Контакти
+        instagram: data.instagram || null,
+        spotify: data.spotify || null,
+        tiktok: data.tiktok || null,
+        telegram: data.telegram || null,
+        twitter: data.twitter || null,
+        contactEmail: data.contactEmail || null,
+        phoneNumber: data.phoneNumber || null,
+        
+        // Крок 10: Сексуальний профіль
+        sexExperience: data.sexExperience || null,
+        condomAttitude: data.condomAttitude || null,
+        circumcision: data.circumcision || null,
+        favoritePositions: data.favoritePositions || [],
+        drugsAttitude: data.drugsAttitude || null,
+        favoriteActivities: data.favoriteActivities || [],
       };
 
       const response = await fetch("/api/profiles", {
@@ -246,7 +349,22 @@ export default function RegistrationFlow() {
     }
   };
 
-  const progress = ((currentStep / totalSteps) * 100);
+  // Обчислюємо логічний номер кроку (скільки кроків пройдено)
+  const getLogicalStep = (step: number) => {
+    if (!isCommerce) {
+      // 1, 2, 7, 8, 9, 10 -> 1, 2, 3, 4, 5, 6
+      if (step === 1) return 1;
+      if (step === 2) return 2;
+      if (step === 7) return 3;
+      if (step === 8) return 4;
+      if (step === 9) return 5;
+      if (step === 10) return 6;
+    }
+    return step;
+  };
+
+  const logicalStep = getLogicalStep(currentStep);
+  const progress = ((logicalStep / totalSteps) * 100);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900/10 via-background to-blue-900/10 py-8 px-4">
@@ -255,7 +373,7 @@ export default function RegistrationFlow() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-muted-foreground">
-              Крок {currentStep} з {totalSteps}
+              Крок {logicalStep} з {totalSteps}
             </span>
             <span className="text-sm font-medium text-primary">
               {Math.round(progress)}%
@@ -276,6 +394,9 @@ export default function RegistrationFlow() {
                 {currentStep === 5 && <Step5 form={form} />}
                 {currentStep === 6 && <Step6 form={form} />}
                 {currentStep === 7 && <Step7 form={form} />}
+                {currentStep === 8 && <Step8 form={form} />}
+                {currentStep === 9 && <Step9 form={form} />}
+                {currentStep === 10 && <Step10 form={form} />}
               </form>
             </Form>
           </CardContent>
@@ -302,40 +423,56 @@ export default function RegistrationFlow() {
                 Назад
               </Button>
 
-              {currentStep < totalSteps ? (
-                <Button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={isSubmitting}
-                  className="min-w-32 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                  data-testid="button-next"
-                >
-                  Далі
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  onClick={async () => {
-                    await form.handleSubmit(handleSubmit)();
-                  }}
-                  disabled={isSubmitting}
-                  className="min-w-32 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-                  data-testid="button-complete"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Збереження...
-                    </>
-                  ) : (
-                    <>
-                      <Check className="mr-2 h-4 w-4" />
-                      Завершити
-                    </>
-                  )}
-                </Button>
-              )}
+              <div className="flex gap-3">
+                {/* Кнопка "Пропустити" для опціональних кроків 8, 9, 10 */}
+                {(currentStep === 8 || currentStep === 9 || currentStep === 10) && currentStep < totalSteps && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleSkip}
+                    disabled={isSubmitting}
+                    className="min-w-32"
+                    data-testid="button-skip"
+                  >
+                    Пропустити
+                  </Button>
+                )}
+
+                {currentStep < totalSteps ? (
+                  <Button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={isSubmitting}
+                    className="min-w-32 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                    data-testid="button-next"
+                  >
+                    Далі
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={async () => {
+                      await form.handleSubmit(handleSubmit)();
+                    }}
+                    disabled={isSubmitting}
+                    className="min-w-32 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                    data-testid="button-complete"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Збереження...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="mr-2 h-4 w-4" />
+                        Завершити
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
           </CardFooter>
         </Card>

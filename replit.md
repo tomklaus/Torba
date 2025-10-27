@@ -4,22 +4,26 @@
 Progressive Web Application для LGBTQ+ спільноти України з фокусом на гей-знакомства. Додаток об'єднує функціонал популярних платформ (Grindr, Hornet) з безкоштовним доступом до преміум функцій.
 
 ## Поточний стан
-**Етап:** MVP Development - ✅ COMPLETED (Tasks 1-3)
-**Дата останнього оновлення:** 26 жовтня 2025
+**Етап:** MVP Development - ✅ Photo Upload Complete, Extended Registration Added
+**Дата останнього оновлення:** 27 жовтня 2025
 
-**Completed Tasks:**
-- ✅ Task 1: Schema & Frontend - Complete with PWA, dark theme, Ukrainian UI
-- ✅ Task 2: Backend - PostgreSQL + Drizzle ORM, full API with Zod validation
-- ✅ Task 3: Integration & Testing - End-to-end flow tested and working
-
-**What Works:**
+**Completed Features:**
 - ✅ Email-only authentication (creates user in DB)
-- ✅ 7-step registration with conditional commerce logic
+- ✅ 10-step registration with all fields from specification
+  - Крок 1: Обов'язкові поля (ім'я, дата, місто, параметри, роль, цілі)
+  - Крок 2: Налаштування комерції
+  - Кроки 3-6: Комерційні налаштування (4 блоки)
+  - Крок 7: Фото галереї (публічні/приватні з NSFW модерацією)
+  - Крок 8: Додаткові поля (про себе, інтереси, ВІЛ-статус, мови тощо)
+  - Крок 9: Контактна інформація (соцмережі, email, phone)
+  - Крок 10: Сексуальний профіль (досвід, пози, активності)
+- ✅ Real photo upload: Sharp compression, ImgBB cloud storage, NSFW.js moderation
 - ✅ Full API integration (auth/check, profiles CRUD)
 - ✅ Data persistence to PostgreSQL
 - ✅ Error handling and loading states throughout
 - ✅ PWA manifest and service worker
 - ✅ Responsive design (mobile + desktop)
+- ✅ Optional steps with "Пропустити" button (Steps 8-10)
 
 ## Технічний стек
 
