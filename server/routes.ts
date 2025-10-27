@@ -63,6 +63,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Users endpoints
+  app.get("/api/users", async (req, res) => {
+    try {
+      const excludeUserId = req.query.excludeUserId as string | undefined;
+      const users = await storage.getAllUsersWithProfiles(excludeUserId);
+      return res.json(users);
+    } catch (error: any) {
+      console.error("Users fetch error:", error);
+      return res.status(500).json({ message: "Помилка отримання користувачів" });
+    }
+  });
+
   // Profile endpoints
   app.post("/api/profiles", async (req, res) => {
     try {

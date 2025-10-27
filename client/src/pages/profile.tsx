@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   User, Heart, MapPin, Ruler, Weight, Calendar,
-  Edit2, LogOut, ChevronLeft, ChevronRight, X,
+  Edit2, ChevronLeft, ChevronRight, X,
   Camera, Info, Phone, Globe, DollarSign, Shield,
   Sparkles, Activity, Languages, Mail, Clock, Save,
   Trash2, ImagePlus, Lock, LockOpen
@@ -84,34 +84,6 @@ export default function ProfilePage() {
 
   const handleFieldSave = (fieldName: string, value: any) => {
     updateFieldMutation.mutate({ [fieldName]: value });
-  };
-
-  // Logout mutation
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch("/api/auth/logout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (!response.ok) throw new Error("Logout failed");
-      return await response.json();
-    },
-    onSuccess: () => {
-      localStorage.clear();
-      toast({
-        title: "Вихід виконано",
-        description: "До побачення!",
-      });
-      setLocation("/");
-    },
-    onError: () => {
-      localStorage.clear();
-      setLocation("/");
-    },
-  });
-
-  const handleLogout = () => {
-    logoutMutation.mutate();
   };
 
   if (!userId) {
@@ -195,8 +167,8 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900/10 via-background to-blue-900/10">
-      {/* Floating Action Buttons */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+      {/* Floating Action Button */}
+      <div className="fixed bottom-20 right-6 z-40">
         <motion.div
           whileTap={{ scale: 0.95 }}
           transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -218,23 +190,6 @@ export default function ProfilePage() {
                 Редагувати
               </>
             )}
-          </Button>
-        </motion.div>
-        
-        <motion.div
-          whileTap={{ scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-        >
-          <Button
-            size="lg"
-            variant="destructive"
-            className="rounded-full shadow-lg"
-            onClick={handleLogout}
-            disabled={logoutMutation.isPending}
-            data-testid="button-logout"
-          >
-            <LogOut className="mr-2 h-5 w-5" />
-            Вийти
           </Button>
         </motion.div>
       </div>

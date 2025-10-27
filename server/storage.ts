@@ -1,12 +1,13 @@
 import { type User, type InsertUser, type Profile, type InsertProfile, users, profiles } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, ne } from "drizzle-orm";
 
 export interface IStorage {
   // User methods
   getUserById(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  getAllUsersWithProfiles(excludeUserId?: string): Promise<Array<User & { profile: Profile | null }>>;
   
   // Profile methods
   getProfileByUserId(userId: string): Promise<Profile | undefined>;
@@ -29,6 +30,25 @@ export class DatabaseStorage implements IStorage {
   async createUser(user: InsertUser): Promise<User> {
     const result = await db.insert(users).values(user).returning();
     return result[0];
+  }
+
+  async getAllUsersWithProfiles(excludeUserId?: string): Promise<Array<User & { profile: Profile | null }>> {
+    const query = db
+      .select({
+        user: users,
+        profile: profiles,
+      })
+      .from(users)
+      .leftJoin(profiles, eq(users.id, profiles.userId));
+
+    const results = excludeUserId 
+      ? await query.where(ne(users.id, excludeUserId))
+      : await query;
+
+    return results.map((row) => ({
+      ...row.user,
+      profile: row.profile,
+    }));
   }
 
   // Profile methods
