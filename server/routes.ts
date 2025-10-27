@@ -154,30 +154,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Photo upload endpoint with compression, imgbb upload, and NSFW moderation
   const upload = multer({ storage: multer.memoryStorage() });
   
-  app.post("/api/upload", upload.array("photos", 10), async (req, res) => {
+  app.post("/api/upload", upload.single("photo"), async (req, res) => {
     try {
-      if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
-        return res.status(400).json({ message: "Файли не надіслано" });
+      if (!req.file) {
+        return res.status(400).json({ message: "Файл не надіслано" });
       }
 
-      // Upload each file and collect URLs
-      const uploadPromises = req.files.map(async (file) => {
-        const { buffer, mimetype } = file;
+      const { buffer, mimetype } = req.file;
 
-        // Validate file type
-        if (!mimetype.startsWith("image/")) {
-          throw new Error("Тільки зображення дозволені");
-        }
+      // Validate file type
+      if (!mimetype.startsWith("image/")) {
+        return res.status(400).json({ message: "Тільки зображення дозволені" });
+      }
 
-        // Upload with compression, imgbb storage, and NSFW moderation
-        const photoData = await uploadPhoto(buffer, mimetype);
-        return photoData.url;
-      });
+      // Upload with compression, imgbb storage, and NSFW moderation
+      const photoData = await uploadPhoto(buffer, mimetype);
 
-      const urls = await Promise.all(uploadPromises);
-
-      console.log(`[API] Upload successful: ${urls.length} photos`);
-      return res.json({ urls });
+      console.log(`[API] Upload successful: ${photoData.url}`);
+      return res.json(photoData);
     } catch (error: any) {
       console.error("[API] Upload error:", error);
       return res.status(500).json({ 
