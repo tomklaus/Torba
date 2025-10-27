@@ -102,27 +102,25 @@ async function uploadToImgbb(buffer: Buffer, mimeType: string): Promise<string> 
 
 // Moderate image with NSFW detection
 async function moderateImage(buffer: Buffer, mimeType: string): Promise<Omit<PhotoWithNsfw, "url">> {
-  // Skip NSFW moderation for GIFs (animated GIFs have multiple frames which causes issues)
-  if (mimeType === "image/gif") {
-    console.log("[NSFW] Skipping moderation for GIF, returning neutral scores");
-    return {
-      drawingScore: 0,
-      hentaiScore: 0,
-      neutralScore: 1,
-      pornScore: 0,
-      sexyScore: 0,
-    };
-  }
-
   const model = await loadNsfwModel();
   
   // Convert buffer to tensor
   let image = await tf.node.decodeImage(buffer, 3);
   
-  // NSFW.js expects Tensor3D, but decodeImage might return Tensor4D
-  // If it's a batch (4D), squeeze to 3D
+  // For GIFs (4D tensor with multiple frames), extract middle frame
   if (image.shape.length === 4) {
-    image = tf.squeeze(image, [0]) as tf.Tensor3D;
+    const numFrames = image.shape[0];
+    const middleFrame = Math.floor(numFrames / 2);
+    
+    console.log(`[NSFW] GIF detected with ${numFrames} frames, using frame ${middleFrame} for moderation`);
+    
+    // Extract single frame: slice([frameIndex, 0, 0, 0], [1, height, width, channels])
+    const singleFrame = image.slice([middleFrame, 0, 0, 0], [1, -1, -1, -1]);
+    image.dispose();
+    
+    // Squeeze to remove the batch dimension
+    image = tf.squeeze(singleFrame, [0]) as tf.Tensor3D;
+    singleFrame.dispose();
   }
   
   const predictions = await model.classify(image as tf.Tensor3D);
@@ -158,8 +156,8 @@ export async function uploadPhoto(
   // Step 2: Upload to ImgBB
   const url = await uploadToImgbb(compressedBuffer, mimeType);
 
-  // Step 3: NSFW moderation
-  const nsfwScores = await moderateImage(compressedBuffer);
+  // Step 3: NSFW moderation (use original buffer for GIFs to get all frames)
+  const nsfwScores = await moderateImage(mimeType === "image/gif" ? buffer : compressedBuffer, mimeType);
 
   return {
     url,
