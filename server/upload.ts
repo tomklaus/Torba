@@ -101,7 +101,19 @@ async function uploadToImgbb(buffer: Buffer, mimeType: string): Promise<string> 
 }
 
 // Moderate image with NSFW detection
-async function moderateImage(buffer: Buffer): Promise<Omit<PhotoWithNsfw, "url">> {
+async function moderateImage(buffer: Buffer, mimeType: string): Promise<Omit<PhotoWithNsfw, "url">> {
+  // Skip NSFW moderation for GIFs (animated GIFs have multiple frames which causes issues)
+  if (mimeType === "image/gif") {
+    console.log("[NSFW] Skipping moderation for GIF, returning neutral scores");
+    return {
+      drawingScore: 0,
+      hentaiScore: 0,
+      neutralScore: 1,
+      pornScore: 0,
+      sexyScore: 0,
+    };
+  }
+
   const model = await loadNsfwModel();
   
   // Convert buffer to tensor
