@@ -19,16 +19,17 @@ export function EditableText({ value, onSave, isEditing, multiline = false, plac
   const [isLocalEditing, setIsLocalEditing] = useState(false);
 
   if (!isEditing) {
-    return <span className="text-foreground">{value || <span className="text-muted-foreground italic">{placeholder || "Не вказано"}</span>}</span>;
+    return <span className="text-foreground truncate block">{value || <span className="text-muted-foreground italic">{placeholder || "Не вказано"}</span>}</span>;
   }
 
   if (!isLocalEditing) {
     return (
-      <div className="flex items-center gap-2">
-        <span className="text-foreground">{value || <span className="text-muted-foreground italic">{placeholder || "Не вказано"}</span>}</span>
+      <div className="flex items-center gap-2 min-w-0">
+        <span className="text-foreground truncate flex-1 min-w-0">{value || <span className="text-muted-foreground italic">{placeholder || "Не вказано"}</span>}</span>
         <Button
           size="sm"
           variant="ghost"
+          className="shrink-0"
           onClick={() => {
             setEditValue(value);
             setIsLocalEditing(true);
@@ -42,14 +43,14 @@ export function EditableText({ value, onSave, isEditing, multiline = false, plac
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 min-w-0 w-full">
       {multiline ? (
         <Textarea
           value={editValue}
           onChange={(e) => setEditValue(e.target.value)}
           placeholder={placeholder}
           maxLength={maxLength}
-          className="flex-1"
+          className="flex-1 min-w-0"
           rows={3}
           data-testid={`textarea-${placeholder?.toLowerCase().replace(/\s/g, '-')}`}
         />
@@ -59,13 +60,14 @@ export function EditableText({ value, onSave, isEditing, multiline = false, plac
           onChange={(e) => setEditValue(e.target.value)}
           placeholder={placeholder}
           maxLength={maxLength}
-          className="flex-1"
+          className="flex-1 min-w-0"
           data-testid={`input-${placeholder?.toLowerCase().replace(/\s/g, '-')}`}
         />
       )}
       <Button
         size="sm"
         variant="ghost"
+        className="shrink-0"
         onClick={() => {
           onSave(editValue);
           setIsLocalEditing(false);
@@ -77,6 +79,7 @@ export function EditableText({ value, onSave, isEditing, multiline = false, plac
       <Button
         size="sm"
         variant="ghost"
+        className="shrink-0"
         onClick={() => {
           setEditValue(value);
           setIsLocalEditing(false);
@@ -104,16 +107,17 @@ export function EditableNumber({ value, onSave, isEditing, placeholder = "", min
   const [isLocalEditing, setIsLocalEditing] = useState(false);
 
   if (!isEditing) {
-    return <span className="text-foreground">{value} {unit}</span>;
+    return <span className="text-foreground truncate block">{value} {unit}</span>;
   }
 
   if (!isLocalEditing) {
     return (
-      <div className="flex items-center gap-2">
-        <span className="text-foreground">{value} {unit}</span>
+      <div className="flex items-center gap-2 min-w-0">
+        <span className="text-foreground truncate flex-1 min-w-0">{value} {unit}</span>
         <Button
           size="sm"
           variant="ghost"
+          className="shrink-0"
           onClick={() => {
             setEditValue(value.toString());
             setIsLocalEditing(true);
@@ -127,7 +131,7 @@ export function EditableNumber({ value, onSave, isEditing, placeholder = "", min
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 min-w-0">
       <Input
         type="number"
         value={editValue}
@@ -135,13 +139,14 @@ export function EditableNumber({ value, onSave, isEditing, placeholder = "", min
         placeholder={placeholder}
         min={min}
         max={max}
-        className="w-24"
+        className="w-24 shrink-0"
         data-testid={`input-${placeholder?.toLowerCase().replace(/\s/g, '-')}`}
       />
-      {unit && <span className="text-muted-foreground text-sm">{unit}</span>}
+      {unit && <span className="text-muted-foreground text-sm shrink-0">{unit}</span>}
       <Button
         size="sm"
         variant="ghost"
+        className="shrink-0"
         onClick={() => {
           const numValue = parseInt(editValue);
           if (!isNaN(numValue)) {
@@ -156,6 +161,7 @@ export function EditableNumber({ value, onSave, isEditing, placeholder = "", min
       <Button
         size="sm"
         variant="ghost"
+        className="shrink-0"
         onClick={() => {
           setEditValue(value.toString());
           setIsLocalEditing(false);

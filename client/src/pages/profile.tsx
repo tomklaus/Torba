@@ -1224,9 +1224,9 @@ export default function ProfilePage() {
               <CardContent>
                 {isEditing ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="flex items-center gap-2 text-base">
-                      <SiTelegram className="h-4 w-4 text-[#0088cc]" />
-                      <span className="text-muted-foreground">Telegram:</span>
+                    <div className="flex items-center gap-2 text-base min-w-0">
+                      <SiTelegram className="h-4 w-4 text-[#0088cc] shrink-0" />
+                      <span className="text-muted-foreground shrink-0">Telegram:</span>
                       <EditableText
                         value={profile.telegram || ""}
                         onSave={(value) => handleFieldSave("telegram", value)}
@@ -1234,9 +1234,9 @@ export default function ProfilePage() {
                         placeholder="@username"
                       />
                     </div>
-                    <div className="flex items-center gap-2 text-base">
-                      <SiInstagram className="h-4 w-4 text-[#E4405F]" />
-                      <span className="text-muted-foreground">Instagram:</span>
+                    <div className="flex items-center gap-2 text-base min-w-0">
+                      <SiInstagram className="h-4 w-4 text-[#E4405F] shrink-0" />
+                      <span className="text-muted-foreground shrink-0">Instagram:</span>
                       <EditableText
                         value={profile.instagram || ""}
                         onSave={(value) => handleFieldSave("instagram", value)}
@@ -1244,9 +1244,9 @@ export default function ProfilePage() {
                         placeholder="@username"
                       />
                     </div>
-                    <div className="flex items-center gap-2 text-base">
-                      <SiSpotify className="h-4 w-4 text-[#1DB954]" />
-                      <span className="text-muted-foreground">Spotify:</span>
+                    <div className="flex items-center gap-2 text-base min-w-0">
+                      <SiSpotify className="h-4 w-4 text-[#1DB954] shrink-0" />
+                      <span className="text-muted-foreground shrink-0">Spotify:</span>
                       <EditableText
                         value={profile.spotify || ""}
                         onSave={(value) => handleFieldSave("spotify", value)}
@@ -1254,9 +1254,9 @@ export default function ProfilePage() {
                         placeholder="@username"
                       />
                     </div>
-                    <div className="flex items-center gap-2 text-base">
-                      <SiTiktok className="h-4 w-4" />
-                      <span className="text-muted-foreground">TikTok:</span>
+                    <div className="flex items-center gap-2 text-base min-w-0">
+                      <SiTiktok className="h-4 w-4 shrink-0" />
+                      <span className="text-muted-foreground shrink-0">TikTok:</span>
                       <EditableText
                         value={profile.tiktok || ""}
                         onSave={(value) => handleFieldSave("tiktok", value)}
@@ -1264,9 +1264,9 @@ export default function ProfilePage() {
                         placeholder="@username"
                       />
                     </div>
-                    <div className="flex items-center gap-2 text-base">
-                      <SiX className="h-4 w-4" />
-                      <span className="text-muted-foreground">Twitter/X:</span>
+                    <div className="flex items-center gap-2 text-base min-w-0">
+                      <SiX className="h-4 w-4 shrink-0" />
+                      <span className="text-muted-foreground shrink-0">Twitter/X:</span>
                       <EditableText
                         value={profile.twitter || ""}
                         onSave={(value) => handleFieldSave("twitter", value)}
@@ -1274,9 +1274,9 @@ export default function ProfilePage() {
                         placeholder="@username"
                       />
                     </div>
-                    <div className="flex items-center gap-2 text-base">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Email:</span>
+                    <div className="flex items-center gap-2 text-base min-w-0">
+                      <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span className="text-muted-foreground shrink-0">Email:</span>
                       <EditableText
                         value={profile.contactEmail || ""}
                         onSave={(value) => handleFieldSave("contactEmail", value)}
@@ -1284,9 +1284,9 @@ export default function ProfilePage() {
                         placeholder="email@example.com"
                       />
                     </div>
-                    <div className="flex items-center gap-2 text-base">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Телефон:</span>
+                    <div className="flex items-center gap-2 text-base min-w-0">
+                      <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span className="text-muted-foreground shrink-0">Телефон:</span>
                       <EditableText
                         value={profile.phoneNumber || ""}
                         onSave={(value) => handleFieldSave("phoneNumber", value)}
