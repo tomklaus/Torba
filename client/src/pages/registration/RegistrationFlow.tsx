@@ -181,7 +181,8 @@ export default function RegistrationFlow() {
   const isCommerce = commerceType === "yes" || commerceType === "commerce_only";
 
   // Визначаємо загальну кількість кроків: 1, 2, (3-6 якщо комерція), 7, 8, 9, 10
-  const totalSteps = isCommerce ? 10 : 6; // 1, 2, 7, 8, 9, 10 якщо немає комерції; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 якщо є
+  const totalSteps = isCommerce ? 10 : 6; // Логічна кількість кроків для прогресу
+  const maxStep = 10; // Максимальний фактичний номер кроку
 
   // Функція для отримання номеру наступного кроку
   const getNextStep = (current: number) => {
@@ -227,7 +228,7 @@ export default function RegistrationFlow() {
     }
 
     const nextStep = getNextStep(currentStep);
-    if (nextStep <= 10) {
+    if (nextStep <= maxStep) {
       setCurrentStep(nextStep);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -236,7 +237,7 @@ export default function RegistrationFlow() {
   const handleSkip = () => {
     // Пропустити опціональний крок (8, 9, 10)
     const nextStep = getNextStep(currentStep);
-    if (nextStep <= 10) {
+    if (nextStep <= maxStep) {
       setCurrentStep(nextStep);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -426,7 +427,7 @@ export default function RegistrationFlow() {
 
               <div className="flex gap-3">
                 {/* Кнопка "Пропустити" для опціональних кроків 8, 9, 10 */}
-                {(currentStep === 8 || currentStep === 9 || currentStep === 10) && currentStep < totalSteps && (
+                {(currentStep === 8 || currentStep === 9 || currentStep === 10) && currentStep < maxStep && (
                   <Button
                     type="button"
                     variant="ghost"
@@ -439,7 +440,7 @@ export default function RegistrationFlow() {
                   </Button>
                 )}
 
-                {currentStep < totalSteps ? (
+                {currentStep < maxStep ? (
                   <Button
                     type="button"
                     onClick={handleNext}
