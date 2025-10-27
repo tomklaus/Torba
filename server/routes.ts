@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
-import { insertUserSchema, insertProfileSchema } from "@shared/schema";
+import { insertUserSchema, insertProfileSchema, updateProfileSchema } from "@shared/schema";
 import { uploadPhoto } from "./upload";
 import { z } from "zod";
 
@@ -127,9 +127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Невірний формат userId" });
       }
 
-      // Validate update data (partial profile schema)
-      const updateProfileSchema = insertProfileSchema.partial();
-      
+      // Validate update data using updateProfileSchema from shared/schema.ts
       const validation = updateProfileSchema.safeParse(req.body);
       if (!validation.success) {
         return res.status(400).json({ 

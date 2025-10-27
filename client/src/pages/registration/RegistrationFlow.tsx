@@ -372,13 +372,24 @@ export default function RegistrationFlow() {
         afterSex: data.afterSex || [],
         fetishes: data.fetishes || [],
         bdsmRoles: data.bdsmRoles || [],
+        
+        // Встановлюємо isComplete: true при завершенні реєстрації
+        isComplete: true,
       };
 
-      const response = await fetch("/api/profiles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(profileData),
-      });
+      // Перевіряємо, чи існує профіль
+      const checkResponse = await fetch(`/api/profiles/${userId}`);
+      const profileExists = checkResponse.ok;
+
+      // Використовуємо PATCH для оновлення існуючого профілю або POST для створення нового
+      const response = await fetch(
+        profileExists ? `/api/profiles/${userId}` : "/api/profiles",
+        {
+          method: profileExists ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(profileData),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();

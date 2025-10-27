@@ -126,6 +126,12 @@ export const insertProfileSchema = createInsertSchema(profiles).omit({
   currentStep: true,
 });
 
+export const updateProfileSchema = createInsertSchema(profiles).omit({
+  id: true,
+  userId: true,
+  updatedAt: true,
+}).partial();
+
 // Schemas для кроків реєстрації
 export const step1Schema = z.object({
   name: z.string().min(1, "Ім'я обов'язкове").max(50, "Максимум 50 символів"),
