@@ -183,12 +183,12 @@ export function EditableBadgeList({ values, onSave, isEditing, options, label, m
 
   if (!isEditing) {
     if (values.length === 0) {
-      return <span className="text-muted-foreground italic">Не вказано</span>;
+      return <span className="text-base text-muted-foreground italic">Не вказано</span>;
     }
     return (
       <div className="flex gap-2 flex-wrap">
         {values.map((val, i) => (
-          <Badge key={i} variant="outline" className="text-xs">
+          <Badge key={i} variant="outline" className="text-base">
             {val}
           </Badge>
         ))}
@@ -202,13 +202,13 @@ export function EditableBadgeList({ values, onSave, isEditing, options, label, m
         {values.length > 0 ? (
           <div className="flex gap-2 flex-wrap">
             {values.map((val, i) => (
-              <Badge key={i} variant="outline" className="text-xs">
+              <Badge key={i} variant="outline" className="text-base">
                 {val}
               </Badge>
             ))}
           </div>
         ) : (
-          <span className="text-muted-foreground italic">Не вказано</span>
+          <span className="text-base text-muted-foreground italic">Не вказано</span>
         )}
         <Button
           size="sm"
@@ -245,7 +245,7 @@ export function EditableBadgeList({ values, onSave, isEditing, options, label, m
           <Badge
             key={option}
             variant={selectedValues.includes(option) ? "default" : "outline"}
-            className="cursor-pointer text-xs hover-elevate"
+            className="cursor-pointer text-base hover-elevate"
             onClick={() => toggleValue(option)}
             data-testid={`badge-option-${option.toLowerCase().replace(/\s/g, '-')}`}
           >

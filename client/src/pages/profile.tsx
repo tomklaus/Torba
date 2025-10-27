@@ -236,12 +236,12 @@ export default function ProfilePage() {
               {profile.name}, {age}
             </h1>
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-sm">
+              <Badge variant="secondary" className="text-base">
                 {userEmail}
               </Badge>
               {isCommerce && (
-                <Badge variant="default" className="text-sm bg-gradient-to-r from-purple-500 to-blue-500">
-                  <DollarSign className="h-3 w-3 mr-1" />
+                <Badge variant="default" className="text-base bg-gradient-to-r from-purple-500 to-blue-500">
+                  <DollarSign className="h-4 w-4 mr-1" />
                   Комерційний профіль
                 </Badge>
               )}
