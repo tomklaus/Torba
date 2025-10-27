@@ -19,13 +19,19 @@ export function EditableText({ value, onSave, isEditing, multiline = false, plac
   const [isLocalEditing, setIsLocalEditing] = useState(false);
 
   if (!isEditing) {
-    return <span className="text-foreground truncate block">{value || <span className="text-muted-foreground italic">{placeholder || "Не вказано"}</span>}</span>;
+    return (
+      <span className={`text-foreground block ${multiline ? 'whitespace-pre-wrap break-words' : 'truncate'}`}>
+        {value || <span className="text-muted-foreground italic">{placeholder || "Не вказано"}</span>}
+      </span>
+    );
   }
 
   if (!isLocalEditing) {
     return (
-      <div className="flex items-center gap-2 min-w-0">
-        <span className="text-foreground truncate flex-1 min-w-0">{value || <span className="text-muted-foreground italic">{placeholder || "Не вказано"}</span>}</span>
+      <div className="flex items-start gap-2 min-w-0">
+        <span className={`text-foreground flex-1 min-w-0 ${multiline ? 'whitespace-pre-wrap break-words' : 'truncate'}`}>
+          {value || <span className="text-muted-foreground italic">{placeholder || "Не вказано"}</span>}
+        </span>
         <Button
           size="sm"
           variant="ghost"
@@ -43,7 +49,7 @@ export function EditableText({ value, onSave, isEditing, multiline = false, plac
   }
 
   return (
-    <div className="flex items-center gap-2 min-w-0 w-full">
+    <div className={`flex gap-2 min-w-0 w-full ${multiline ? 'items-start' : 'items-center'}`}>
       {multiline ? (
         <Textarea
           value={editValue}
