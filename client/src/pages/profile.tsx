@@ -270,21 +270,16 @@ export default function ProfilePage() {
               </Badge>
             )}
             
-            {/* Height & Weight */}
-            {(profile.height || profile.weight) && (
+            {/* Height & Weight & Penis Size */}
+            {(profile.height || profile.weight || profile.penisSize) && (
               <Badge variant="outline" className="gap-1.5">
                 <Ruler className="h-3.5 w-3.5" />
                 {profile.height && `${profile.height} см`}
-                {profile.height && profile.weight && " / "}
+                {profile.height && (profile.weight || profile.penisSize) && " / "}
                 {profile.weight && `${profile.weight} кг`}
-              </Badge>
-            )}
-            
-            {/* Penis Size */}
-            {profile.penisSize && (
-              <Badge variant="outline" className="gap-1.5">
-                <Activity className="h-3.5 w-3.5" />
-                {profile.penisSize} см
+                {profile.weight && profile.penisSize && " / "}
+                {!profile.weight && profile.height && profile.penisSize && " / "}
+                {profile.penisSize && `${profile.penisSize} см`}
               </Badge>
             )}
             
