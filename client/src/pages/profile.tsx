@@ -12,7 +12,7 @@ import {
   Edit2, LogOut, ChevronLeft, ChevronRight, X,
   Camera, Info, Phone, Globe, DollarSign, Shield,
   Sparkles, Activity, Languages, Mail, Clock, Save,
-  Trash2, ImagePlus, Lock
+  Trash2, ImagePlus, Lock, LockOpen
 } from "lucide-react";
 import { 
   SiTelegram, SiInstagram, SiSpotify, SiTiktok, 
@@ -39,6 +39,10 @@ export default function ProfilePage() {
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
   const [fullscreenPhotoIndex, setFullscreenPhotoIndex] = useState(0);
   const [fullscreenGalleryType, setFullscreenGalleryType] = useState<'public' | 'private'>('public');
+  
+  // For demo: user viewing their own profile always has access
+  // In production, this would check if user has been granted access to view this private gallery
+  const hasPrivateGalleryAccess = true;
 
   // Check authentication
   const userId = localStorage.getItem("userId");
@@ -476,7 +480,11 @@ export default function ProfilePage() {
             <Card className="overflow-hidden border-2 border-pink-500/20 shadow-lg shadow-pink-500/10">
               <CardHeader className="pb-3">
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Lock className="h-5 w-5 text-pink-500" />
+                  {hasPrivateGalleryAccess ? (
+                    <LockOpen className="h-5 w-5 text-green-500" />
+                  ) : (
+                    <Lock className="h-5 w-5 text-pink-500" />
+                  )}
                   Приватні фото
                 </CardTitle>
               </CardHeader>
@@ -486,12 +494,14 @@ export default function ProfilePage() {
                     {privatePhotos.map((photo, index) => (
                       <motion.div
                         key={photo.url}
-                        className="relative aspect-square bg-muted rounded-md overflow-hidden cursor-pointer"
+                        className={`relative aspect-square bg-muted rounded-md overflow-hidden ${
+                          hasPrivateGalleryAccess || isEditing ? 'cursor-pointer' : 'cursor-default'
+                        }`}
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.05 }}
                         onClick={() => {
-                          if (!isEditing) {
+                          if (!isEditing && hasPrivateGalleryAccess) {
                             setFullscreenGalleryType('private');
                             setFullscreenPhotoIndex(index);
                             setIsFullscreenOpen(true);
@@ -502,8 +512,17 @@ export default function ProfilePage() {
                         <img
                           src={photo.url}
                           alt={`Private Photo ${index + 1}`}
-                          className="w-full h-full object-cover"
+                          className={`w-full h-full object-cover ${
+                            !hasPrivateGalleryAccess && !isEditing ? 'blur-md' : ''
+                          }`}
                         />
+
+                        {/* Lock overlay when no access */}
+                        {!hasPrivateGalleryAccess && !isEditing && (
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
+                            <Lock className="h-8 w-8 text-white" />
+                          </div>
+                        )}
 
                         {/* Delete button (in edit mode) */}
                         {isEditing && (
@@ -528,7 +547,11 @@ export default function ProfilePage() {
                 ) : (
                   <div className="aspect-video bg-muted flex items-center justify-center rounded-md">
                     <div className="text-center">
-                      <Lock className="h-12 w-12 mx-auto text-pink-500 opacity-50 mb-2" />
+                      {hasPrivateGalleryAccess ? (
+                        <LockOpen className="h-12 w-12 mx-auto text-green-500 opacity-50 mb-2" />
+                      ) : (
+                        <Lock className="h-12 w-12 mx-auto text-pink-500 opacity-50 mb-2" />
+                      )}
                       <p className="text-sm text-muted-foreground">Немає приватних фото</p>
                     </div>
                   </div>
