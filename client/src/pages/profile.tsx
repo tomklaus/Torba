@@ -11,17 +11,18 @@ import {
   User, Heart, MapPin, Ruler, Weight, Calendar,
   Edit2, LogOut, ChevronLeft, ChevronRight, X,
   Camera, Info, Phone, Globe, DollarSign, Shield,
-  Sparkles, Activity, Languages, Mail, Clock
+  Sparkles, Activity, Languages, Mail, Clock, Save
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { EditProfileDialog } from "@/components/EditProfileDialog";
+import { EditableText, EditableNumber, EditableBadgeList } from "@/components/EditableField";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Profile } from "@shared/schema";
 
 export default function ProfilePage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Check authentication
   const userId = localStorage.getItem("userId");
@@ -38,6 +39,31 @@ export default function ProfilePage() {
     queryKey: [`/api/profiles/${userId}`],
     enabled: !!userId,
   });
+
+  // Update field mutation
+  const updateFieldMutation = useMutation({
+    mutationFn: async (data: Partial<Profile>) => {
+      return await apiRequest("PATCH", `/api/profiles/${userId}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/profiles/${userId}`] });
+      toast({
+        title: "Збережено",
+        description: "Поле успішно оновлено",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Помилка",
+        description: error.message || "Не вдалося зберегти",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleFieldSave = (fieldName: string, value: any) => {
+    updateFieldMutation.mutate({ [fieldName]: value });
+  };
 
   // Logout mutation
   const logoutMutation = useMutation({
@@ -152,11 +178,20 @@ export default function ProfilePage() {
           <Button
             size="lg"
             className="rounded-full shadow-lg shadow-primary/50 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
-            onClick={() => setIsEditDialogOpen(true)}
+            onClick={() => setIsEditing(!isEditing)}
             data-testid="button-edit-profile"
           >
-            <Edit2 className="mr-2 h-5 w-5" />
-            Редагувати
+            {isEditing ? (
+              <>
+                <Save className="mr-2 h-5 w-5" />
+                Завершити
+              </>
+            ) : (
+              <>
+                <Edit2 className="mr-2 h-5 w-5" />
+                Редагувати
+              </>
+            )}
           </Button>
         </motion.div>
         
@@ -381,140 +416,167 @@ export default function ProfilePage() {
 
             {/* About & Looking For */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {profile.aboutMe && (
-                <Card className="border-primary/20">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Info className="h-5 w-5 text-primary" />
-                      Про себе
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-foreground whitespace-pre-wrap text-sm">{profile.aboutMe}</p>
-                  </CardContent>
-                </Card>
-              )}
+              <Card className="border-primary/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Info className="h-5 w-5 text-primary" />
+                    Про себе
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <EditableText
+                    value={profile.aboutMe || ""}
+                    onSave={(value) => handleFieldSave("aboutMe", value)}
+                    isEditing={isEditing}
+                    multiline={true}
+                    placeholder="Розкажіть про себе..."
+                    maxLength={500}
+                  />
+                </CardContent>
+              </Card>
 
-              {profile.lookingFor && (
-                <Card className="border-primary/20">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Sparkles className="h-5 w-5 text-primary" />
-                      Шукаю
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-foreground whitespace-pre-wrap text-sm">{profile.lookingFor}</p>
-                  </CardContent>
-                </Card>
-              )}
+              <Card className="border-primary/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    Шукаю
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <EditableText
+                    value={profile.lookingFor || ""}
+                    onSave={(value) => handleFieldSave("lookingFor", value)}
+                    isEditing={isEditing}
+                    multiline={true}
+                    placeholder="Кого ви шукаєте..."
+                    maxLength={500}
+                  />
+                </CardContent>
+              </Card>
             </div>
 
             {/* Interests & Languages */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {profile.interests && profile.interests.length > 0 && (
-                <Card className="border-primary/20">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Sparkles className="h-5 w-5 text-primary" />
-                      Інтереси
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex gap-2 flex-wrap">
-                      {profile.interests.map((interest: string, i: number) => (
-                        <Badge key={i} variant="secondary" className="text-xs">
-                          {interest}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {profile.languages && profile.languages.length > 0 && (
-                <Card className="border-primary/20">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Languages className="h-5 w-5 text-primary" />
-                      Мови
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex gap-2 flex-wrap">
-                      {profile.languages.map((lang: string, i: number) => (
-                        <Badge key={i} variant="secondary" className="text-xs">
-                          {lang}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            {/* Contact Info */}
-            {(profile.telegram || profile.instagram || profile.contactEmail || profile.phoneNumber || profile.spotify || profile.tiktok || profile.twitter) && (
               <Card className="border-primary/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Phone className="h-5 w-5 text-primary" />
-                    Контакти
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    Інтереси
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {profile.telegram && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Globe className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Telegram:</span>
-                      <span className="font-medium">{profile.telegram}</span>
-                    </div>
-                  )}
-                  {profile.instagram && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Globe className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Instagram:</span>
-                      <span className="font-medium">{profile.instagram}</span>
-                    </div>
-                  )}
-                  {profile.spotify && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Globe className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Spotify:</span>
-                      <span className="font-medium">{profile.spotify}</span>
-                    </div>
-                  )}
-                  {profile.tiktok && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Globe className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">TikTok:</span>
-                      <span className="font-medium">{profile.tiktok}</span>
-                    </div>
-                  )}
-                  {profile.twitter && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Globe className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Twitter:</span>
-                      <span className="font-medium">{profile.twitter}</span>
-                    </div>
-                  )}
-                  {profile.contactEmail && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Email:</span>
-                      <span className="font-medium">{profile.contactEmail}</span>
-                    </div>
-                  )}
-                  {profile.phoneNumber && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">Телефон:</span>
-                      <span className="font-medium">{profile.phoneNumber}</span>
-                    </div>
-                  )}
+                <CardContent>
+                  <EditableBadgeList
+                    values={profile.interests || []}
+                    onSave={(values) => handleFieldSave("interests", values)}
+                    isEditing={isEditing}
+                    options={["Спорт", "Музика", "Кіно", "Подорожі", "Книги", "Кулінарія", "Мистецтво", "Технології", "Мода", "Фотографія"]}
+                    label="Інтереси"
+                    multiSelect={true}
+                  />
                 </CardContent>
               </Card>
-            )}
+
+              <Card className="border-primary/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Languages className="h-5 w-5 text-primary" />
+                    Мови
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <EditableBadgeList
+                    values={profile.languages || []}
+                    onSave={(values) => handleFieldSave("languages", values)}
+                    isEditing={isEditing}
+                    options={["Українська", "Англійська", "Російська", "Польська", "Німецька", "Французька", "Іспанська"]}
+                    label="Мови"
+                    multiSelect={true}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Contact Info */}
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Phone className="h-5 w-5 text-primary" />
+                  Контакти
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="flex items-center gap-2 text-sm">
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Telegram:</span>
+                  <EditableText
+                    value={profile.telegram || ""}
+                    onSave={(value) => handleFieldSave("telegram", value)}
+                    isEditing={isEditing}
+                    placeholder="@username"
+                  />
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Instagram:</span>
+                  <EditableText
+                    value={profile.instagram || ""}
+                    onSave={(value) => handleFieldSave("instagram", value)}
+                    isEditing={isEditing}
+                    placeholder="@username"
+                  />
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Spotify:</span>
+                  <EditableText
+                    value={profile.spotify || ""}
+                    onSave={(value) => handleFieldSave("spotify", value)}
+                    isEditing={isEditing}
+                    placeholder="@username"
+                  />
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">TikTok:</span>
+                  <EditableText
+                    value={profile.tiktok || ""}
+                    onSave={(value) => handleFieldSave("tiktok", value)}
+                    isEditing={isEditing}
+                    placeholder="@username"
+                  />
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Twitter:</span>
+                  <EditableText
+                    value={profile.twitter || ""}
+                    onSave={(value) => handleFieldSave("twitter", value)}
+                    isEditing={isEditing}
+                    placeholder="@username"
+                  />
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Email:</span>
+                  <EditableText
+                    value={profile.contactEmail || ""}
+                    onSave={(value) => handleFieldSave("contactEmail", value)}
+                    isEditing={isEditing}
+                    placeholder="email@example.com"
+                  />
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Телефон:</span>
+                  <EditableText
+                    value={profile.phoneNumber || ""}
+                    onSave={(value) => handleFieldSave("phoneNumber", value)}
+                    isEditing={isEditing}
+                    placeholder="+380..."
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Commerce Settings */}
             {isCommerce && (
@@ -915,14 +977,6 @@ export default function ProfilePage() {
           </motion.div>
         </div>
       </motion.div>
-
-      {/* Edit Profile Dialog */}
-      <EditProfileDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        profile={profile}
-        userId={userId!}
-      />
     </div>
   );
 }
