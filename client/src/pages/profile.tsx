@@ -587,61 +587,6 @@ export default function ProfilePage() {
             </Card>
 
 
-            {/* Relationship & Lifestyle */}
-            <Card className="border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <Heart className="h-6 w-6 text-primary" />
-                  Стиль життя
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <span className="text-base text-muted-foreground">Статус стосунків:</span>
-                  <EditableBadgeList
-                    values={profile.relationshipStatus ? valuesToLabels("relationshipStatus", [profile.relationshipStatus]) : []}
-                    onSave={(values) => handleFieldSave("relationshipStatus", labelsToValues("relationshipStatus", values)[0] || "")}
-                    isEditing={isEditing}
-                    options={getAllLabels("relationshipStatus")}
-                    label="Статус"
-                    multiSelect={false}
-                  />
-                </div>
-                <div>
-                  <span className="text-base text-muted-foreground">ВІЛ-статус:</span>
-                  <EditableBadgeList
-                    values={profile.hivStatus ? valuesToLabels("hivStatus", [profile.hivStatus]) : []}
-                    onSave={(values) => handleFieldSave("hivStatus", labelsToValues("hivStatus", values)[0] || "")}
-                    isEditing={isEditing}
-                    options={getAllLabels("hivStatus")}
-                    label="ВІЛ-статус"
-                    multiSelect={false}
-                  />
-                </div>
-                <div>
-                  <span className="text-base text-muted-foreground">Алкоголь:</span>
-                  <EditableBadgeList
-                    values={profile.alcoholUse ? valuesToLabels("alcoholUse", [profile.alcoholUse]) : []}
-                    onSave={(values) => handleFieldSave("alcoholUse", labelsToValues("alcoholUse", values)[0] || "")}
-                    isEditing={isEditing}
-                    options={getAllLabels("alcoholUse")}
-                    label="Алкоголь"
-                    multiSelect={false}
-                  />
-                </div>
-                <div>
-                  <span className="text-base text-muted-foreground">Куріння:</span>
-                  <EditableBadgeList
-                    values={profile.smoking ? valuesToLabels("smoking", [profile.smoking]) : []}
-                    onSave={(values) => handleFieldSave("smoking", labelsToValues("smoking", values)[0] || "")}
-                    isEditing={isEditing}
-                    options={getAllLabels("smoking")}
-                    label="Куріння"
-                    multiSelect={false}
-                  />
-                </div>
-              </CardContent>
-            </Card>
           </motion.div>
 
           {/* Right Column: Additional Info */}
@@ -731,18 +676,6 @@ export default function ProfilePage() {
                       <Separator />
                       
                       <div className="space-y-2">
-                        <div className="text-base text-muted-foreground">Тип тіла:</div>
-                        <EditableBadgeList
-                          values={profile.bodyType ? valuesToLabels("bodyType", [profile.bodyType]) : []}
-                          onSave={(values) => handleFieldSave("bodyType", labelsToValues("bodyType", values)[0] || "")}
-                          isEditing={isEditing}
-                          options={getAllLabels("bodyType")}
-                          label="Тип тіла"
-                          multiSelect={false}
-                        />
-                      </div>
-                      
-                      <div className="space-y-2">
                         <div className="text-base text-muted-foreground">Роль:</div>
                         <EditableBadgeList
                           values={profile.sexRole ? [profile.sexRole] : []}
@@ -767,6 +700,45 @@ export default function ProfilePage() {
                   placeholder="Розкажіть про себе..."
                   maxLength={500}
                 />
+
+                <Separator />
+
+                {/* Body Type, Alcohol, Smoking */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-base text-muted-foreground mb-2">Тип тіла:</p>
+                    <EditableBadgeList
+                      values={profile.bodyType ? valuesToLabels("bodyType", [profile.bodyType]) : []}
+                      onSave={(values) => handleFieldSave("bodyType", labelsToValues("bodyType", values)[0] || "")}
+                      isEditing={isEditing}
+                      options={getAllLabels("bodyType")}
+                      label="Тип тіла"
+                      multiSelect={false}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-base text-muted-foreground mb-2">Алкоголь:</p>
+                    <EditableBadgeList
+                      values={profile.alcoholUse ? valuesToLabels("alcoholUse", [profile.alcoholUse]) : []}
+                      onSave={(values) => handleFieldSave("alcoholUse", labelsToValues("alcoholUse", values)[0] || "")}
+                      isEditing={isEditing}
+                      options={getAllLabels("alcoholUse")}
+                      label="Алкоголь"
+                      multiSelect={false}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-base text-muted-foreground mb-2">Куріння:</p>
+                    <EditableBadgeList
+                      values={profile.smoking ? valuesToLabels("smoking", [profile.smoking]) : []}
+                      onSave={(values) => handleFieldSave("smoking", labelsToValues("smoking", values)[0] || "")}
+                      isEditing={isEditing}
+                      options={getAllLabels("smoking")}
+                      label="Куріння"
+                      multiSelect={false}
+                    />
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
@@ -1093,7 +1065,7 @@ export default function ProfilePage() {
             )}
 
             {/* Sexual Profile */}
-            {(profile.sexExperience || profile.favoritePositions?.length || profile.favoriteActivities?.length || 
+            {(profile.relationshipStatus || profile.hivStatus || profile.sexExperience || profile.favoritePositions?.length || profile.favoriteActivities?.length || 
               profile.toysAccessories?.length || profile.fetishes?.length || profile.bdsmRoles?.length) && (
               <Card className="border-primary/20 bg-gradient-to-br from-pink-500/5 to-purple-500/5">
                 <CardHeader>
@@ -1105,6 +1077,28 @@ export default function ProfilePage() {
                 <CardContent className="space-y-4">
                   {/* Experience & Preferences */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-base text-muted-foreground mb-2">Статус стосунків:</p>
+                      <EditableBadgeList
+                        values={profile.relationshipStatus ? valuesToLabels("relationshipStatus", [profile.relationshipStatus]) : []}
+                        onSave={(values) => handleFieldSave("relationshipStatus", labelsToValues("relationshipStatus", values)[0] || "")}
+                        isEditing={isEditing}
+                        options={getAllLabels("relationshipStatus")}
+                        label="Статус"
+                        multiSelect={false}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-base text-muted-foreground mb-2">ВІЛ-статус:</p>
+                      <EditableBadgeList
+                        values={profile.hivStatus ? valuesToLabels("hivStatus", [profile.hivStatus]) : []}
+                        onSave={(values) => handleFieldSave("hivStatus", labelsToValues("hivStatus", values)[0] || "")}
+                        isEditing={isEditing}
+                        options={getAllLabels("hivStatus")}
+                        label="ВІЛ-статус"
+                        multiSelect={false}
+                      />
+                    </div>
                     <div>
                       <p className="text-base text-muted-foreground mb-2">Досвід:</p>
                       <EditableBadgeList
