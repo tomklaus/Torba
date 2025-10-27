@@ -14,6 +14,10 @@ import {
   Sparkles, Activity, Languages, Mail, Clock, Save,
   Trash2, ImagePlus, Lock
 } from "lucide-react";
+import { 
+  SiTelegram, SiInstagram, SiSpotify, SiTiktok, 
+  SiX 
+} from "react-icons/si";
 import { useToast } from "@/hooks/use-toast";
 import { EditableText, EditableNumber, EditableBadgeList } from "@/components/EditableField";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -670,87 +674,6 @@ export default function ProfilePage() {
               </Card>
             </div>
 
-            {/* Contact Info */}
-            <Card className="border-primary/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <Phone className="h-5 w-5 text-primary" />
-                  Контакти
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <Globe className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Telegram:</span>
-                  <EditableText
-                    value={profile.telegram || ""}
-                    onSave={(value) => handleFieldSave("telegram", value)}
-                    isEditing={isEditing}
-                    placeholder="@username"
-                  />
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Globe className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Instagram:</span>
-                  <EditableText
-                    value={profile.instagram || ""}
-                    onSave={(value) => handleFieldSave("instagram", value)}
-                    isEditing={isEditing}
-                    placeholder="@username"
-                  />
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Globe className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Spotify:</span>
-                  <EditableText
-                    value={profile.spotify || ""}
-                    onSave={(value) => handleFieldSave("spotify", value)}
-                    isEditing={isEditing}
-                    placeholder="@username"
-                  />
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Globe className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">TikTok:</span>
-                  <EditableText
-                    value={profile.tiktok || ""}
-                    onSave={(value) => handleFieldSave("tiktok", value)}
-                    isEditing={isEditing}
-                    placeholder="@username"
-                  />
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Globe className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Twitter:</span>
-                  <EditableText
-                    value={profile.twitter || ""}
-                    onSave={(value) => handleFieldSave("twitter", value)}
-                    isEditing={isEditing}
-                    placeholder="@username"
-                  />
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Email:</span>
-                  <EditableText
-                    value={profile.contactEmail || ""}
-                    onSave={(value) => handleFieldSave("contactEmail", value)}
-                    isEditing={isEditing}
-                    placeholder="email@example.com"
-                  />
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-muted-foreground">Телефон:</span>
-                  <EditableText
-                    value={profile.phoneNumber || ""}
-                    onSave={(value) => handleFieldSave("phoneNumber", value)}
-                    isEditing={isEditing}
-                    placeholder="+380..."
-                  />
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Commerce Settings - Unified */}
             {isCommerce && (
@@ -1182,6 +1105,180 @@ export default function ProfilePage() {
                 </CardContent>
               </Card>
             )}
+
+            {/* Social Media Contacts - Bottom of Page */}
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Globe className="h-5 w-5 text-primary" />
+                  Контакти
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {isEditing ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="flex items-center gap-2 text-base">
+                      <SiTelegram className="h-4 w-4 text-[#0088cc]" />
+                      <span className="text-muted-foreground">Telegram:</span>
+                      <EditableText
+                        value={profile.telegram || ""}
+                        onSave={(value) => handleFieldSave("telegram", value)}
+                        isEditing={isEditing}
+                        placeholder="@username"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 text-base">
+                      <SiInstagram className="h-4 w-4 text-[#E4405F]" />
+                      <span className="text-muted-foreground">Instagram:</span>
+                      <EditableText
+                        value={profile.instagram || ""}
+                        onSave={(value) => handleFieldSave("instagram", value)}
+                        isEditing={isEditing}
+                        placeholder="@username"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 text-base">
+                      <SiSpotify className="h-4 w-4 text-[#1DB954]" />
+                      <span className="text-muted-foreground">Spotify:</span>
+                      <EditableText
+                        value={profile.spotify || ""}
+                        onSave={(value) => handleFieldSave("spotify", value)}
+                        isEditing={isEditing}
+                        placeholder="@username"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 text-base">
+                      <SiTiktok className="h-4 w-4" />
+                      <span className="text-muted-foreground">TikTok:</span>
+                      <EditableText
+                        value={profile.tiktok || ""}
+                        onSave={(value) => handleFieldSave("tiktok", value)}
+                        isEditing={isEditing}
+                        placeholder="@username"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 text-base">
+                      <SiX className="h-4 w-4" />
+                      <span className="text-muted-foreground">Twitter/X:</span>
+                      <EditableText
+                        value={profile.twitter || ""}
+                        onSave={(value) => handleFieldSave("twitter", value)}
+                        isEditing={isEditing}
+                        placeholder="@username"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 text-base">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">Email:</span>
+                      <EditableText
+                        value={profile.contactEmail || ""}
+                        onSave={(value) => handleFieldSave("contactEmail", value)}
+                        isEditing={isEditing}
+                        placeholder="email@example.com"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 text-base">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">Телефон:</span>
+                      <EditableText
+                        value={profile.phoneNumber || ""}
+                        onSave={(value) => handleFieldSave("phoneNumber", value)}
+                        isEditing={isEditing}
+                        placeholder="+380..."
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex justify-center items-center gap-4 flex-wrap">
+                    {profile.telegram && (
+                      <a
+                        href={`https://t.me/${profile.telegram.replace('@', '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover-elevate active-elevate-2 p-3 rounded-lg transition-all"
+                        data-testid="link-telegram"
+                      >
+                        <SiTelegram className="h-8 w-8 text-[#0088cc]" />
+                      </a>
+                    )}
+                    {profile.instagram && (
+                      <a
+                        href={`https://instagram.com/${profile.instagram.replace('@', '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover-elevate active-elevate-2 p-3 rounded-lg transition-all"
+                        data-testid="link-instagram"
+                      >
+                        <SiInstagram className="h-8 w-8 text-[#E4405F]" />
+                      </a>
+                    )}
+                    {profile.spotify && (
+                      <a
+                        href={`https://open.spotify.com/user/${profile.spotify.replace('@', '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover-elevate active-elevate-2 p-3 rounded-lg transition-all"
+                        data-testid="link-spotify"
+                      >
+                        <SiSpotify className="h-8 w-8 text-[#1DB954]" />
+                      </a>
+                    )}
+                    {profile.tiktok && (
+                      <a
+                        href={`https://tiktok.com/@${profile.tiktok.replace('@', '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover-elevate active-elevate-2 p-3 rounded-lg transition-all"
+                        data-testid="link-tiktok"
+                      >
+                        <SiTiktok className="h-8 w-8" />
+                      </a>
+                    )}
+                    {profile.twitter && (
+                      <a
+                        href={`https://twitter.com/${profile.twitter.replace('@', '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover-elevate active-elevate-2 p-3 rounded-lg transition-all"
+                        data-testid="link-twitter"
+                      >
+                        <SiX className="h-8 w-8" />
+                      </a>
+                    )}
+                    {profile.contactEmail && (
+                      <a
+                        href={`mailto:${profile.contactEmail}`}
+                        className="hover-elevate active-elevate-2 p-3 rounded-lg transition-all"
+                        data-testid="link-email"
+                      >
+                        <Mail className="h-8 w-8 text-primary" />
+                      </a>
+                    )}
+                    {profile.phoneNumber && (
+                      <button
+                        onClick={() => {
+                          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                          if (isMobile) {
+                            window.location.href = `tel:${profile.phoneNumber}`;
+                          } else {
+                            navigator.clipboard.writeText(profile.phoneNumber!).then(() => {
+                              toast({
+                                title: "Скопійовано",
+                                description: `Номер ${profile.phoneNumber} скопійовано в буфер обміну`,
+                              });
+                            });
+                          }
+                        }}
+                        className="hover-elevate active-elevate-2 p-3 rounded-lg transition-all"
+                        data-testid="button-phone"
+                      >
+                        <Phone className="h-8 w-8 text-primary" />
+                      </button>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </motion.div>
         </div>
       </motion.div>
