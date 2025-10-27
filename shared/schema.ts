@@ -97,9 +97,16 @@ export const profiles = pgTable("profiles", {
   sexExperience: text("sex_experience"), // Початківець, Середній, Досвідчений, Експерт
   condomAttitude: text("condom_attitude"), // Завжди, Зазвичай, Іноді, Ніколи
   circumcision: text("circumcision"), // Обрізаний, Необрізаний
-  favoritePositions: jsonb("favorite_positions").notNull().default(sql`'[]'`).$type<string[]>(), // Місіонерська, Догі-стайл, тощо
-  drugsAttitude: text("drugs_attitude"), // Ніколи, Іноді (поперси), Так (сильніші речовини)
+  favoritePositions: jsonb("favorite_positions").notNull().default(sql`'[]'`).$type<string[]>(), // Місіонерська, Ззаду, Наїзник, На боці, Стоячи
+  sexFrequency: text("sex_frequency"), // Щоденно, Кілька разів на тиждень, тощо
+  groupSex: text("group_sex"), // Люблю, Іноді, Ні, Хочу але ще не робив, Спостерігач
+  substancesAttitude: text("substances_attitude"), // Ні (тверезий секс), Іноді (легкі поперси), Так (сильніші речовини)
   favoriteActivities: jsonb("favorite_activities").notNull().default(sql`'[]'`).$type<string[]>(), // Масив активностей
+  toysAccessories: jsonb("toys_accessories").notNull().default(sql`'[]'`).$type<string[]>(), // Вібратори, Анальні пробки, тощо
+  meetingPlaces: jsonb("meeting_places").notNull().default(sql`'[]'`).$type<string[]>(), // Дома, Готель, Сауна/Клуб, Природа
+  afterSex: jsonb("after_sex").notNull().default(sql`'[]'`).$type<string[]>(), // Обійми/Розмова, Швидкий душ, Ніч разом, Нічого
+  fetishes: jsonb("fetishes").notNull().default(sql`'[]'`).$type<string[]>(), // Ведмеді, Шкіра, Уніформа, тощо
+  bdsmRoles: jsonb("bdsm_roles").notNull().default(sql`'[]'`).$type<string[]>(), // Домінант, Сабмісив, Світч, тощо
   
   // Системні поля
   isComplete: boolean("is_complete").notNull().default(false), // Чи завершена реєстрація
@@ -204,8 +211,15 @@ export const step10Schema = z.object({
   condomAttitude: z.string().optional(),
   circumcision: z.string().optional(),
   favoritePositions: z.array(z.string()).optional(),
-  drugsAttitude: z.string().optional(),
+  sexFrequency: z.string().optional(),
+  groupSex: z.string().optional(),
+  substancesAttitude: z.string().optional(),
   favoriteActivities: z.array(z.string()).optional(),
+  toysAccessories: z.array(z.string()).optional(),
+  meetingPlaces: z.array(z.string()).optional(),
+  afterSex: z.array(z.string()).optional(),
+  fetishes: z.array(z.string()).optional(),
+  bdsmRoles: z.array(z.string()).optional(),
 });
 
 // Types

@@ -97,8 +97,15 @@ const registrationSchema = z.object({
   condomAttitude: z.string().optional(),
   circumcision: z.string().optional(),
   favoritePositions: z.array(z.string()).optional(),
-  drugsAttitude: z.string().optional(),
+  sexFrequency: z.string().optional(),
+  groupSex: z.string().optional(),
+  substancesAttitude: z.string().optional(),
   favoriteActivities: z.array(z.string()).optional(),
+  toysAccessories: z.array(z.string()).optional(),
+  meetingPlaces: z.array(z.string()).optional(),
+  afterSex: z.array(z.string()).optional(),
+  fetishes: z.array(z.string()).optional(),
+  bdsmRoles: z.array(z.string()).optional(),
 });
 
 type RegistrationData = z.infer<typeof registrationSchema>;
@@ -163,8 +170,15 @@ export default function RegistrationFlow() {
       condomAttitude: "",
       circumcision: "",
       favoritePositions: [],
-      drugsAttitude: "",
+      sexFrequency: "",
+      groupSex: "",
+      substancesAttitude: "",
       favoriteActivities: [],
+      toysAccessories: [],
+      meetingPlaces: [],
+      afterSex: [],
+      fetishes: [],
+      bdsmRoles: [],
     },
     mode: "onChange",
   });
@@ -349,8 +363,15 @@ export default function RegistrationFlow() {
         condomAttitude: data.condomAttitude || null,
         circumcision: data.circumcision || null,
         favoritePositions: data.favoritePositions || [],
-        drugsAttitude: data.drugsAttitude || null,
+        sexFrequency: data.sexFrequency || null,
+        groupSex: data.groupSex || null,
+        substancesAttitude: data.substancesAttitude || null,
         favoriteActivities: data.favoriteActivities || [],
+        toysAccessories: data.toysAccessories || [],
+        meetingPlaces: data.meetingPlaces || [],
+        afterSex: data.afterSex || [],
+        fetishes: data.fetishes || [],
+        bdsmRoles: data.bdsmRoles || [],
       };
 
       const response = await fetch("/api/profiles", {

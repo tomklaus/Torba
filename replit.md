@@ -16,7 +16,7 @@ Progressive Web Application для LGBTQ+ спільноти України з �
   - Крок 7: Фото галереї (публічні/приватні з локальним preview + batch upload на submit)
   - Крок 8: Додаткові поля (про себе, інтереси, ВІЛ-статус, мови тощо) - опціонально
   - Крок 9: Контактна інформація (соцмережі, email, phone) - опціонально
-  - Крок 10: Сексуальний профіль (досвід, пози, активності) - опціонально
+  - Крок 10: Сексуальний профіль (13 блоків полів згідно специфікації) - опціонально
 - ✅ **NEW: Real photo upload system**:
   - Local preview with File objects (deletable before upload)
   - Batch upload to ImgBB.com on registration completion
@@ -159,6 +159,25 @@ Environment variables:
 - Production: service-worker.js with full offline caching
 - Registration happens in client/src/main.tsx
 - Browser logs confirm successful registration: "[SW] Service Worker registered successfully"
+
+## Step 10: Сексуальний профіль (13 блоків полів)
+**Всі поля опціональні**. Повністю відповідає документу "Шоста сторінка - Сексуальний профіль":
+
+1. **Досвід** (single select): Початківець, Середній, Досвідчений, Експерт
+2. **Ставлення до презервативів** (single select): Завжди, Зазвичай, Іноді, Ніколи
+3. **Обрізання** (single select): Обрізаний, Необрізаний
+4. **Улюблені пози** (multi select): Місіонерська, Ззаду, Наїзник, На боці, Стоячи
+5. **Бажана частота сексу** (single select): Щоденно, Кілька разів на тиждень, Раз на тиждень, Кілька разів на місяць, Раз на місяць, Кілька разів на рік, Залежить від партнера, Зараз неактуально/Утримання
+6. **Груповий секс** (single select): Люблю, Іноді, Ні, Хочу але ще не робив, Спостерігач
+7. **Ставлення до речовин у сексі** (single select): Ні (тверезий), Іноді (легкі поперси), Так (сильніші)
+8. **Улюблені активності** (multi select): 10 варіантів (Оральний, Анальний, Лизання ануса, 69, Фістинг, Масаж простати, Стимуляція сосків, Ручна стимуляція, Секс з іграшками, Легке зв'язування)
+9. **Іграшки/Аксесуари** (multi select): 10 варіантів (Вібратори, Анальні пробки, Наручники, Мотузки, Підвіс, Анальні намиста, Фалоімітатори, Масажери простати, Кільця для пеніса, Маски/Пов'язки)
+10. **Місце зустрічі** (multi select): Дома, Готель, Сауна/Клуб, Природа
+11. **Після сексу** (multi select): Обійми/Розмова, Швидкий душ, Ніч разом, Нічого
+12. **Фетиші/вподобання** (multi select): 15 варіантів (Bears, Leather, Uniform, Sportswear, Daddies, Jocks, Twinks, BDSM, Cruising, Foot Fetish, Group Sex, Latex/Rubber, Underwear Fetish, Voyeurism, Exhibitionism)
+13. **Роль у BDSM** (multi select): 9 варіантів (Dom, Master, Sadist, Sub, Slave, Masochist, Switch, Kinky/Experimental, Curious/Learning)
+
+**Database schema**: Всі поля додані до `profiles` table (TEXT для single select, JSONB для multi select).
 
 ## Known Limitations (MVP)
 - Photo upload uses mock URLs (real file storage in future)
