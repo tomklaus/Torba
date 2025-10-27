@@ -139,10 +139,10 @@ export default function ProfilePage() {
     );
   }
 
-  // Combine public and private photos
-  const allPhotos = [
-    ...(profile.publicPhotos || []),
-    ...(profile.privatePhotos || []),
+  // Combine public and private photos with metadata
+  const allPhotos: Array<{ url: string; isPrivate: boolean }> = [
+    ...(profile.publicPhotos || []).map(photo => ({ url: typeof photo === 'string' ? photo : photo.url, isPrivate: false })),
+    ...(profile.privatePhotos || []).map(photo => ({ url: typeof photo === 'string' ? photo : photo.url, isPrivate: true })),
   ];
 
   const containerVariants = {
@@ -249,98 +249,59 @@ export default function ProfilePage() {
           <motion.div variants={cardVariants} className="lg:col-span-1 space-y-6">
             {/* Photo Gallery */}
             <Card className="overflow-hidden border-2 border-primary/20 shadow-lg shadow-primary/10">
-              <CardContent className="p-0">
+              <CardContent className="p-4">
                 {allPhotos.length > 0 ? (
-                  <div className="relative aspect-square bg-muted">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent animate-shimmer" />
-                    
-                    <AnimatePresence mode="wait">
-                      <motion.img
-                        key={currentPhotoIndex}
-                        src={allPhotos[currentPhotoIndex].url}
-                        alt={`Photo ${currentPhotoIndex + 1}`}
-                        className="w-full h-full object-cover"
-                        initial={{ opacity: 0, scale: 1.1 }}
+                  <div className="grid grid-cols-2 gap-2">
+                    {allPhotos.map((photo, index) => (
+                      <motion.div
+                        key={photo.url}
+                        className="relative aspect-square bg-muted rounded-md overflow-hidden"
+                        initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ duration: 0.3 }}
-                        drag="x"
-                        dragConstraints={{ left: 0, right: 0 }}
-                        dragElastic={0.2}
-                        onDragEnd={(_, info) => {
-                          if (info.offset.x > 100 && currentPhotoIndex > 0) {
-                            setCurrentPhotoIndex(currentPhotoIndex - 1);
-                          } else if (info.offset.x < -100 && currentPhotoIndex < allPhotos.length - 1) {
-                            setCurrentPhotoIndex(currentPhotoIndex + 1);
-                          }
-                        }}
-                      />
-                    </AnimatePresence>
-
-                    {/* Delete Photo Button (in edit mode) */}
-                    {isEditing && (
-                      <motion.button
-                        whileTap={{ scale: 0.9 }}
-                        className="absolute top-2 right-2 bg-red-500/90 backdrop-blur-sm rounded-full p-2 text-white hover:bg-red-600"
-                        onClick={() => {
-                          const currentPhoto = allPhotos[currentPhotoIndex];
-                          const confirmDelete = window.confirm(`Видалити це фото?`);
-                          if (confirmDelete) {
-                            // Remove from appropriate array
-                            if (currentPhoto.isPrivate) {
-                              const newPrivate = (profile.privatePhotos || []).filter(p => p !== currentPhoto.url);
-                              handleFieldSave("privatePhotos", newPrivate);
-                            } else {
-                              const newPublic = (profile.publicPhotos || []).filter(p => p !== currentPhoto.url);
-                              handleFieldSave("publicPhotos", newPublic);
-                            }
-                            // Reset index if needed
-                            if (currentPhotoIndex >= allPhotos.length - 1) {
-                              setCurrentPhotoIndex(Math.max(0, allPhotos.length - 2));
-                            }
-                          }
-                        }}
-                        data-testid="button-delete-photo"
+                        transition={{ delay: index * 0.05 }}
                       >
-                        <Trash2 className="h-5 w-5" />
-                      </motion.button>
-                    )}
+                        <img
+                          src={photo.url}
+                          alt={`Photo ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        
+                        {/* Private badge */}
+                        {photo.isPrivate && (
+                          <div className="absolute top-2 left-2 bg-pink-500/90 backdrop-blur-sm rounded-full p-1.5">
+                            <Lock className="h-3 w-3 text-white" />
+                          </div>
+                        )}
 
-                    {allPhotos.length > 1 && (
-                      <>
-                        {currentPhotoIndex > 0 && (
+                        {/* Delete button (in edit mode) */}
+                        {isEditing && (
                           <motion.button
                             whileTap={{ scale: 0.9 }}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 backdrop-blur-sm rounded-full p-2 text-white hover-elevate"
-                            onClick={() => setCurrentPhotoIndex(currentPhotoIndex - 1)}
-                            data-testid="button-photo-prev"
+                            className="absolute top-2 right-2 bg-red-500/90 backdrop-blur-sm rounded-full p-1.5 text-white hover:bg-red-600"
+                            onClick={() => {
+                              // Remove from appropriate array without confirmation
+                              if (photo.isPrivate) {
+                                const newPrivate = (profile.privatePhotos || []).filter(p => 
+                                  (typeof p === 'string' ? p : p.url) !== photo.url
+                                );
+                                handleFieldSave("privatePhotos", newPrivate);
+                              } else {
+                                const newPublic = (profile.publicPhotos || []).filter(p => 
+                                  (typeof p === 'string' ? p : p.url) !== photo.url
+                                );
+                                handleFieldSave("publicPhotos", newPublic);
+                              }
+                            }}
+                            data-testid={`button-delete-photo-${index}`}
                           >
-                            <ChevronLeft className="h-6 w-6" />
+                            <X className="h-4 w-4" />
                           </motion.button>
                         )}
-                        
-                        {currentPhotoIndex < allPhotos.length - 1 && (
-                          <motion.button
-                            whileTap={{ scale: 0.9 }}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 backdrop-blur-sm rounded-full p-2 text-white hover-elevate"
-                            onClick={() => setCurrentPhotoIndex(currentPhotoIndex + 1)}
-                            data-testid="button-photo-next"
-                          >
-                            <ChevronRight className="h-6 w-6" />
-                          </motion.button>
-                        )}
-                        
-                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full text-white text-sm">
-                          {currentPhotoIndex + 1} / {allPhotos.length}
-                          {isEditing && allPhotos[currentPhotoIndex].isPrivate && (
-                            <span className="ml-2 text-pink-300">🔒</span>
-                          )}
-                        </div>
-                      </>
-                    )}
+                      </motion.div>
+                    ))}
                   </div>
                 ) : (
-                  <div className="aspect-square bg-muted flex items-center justify-center">
+                  <div className="aspect-square bg-muted flex items-center justify-center rounded-md">
                     <Camera className="h-16 w-16 text-muted-foreground opacity-50" />
                   </div>
                 )}
