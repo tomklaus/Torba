@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { Flame, Info } from "lucide-react";
 
 interface Step10Props {
@@ -22,137 +23,137 @@ interface Step10Props {
 
 // 1. Досвід
 const EXPERIENCE_LEVELS = [
-  { value: "beginner", label: "Початківець: Мало досвіду, шукаю порад" },
-  { value: "intermediate", label: "Середній: Базовий досвід, хочу більше" },
-  { value: "experienced", label: "Досвідчений: Багато практики, можу вести" },
-  { value: "expert", label: "Експерт: Професіонал, можу навчати" },
+  { value: "beginner", name: "Початківець", description: "Мало досвіду, шукаю порад" },
+  { value: "intermediate", name: "Середній", description: "Базовий досвід, хочу більше" },
+  { value: "experienced", name: "Досвідчений", description: "Багато практики, можу вести" },
+  { value: "expert", name: "Експерт", description: "Професіонал, можу навчати" },
 ];
 
 // 2. Ставлення до презервативів
 const CONDOM_ATTITUDES = [
-  { value: "always", label: "Завжди: Обов'язково з презервативом" },
-  { value: "usually", label: "Зазвичай: Переважно, але гнучко" },
-  { value: "sometimes", label: "Іноді: Залежно від ситуації" },
-  { value: "never", label: "Ніколи: Тільки без захисту" },
+  { value: "always", name: "Завжди", description: "Обов'язково з презервативом" },
+  { value: "usually", name: "Зазвичай", description: "Переважно, але гнучко" },
+  { value: "sometimes", name: "Іноді", description: "Залежно від ситуації" },
+  { value: "never", name: "Ніколи", description: "Тільки без захисту" },
 ];
 
 // 3. Обрізання
 const CIRCUMCISION = [
-  { value: "cut", label: "Обрізаний: Гладкий, чистий" },
-  { value: "uncut", label: "Необрізаний: З крайньою плоттю" },
+  { value: "cut", name: "Обрізаний", description: "Гладкий, чистий" },
+  { value: "uncut", name: "Необрізаний", description: "З крайньою плоттю" },
 ];
 
 // 4. Улюблені пози
 const FAVORITE_POSITIONS = [
-  "Місіонерська: Очима в очі",
-  "Ззаду: Партнер ззаду",
-  "Наїзник: Партнер зверху",
-  "На боці: Лежачи збоку",
-  "Стоячи: Проти стіни",
+  { name: "Місіонерська", description: "Очима в очі" },
+  { name: "Ззаду", description: "Партнер ззаду" },
+  { name: "Наїзник", description: "Партнер зверху" },
+  { name: "На боці", description: "Лежачи збоку" },
+  { name: "Стоячи", description: "Проти стіни" },
 ];
 
 // 5. Бажана частота сексу
 const SEX_FREQUENCY = [
-  { value: "daily", label: "Щоденно" },
-  { value: "several_week", label: "Кілька разів на тиждень" },
-  { value: "weekly", label: "Приблизно раз на тиждень" },
-  { value: "several_month", label: "Кілька разів на місяць" },
-  { value: "monthly", label: "Раз на місяць" },
-  { value: "several_year", label: "Кілька разів на рік" },
-  { value: "depends", label: "Залежить від партнера та настрою" },
-  { value: "not_now", label: "Зараз неактуально / Утримання" },
+  { value: "daily", name: "Щоденно" },
+  { value: "several_week", name: "Кілька разів на тиждень" },
+  { value: "weekly", name: "Приблизно раз на тиждень" },
+  { value: "several_month", name: "Кілька разів на місяць" },
+  { value: "monthly", name: "Раз на місяць" },
+  { value: "several_year", name: "Кілька разів на рік" },
+  { value: "depends", name: "Залежить від партнера та настрою" },
+  { value: "not_now", name: "Зараз неактуально / Утримання" },
 ];
 
 // 6. Груповий секс
 const GROUP_SEX_ATTITUDE = [
-  { value: "love", label: "Люблю: Групові зустрічі, трійки або більше" },
-  { value: "sometimes", label: "Іноді: З одним-двома" },
-  { value: "no", label: "Ні: Тільки один на один" },
-  { value: "want_not_tried", label: "Хочу, але ще не робив" },
-  { value: "observer", label: "Спостерігач: Дивлюся" },
+  { value: "love", name: "Люблю", description: "Групові зустрічі, трійки або більше" },
+  { value: "sometimes", name: "Іноді", description: "З одним-двома" },
+  { value: "no", name: "Ні", description: "Тільки один на один" },
+  { value: "want_not_tried", name: "Хочу, але ще не робив" },
+  { value: "observer", name: "Спостерігач", description: "Дивлюся" },
 ];
 
 // 7. Ставлення до речовин у сексі
 const SUBSTANCES_ATTITUDE = [
-  { value: "no", label: "Ні: Тверезий секс" },
-  { value: "light", label: "Іноді: Легкі (поперси)" },
-  { value: "yes", label: "Так: Сильніші речовини" },
+  { value: "no", name: "Ні", description: "Тверезий секс" },
+  { value: "light", name: "Іноді", description: "Легкі (поперси)" },
+  { value: "yes", name: "Так", description: "Сильніші речовини" },
 ];
 
 // 8. Улюблені активності (10 варіантів з документа)
 const FAVORITE_ACTIVITIES = [
-  "Оральний секс: Лизання або смоктання статевого органа",
-  "Анальний секс: Проникнення в анус",
-  "Лизання ануса: Стимуляція ануса язиком",
-  "Взаємний оральний (69): Одночасний оральний секс обох партнерів",
-  "Фістинг: Введення руки в анус",
-  "Масаж простати: Стимуляція простати пальцем або іграшкою",
-  "Стимуляція сосків: Лизання, кусання або стискання сосків",
-  "Ручна стимуляція: Мастурбація партнера рукою",
-  "Секс із іграшками: Використання вібраторів, пробок чи інших пристроїв",
-  "Легке зв'язування: Використання наручників або мотузок для обмеження рухів",
+  { name: "Оральний секс", description: "Лизання або смоктання статевого органа" },
+  { name: "Анальний секс", description: "Проникнення в анус" },
+  { name: "Лизання ануса", description: "Стимуляція ануса язиком" },
+  { name: "Взаємний оральний (69)", description: "Одночасний оральний секс обох партнерів" },
+  { name: "Фістинг", description: "Введення руки в анус" },
+  { name: "Масаж простати", description: "Стимуляція простати пальцем або іграшкою" },
+  { name: "Стимуляція сосків", description: "Лизання, кусання або стискання сосків" },
+  { name: "Ручна стимуляція", description: "Мастурбація партнера рукою" },
+  { name: "Секс із іграшками", description: "Використання вібраторів, пробок чи інших пристроїв" },
+  { name: "Легке зв'язування", description: "Використання наручників або мотузок для обмеження рухів" },
 ];
 
 // 9. Іграшки/Аксесуари
 const TOYS_ACCESSORIES = [
-  "Вібратори: Пристрої для стимуляції ерогенних зон",
-  "Анальні пробки: Іграшки для анальної підготовки або задоволення",
-  "Наручники: Для зв'язування рук чи ніг",
-  "Мотузки: Для складнішого бондажу",
-  "Підвіс (слінг): Спеціальна конструкція для анального сексу",
-  "Анальні намиста: Намистини для поступової анальної стимуляції",
-  "Фалоімітатори: Іграшки для проникнення",
-  "Масажери простати: Пристрої для стимуляції простати",
-  "Кільця для пеніса: Обмежують кровотік для тривалішої ерекції",
-  "Маски/Пов'язки на очі: Для закриття очей під час сексу",
+  { name: "Вібратори", description: "Пристрої для стимуляції ерогенних зон" },
+  { name: "Анальні пробки", description: "Іграшки для анальної підготовки або задоволення" },
+  { name: "Наручники", description: "Для зв'язування рук чи ніг" },
+  { name: "Мотузки", description: "Для складнішого бондажу" },
+  { name: "Підвіс (слінг)", description: "Спеціальна конструкція для анального сексу" },
+  { name: "Анальні намиста", description: "Намистини для поступової анальної стимуляції" },
+  { name: "Фалоімітатори", description: "Іграшки для проникнення" },
+  { name: "Масажери простати", description: "Пристрої для стимуляції простати" },
+  { name: "Кільця для пеніса", description: "Обмежують кровотік для тривалішої ерекції" },
+  { name: "Маски/Пов'язки на очі", description: "Для закриття очей під час сексу" },
 ];
 
 // 10. Місце зустрічі
 const MEETING_PLACES = [
-  "Дома: Ваша/його квартира",
-  "Готель: Нейтральне місце",
-  "Сауна/Клуб: Публічне",
-  "Природа: Парк/ліс",
+  { name: "Дома", description: "Ваша/його квартира" },
+  { name: "Готель", description: "Нейтральне місце" },
+  { name: "Сауна/Клуб", description: "Публічне" },
+  { name: "Природа", description: "Парк/ліс" },
 ];
 
 // 11. Після сексу
 const AFTER_SEX = [
-  "Обійми/Розмова: Чутливий для найкращих",
-  "Швидкий душ: Практичний",
-  "Ніч разом: Романтичний",
-  "Нічого: Встаю і йду",
+  { name: "Обійми/Розмова", description: "Чутливий для найкращих" },
+  { name: "Швидкий душ", description: "Практичний" },
+  { name: "Ніч разом", description: "Романтичний" },
+  { name: "Нічого", description: "Встаю і йду" },
 ];
 
-// 12. Фетиші/вподобання (14 варіантів)
+// 12. Фетиші/вподобання (15 варіантів)
 const FETISHES = [
-  "Ведмеді (Bears): Тяжіння до великих, кремезних та часто волохатих чоловіків",
-  "Шкіра (Leather): Сексуальний потяг до одягу зі шкіри",
-  "Уніформа (Uniform): Збудження від вигляду чоловіка у формі",
-  "Спортивний одяг (Sportswear): Фетиш на спортивний одяг та екіпіровку",
-  "Татусі (Daddies): Потяг до старших, зрілих та часто домінантних чоловіків",
-  "Спортсмени / Джоки (Jocks): Тяжіння до чоловіків атлетичної, мускулистої статури",
-  "Твінки (Twinks): Потяг до молодих (18-25 років), худих, струнких хлопців",
-  "БДСМ (BDSM): Бондаж, домінування, підкорення, садизм та мазохізм",
-  "Круїзинг (Cruising): Пошук анонімного та швидкого сексу в громадських місцях",
-  "Фут-фетиш (Foot Fetish): Сексуальний інтерес до чоловічих ніг, ступень та іноді взуття",
-  "Груповий секс (Group Sex): Сексуальна активність за участю трьох або більше людей",
-  "Латекс / гума (Latex / Rubber): Збудження від одягу з латексу або гуми",
-  "Спідня білизна (Underwear Fetish): Особливий інтерес до чоловічої спідньої білизни",
-  "Вуаєризм (Voyeurism): Отримання сексуального задоволення від таємного підглядання",
-  "Ексгібіціонізм (Exhibitionism): Бажання демонструвати своє оголене тіло або сексуальні акти іншим",
+  { name: "Ведмеді (Bears)", description: "Тяжіння до великих, кремезних та часто волохатих чоловіків" },
+  { name: "Шкіра (Leather)", description: "Сексуальний потяг до одягу зі шкіри" },
+  { name: "Уніформа (Uniform)", description: "Збудження від вигляду чоловіка у формі" },
+  { name: "Спортивний одяг (Sportswear)", description: "Фетиш на спортивний одяг та екіпіровку" },
+  { name: "Татусі (Daddies)", description: "Потяг до старших, зрілих та часто домінантних чоловіків" },
+  { name: "Спортсмени / Джоки (Jocks)", description: "Тяжіння до чоловіків атлетичної, мускулистої статури" },
+  { name: "Твінки (Twinks)", description: "Потяг до молодих (18-25 років), худих, струнких хлопців" },
+  { name: "БДСМ (BDSM)", description: "Бондаж, домінування, підкорення, садизм та мазохізм" },
+  { name: "Круїзинг (Cruising)", description: "Пошук анонімного та швидкого сексу в громадських місцях" },
+  { name: "Фут-фетиш (Foot Fetish)", description: "Сексуальний інтерес до чоловічих ніг, ступень та іноді взуття" },
+  { name: "Груповий секс (Group Sex)", description: "Сексуальна активність за участю трьох або більше людей" },
+  { name: "Латекс / гума (Latex / Rubber)", description: "Збудження від одягу з латексу або гуми" },
+  { name: "Спідня білизна (Underwear Fetish)", description: "Особливий інтерес до чоловічої спідньої білизни" },
+  { name: "Вуаєризм (Voyeurism)", description: "Отримання сексуального задоволення від таємного підглядання" },
+  { name: "Ексгібіціонізм (Exhibitionism)", description: "Бажання демонструвати своє оголене тіло або сексуальні акти іншим" },
 ];
 
 // 13. Роль у BDSM (9 варіантів)
 const BDSM_ROLES = [
-  "Домінант (Dom): Віддаю перевагу контролю, встановленню правил та психологічному домінуванню",
-  "Майстер / Господар (Master): Більш глибока форма домінування",
-  "Садист (Sadist): Отримую сексуальне задоволення від заподіяння партнеру узгодженого фізичного болю",
-  "Сабмісив (Sub): Отримую задоволення від підкорення, виконання наказів та передачі контролю",
-  "Раб (Slave): Прагну до повної передачі контролю над собою Майстру/Господарю",
-  "Мазохіст (Masochist): Отримую сексуальне задоволення від отримання болю, приниження або дискомфорту",
-  "Світч (Switch): Гнучкий у своїх ролях. Можу отримувати задоволення як від домінування, так і від підкорення",
-  "Кінкі / Практикую різне (Kinky / Experimental): Мені подобаються нетрадиційні сексуальні практики",
-  "Цікавлюся / Вивчаю (Curious / Learning): Я новачок у світі BDSM, але мені цікаво спробувати",
+  { name: "Домінант (Dom)", description: "Віддаю перевагу контролю, встановленню правил та психологічному домінуванню" },
+  { name: "Майстер / Господар (Master)", description: "Більш глибока форма домінування" },
+  { name: "Садист (Sadist)", description: "Отримую сексуальне задоволення від заподіяння партнеру узгодженого фізичного болю" },
+  { name: "Сабмісив (Sub)", description: "Отримую задоволення від підкорення, виконання наказів та передачі контролю" },
+  { name: "Раб (Slave)", description: "Прагну до повної передачі контролю над собою Майстру/Господарю" },
+  { name: "Мазохіст (Masochist)", description: "Отримую сексуальне задоволення від отримання болю, приниження або дискомфорту" },
+  { name: "Світч (Switch)", description: "Гнучкий у своїх ролях. Можу отримувати задоволення як від домінування, так і від підкорення" },
+  { name: "Кінкі / Практикую різне (Kinky / Experimental)", description: "Мені подобаються нетрадиційні сексуальні практики" },
+  { name: "Цікавлюся / Вивчаю (Curious / Learning)", description: "Я новачок у світі BDSM, але мені цікаво спробувати" },
 ];
 
 export default function Step10({ form }: Step10Props) {
@@ -216,7 +217,10 @@ export default function Step10({ form }: Step10Props) {
               <SelectContent>
                 {EXPERIENCE_LEVELS.map((level) => (
                   <SelectItem key={level.value} value={level.value}>
-                    {level.label}
+                    <div className="flex flex-col">
+                      <span className="font-medium">{level.name}</span>
+                      <span className="text-xs text-muted-foreground">{level.description}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -243,7 +247,10 @@ export default function Step10({ form }: Step10Props) {
               <SelectContent>
                 {CONDOM_ATTITUDES.map((attitude) => (
                   <SelectItem key={attitude.value} value={attitude.value}>
-                    {attitude.label}
+                    <div className="flex flex-col">
+                      <span className="font-medium">{attitude.name}</span>
+                      <span className="text-xs text-muted-foreground">{attitude.description}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -270,7 +277,10 @@ export default function Step10({ form }: Step10Props) {
               <SelectContent>
                 {CIRCUMCISION.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+                    <div className="flex flex-col">
+                      <span className="font-medium">{option.name}</span>
+                      <span className="text-xs text-muted-foreground">{option.description}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -286,22 +296,25 @@ export default function Step10({ form }: Step10Props) {
           <FormLabel>Улюблені пози</FormLabel>
           <FormDescription>Конкретні пози для швидкого збігу за вподобаннями</FormDescription>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {FAVORITE_POSITIONS.map((position) => {
-            const isSelected = favoritePositions.includes(position);
+            const isSelected = favoritePositions.includes(position.name);
             return (
               <button
-                key={position}
+                key={position.name}
                 type="button"
-                onClick={() => toggleItem("favoritePositions", position, favoritePositions)}
-                className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                onClick={() => toggleItem("favoritePositions", position.name, favoritePositions)}
+                className={`p-3 text-left rounded-md border transition-colors ${
                   isSelected
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background border-input hover-elevate"
+                    ? "bg-primary/10 border-primary"
+                    : "bg-card border-border hover-elevate"
                 }`}
-                data-testid={`tag-position-${position.split(":")[0].toLowerCase().replace(/\s+/g, "-")}`}
+                data-testid={`tag-position-${position.name.toLowerCase().replace(/\s+/g, "-")}`}
               >
-                {position}
+                <Badge variant={isSelected ? "default" : "secondary"} className="mb-1">
+                  {position.name}
+                </Badge>
+                <p className="text-xs text-muted-foreground">{position.description}</p>
               </button>
             );
           })}
@@ -328,7 +341,7 @@ export default function Step10({ form }: Step10Props) {
               <SelectContent>
                 {SEX_FREQUENCY.map((freq) => (
                   <SelectItem key={freq.value} value={freq.value}>
-                    {freq.label}
+                    {freq.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -355,7 +368,12 @@ export default function Step10({ form }: Step10Props) {
               <SelectContent>
                 {GROUP_SEX_ATTITUDE.map((attitude) => (
                   <SelectItem key={attitude.value} value={attitude.value}>
-                    {attitude.label}
+                    <div className="flex flex-col">
+                      <span className="font-medium">{attitude.name}</span>
+                      {attitude.description && (
+                        <span className="text-xs text-muted-foreground">{attitude.description}</span>
+                      )}
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -382,7 +400,10 @@ export default function Step10({ form }: Step10Props) {
               <SelectContent>
                 {SUBSTANCES_ATTITUDE.map((attitude) => (
                   <SelectItem key={attitude.value} value={attitude.value}>
-                    {attitude.label}
+                    <div className="flex flex-col">
+                      <span className="font-medium">{attitude.name}</span>
+                      <span className="text-xs text-muted-foreground">{attitude.description}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -398,22 +419,25 @@ export default function Step10({ form }: Step10Props) {
           <FormLabel>Улюблені активності</FormLabel>
           <FormDescription>Перелік сексуальних актів, які ви віддаєте перевагу, щоб визначити сумісність із потенційними партнерами</FormDescription>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {FAVORITE_ACTIVITIES.map((activity) => {
-            const isSelected = favoriteActivities.includes(activity);
+            const isSelected = favoriteActivities.includes(activity.name);
             return (
               <button
-                key={activity}
+                key={activity.name}
                 type="button"
-                onClick={() => toggleItem("favoriteActivities", activity, favoriteActivities)}
-                className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                onClick={() => toggleItem("favoriteActivities", activity.name, favoriteActivities)}
+                className={`p-3 text-left rounded-md border transition-colors ${
                   isSelected
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background border-input hover-elevate"
+                    ? "bg-primary/10 border-primary"
+                    : "bg-card border-border hover-elevate"
                 }`}
-                data-testid={`tag-activity-${activity.split(":")[0].toLowerCase().replace(/\s+/g, "-")}`}
+                data-testid={`tag-activity-${activity.name.toLowerCase().replace(/\s+/g, "-")}`}
               >
-                {activity}
+                <Badge variant={isSelected ? "default" : "secondary"} className="mb-1">
+                  {activity.name}
+                </Badge>
+                <p className="text-xs text-muted-foreground">{activity.description}</p>
               </button>
             );
           })}
@@ -429,22 +453,25 @@ export default function Step10({ form }: Step10Props) {
           <FormLabel>Іграшки/Аксесуари</FormLabel>
           <FormDescription>Вподобання щодо використання секс-іграшок чи аксесуарів під час інтимних зустрічей</FormDescription>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {TOYS_ACCESSORIES.map((toy) => {
-            const isSelected = toysAccessories.includes(toy);
+            const isSelected = toysAccessories.includes(toy.name);
             return (
               <button
-                key={toy}
+                key={toy.name}
                 type="button"
-                onClick={() => toggleItem("toysAccessories", toy, toysAccessories)}
-                className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                onClick={() => toggleItem("toysAccessories", toy.name, toysAccessories)}
+                className={`p-3 text-left rounded-md border transition-colors ${
                   isSelected
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background border-input hover-elevate"
+                    ? "bg-primary/10 border-primary"
+                    : "bg-card border-border hover-elevate"
                 }`}
-                data-testid={`tag-toy-${toy.split(":")[0].toLowerCase().replace(/\s+/g, "-")}`}
+                data-testid={`tag-toy-${toy.name.toLowerCase().replace(/\s+/g, "-")}`}
               >
-                {toy}
+                <Badge variant={isSelected ? "default" : "secondary"} className="mb-1">
+                  {toy.name}
+                </Badge>
+                <p className="text-xs text-muted-foreground">{toy.description}</p>
               </button>
             );
           })}
@@ -460,22 +487,25 @@ export default function Step10({ form }: Step10Props) {
           <FormLabel>Місце зустрічі</FormLabel>
           <FormDescription>Де ви комфортно займаєтеся сексом</FormDescription>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {MEETING_PLACES.map((place) => {
-            const isSelected = meetingPlaces.includes(place);
+            const isSelected = meetingPlaces.includes(place.name);
             return (
               <button
-                key={place}
+                key={place.name}
                 type="button"
-                onClick={() => toggleItem("meetingPlaces", place, meetingPlaces)}
-                className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                onClick={() => toggleItem("meetingPlaces", place.name, meetingPlaces)}
+                className={`p-3 text-left rounded-md border transition-colors ${
                   isSelected
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background border-input hover-elevate"
+                    ? "bg-primary/10 border-primary"
+                    : "bg-card border-border hover-elevate"
                 }`}
-                data-testid={`tag-place-${place.split(":")[0].toLowerCase().replace(/\s+/g, "-")}`}
+                data-testid={`tag-place-${place.name.toLowerCase().replace(/\s+/g, "-")}`}
               >
-                {place}
+                <Badge variant={isSelected ? "default" : "secondary"} className="mb-1">
+                  {place.name}
+                </Badge>
+                <p className="text-xs text-muted-foreground">{place.description}</p>
               </button>
             );
           })}
@@ -491,22 +521,25 @@ export default function Step10({ form }: Step10Props) {
           <FormLabel>Після сексу</FormLabel>
           <FormDescription>Ставлення до емоційного догляду після акту</FormDescription>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {AFTER_SEX.map((option) => {
-            const isSelected = afterSex.includes(option);
+            const isSelected = afterSex.includes(option.name);
             return (
               <button
-                key={option}
+                key={option.name}
                 type="button"
-                onClick={() => toggleItem("afterSex", option, afterSex)}
-                className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                onClick={() => toggleItem("afterSex", option.name, afterSex)}
+                className={`p-3 text-left rounded-md border transition-colors ${
                   isSelected
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background border-input hover-elevate"
+                    ? "bg-primary/10 border-primary"
+                    : "bg-card border-border hover-elevate"
                 }`}
-                data-testid={`tag-aftersex-${option.split(":")[0].toLowerCase().replace(/\s+/g, "-")}`}
+                data-testid={`tag-aftersex-${option.name.toLowerCase().replace(/\s+/g, "-")}`}
               >
-                {option}
+                <Badge variant={isSelected ? "default" : "secondary"} className="mb-1">
+                  {option.name}
+                </Badge>
+                <p className="text-xs text-muted-foreground">{option.description}</p>
               </button>
             );
           })}
@@ -522,22 +555,25 @@ export default function Step10({ form }: Step10Props) {
           <FormLabel>Фетиші/вподобання</FormLabel>
           <FormDescription>Оберіть ваші сексуальні інтереси та фетиші</FormDescription>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {FETISHES.map((fetish) => {
-            const isSelected = fetishes.includes(fetish);
+            const isSelected = fetishes.includes(fetish.name);
             return (
               <button
-                key={fetish}
+                key={fetish.name}
                 type="button"
-                onClick={() => toggleItem("fetishes", fetish, fetishes)}
-                className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                onClick={() => toggleItem("fetishes", fetish.name, fetishes)}
+                className={`p-3 text-left rounded-md border transition-colors ${
                   isSelected
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background border-input hover-elevate"
+                    ? "bg-primary/10 border-primary"
+                    : "bg-card border-border hover-elevate"
                 }`}
-                data-testid={`tag-fetish-${fetish.split(":")[0].toLowerCase().replace(/\s+/g, "-").replace(/\(/g, "").replace(/\)/g, "")}`}
+                data-testid={`tag-fetish-${fetish.name.toLowerCase().replace(/\s+/g, "-").replace(/\(/g, "").replace(/\)/g, "")}`}
               >
-                {fetish}
+                <Badge variant={isSelected ? "default" : "secondary"} className="mb-1">
+                  {fetish.name}
+                </Badge>
+                <p className="text-xs text-muted-foreground">{fetish.description}</p>
               </button>
             );
           })}
@@ -553,22 +589,25 @@ export default function Step10({ form }: Step10Props) {
           <FormLabel>Роль у BDSM</FormLabel>
           <FormDescription>Оберіть вашу роль або ролі у BDSM практиках (можна обрати кілька)</FormDescription>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {BDSM_ROLES.map((role) => {
-            const isSelected = bdsmRoles.includes(role);
+            const isSelected = bdsmRoles.includes(role.name);
             return (
               <button
-                key={role}
+                key={role.name}
                 type="button"
-                onClick={() => toggleItem("bdsmRoles", role, bdsmRoles)}
-                className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                onClick={() => toggleItem("bdsmRoles", role.name, bdsmRoles)}
+                className={`p-3 text-left rounded-md border transition-colors ${
                   isSelected
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background border-input hover-elevate"
+                    ? "bg-primary/10 border-primary"
+                    : "bg-card border-border hover-elevate"
                 }`}
-                data-testid={`tag-bdsm-${role.split(":")[0].toLowerCase().replace(/\s+/g, "-").replace(/\(/g, "").replace(/\)/g, "")}`}
+                data-testid={`tag-bdsm-${role.name.toLowerCase().replace(/\s+/g, "-").replace(/\(/g, "").replace(/\)/g, "")}`}
               >
-                {role}
+                <Badge variant={isSelected ? "default" : "secondary"} className="mb-1">
+                  {role.name}
+                </Badge>
+                <p className="text-xs text-muted-foreground">{role.description}</p>
               </button>
             );
           })}
