@@ -437,7 +437,7 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-2 text-base">
                   <MapPin className="h-5 w-5 text-muted-foreground" />
                   <EditableText
-                    value={profile.customCity || profile.city || ""}
+                    value={profile.customCity ? `${profile.city} (${profile.customCity})` : (profile.city || "")}
                     onSave={(value) => handleFieldSave("customCity", value)}
                     isEditing={isEditing}
                     placeholder="Місто"
