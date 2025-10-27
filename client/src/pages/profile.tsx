@@ -167,6 +167,14 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900/10 via-background to-blue-900/10">
+      {/* Hidden button for BottomNav to trigger edit mode */}
+      <button
+        className="hidden"
+        onClick={() => setIsEditing(true)}
+        data-testid="button-edit-profile"
+        aria-hidden="true"
+      />
+      
       {/* Floating Action Buttons - Only in Edit Mode */}
       <AnimatePresence>
         {isEditing && (
