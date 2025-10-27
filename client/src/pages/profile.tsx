@@ -38,6 +38,7 @@ export default function ProfilePage() {
   const [uploadingPrivatePhotos, setUploadingPrivatePhotos] = useState(false);
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
   const [fullscreenPhotoIndex, setFullscreenPhotoIndex] = useState(0);
+  const [fullscreenGalleryType, setFullscreenGalleryType] = useState<'public' | 'private'>('public');
 
   // Check authentication
   const userId = localStorage.getItem("userId");
@@ -151,11 +152,16 @@ export default function ProfilePage() {
     );
   }
 
-  // Combine public and private photos with metadata
-  const allPhotos: Array<{ url: string; isPrivate: boolean }> = [
-    ...(profile.publicPhotos || []).map(photo => ({ url: typeof photo === 'string' ? photo : photo.url, isPrivate: false })),
-    ...(profile.privatePhotos || []).map(photo => ({ url: typeof photo === 'string' ? photo : photo.url, isPrivate: true })),
-  ];
+  // Separate public and private photos
+  const publicPhotos: Array<{ url: string; isPrivate: boolean }> = (profile.publicPhotos || []).map(photo => ({ 
+    url: typeof photo === 'string' ? photo : photo.url, 
+    isPrivate: false 
+  }));
+  
+  const privatePhotos: Array<{ url: string; isPrivate: boolean }> = (profile.privatePhotos || []).map(photo => ({ 
+    url: typeof photo === 'string' ? photo : photo.url, 
+    isPrivate: true 
+  }));
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -259,12 +265,18 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column: Photos + Basic Info */}
           <motion.div variants={cardVariants} className="lg:col-span-1 space-y-4">
-            {/* Photo Gallery */}
+            {/* Public Photos Gallery */}
             <Card className="overflow-hidden border-2 border-primary/20 shadow-lg shadow-primary/10">
-              <CardContent className="p-4">
-                {allPhotos.length > 0 ? (
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Camera className="h-5 w-5 text-primary" />
+                  Загальнодоступні фото
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 pt-0">
+                {publicPhotos.length > 0 ? (
                   <div className="grid grid-cols-2 gap-2">
-                    {allPhotos.map((photo, index) => (
+                    {publicPhotos.map((photo, index) => (
                       <motion.div
                         key={photo.url}
                         className="relative aspect-square bg-muted rounded-md overflow-hidden cursor-pointer"
@@ -273,45 +285,32 @@ export default function ProfilePage() {
                         transition={{ delay: index * 0.05 }}
                         onClick={() => {
                           if (!isEditing) {
+                            setFullscreenGalleryType('public');
                             setFullscreenPhotoIndex(index);
                             setIsFullscreenOpen(true);
                           }
                         }}
-                        data-testid={`photo-thumbnail-${index}`}
+                        data-testid={`public-photo-thumbnail-${index}`}
                       >
                         <img
                           src={photo.url}
-                          alt={`Photo ${index + 1}`}
+                          alt={`Public Photo ${index + 1}`}
                           className="w-full h-full object-cover"
                         />
-                        
-                        {/* Private badge */}
-                        {photo.isPrivate && (
-                          <div className="absolute top-2 left-2 bg-pink-500/90 backdrop-blur-sm rounded-full p-1.5">
-                            <Lock className="h-3 w-3 text-white" />
-                          </div>
-                        )}
 
                         {/* Delete button (in edit mode) */}
                         {isEditing && (
                           <motion.button
                             whileTap={{ scale: 0.9 }}
                             className="absolute top-2 right-2 bg-red-500/90 backdrop-blur-sm rounded-full p-1.5 text-white hover:bg-red-600"
-                            onClick={() => {
-                              // Remove from appropriate array without confirmation
-                              if (photo.isPrivate) {
-                                const newPrivate = (profile.privatePhotos || []).filter(p => 
-                                  (typeof p === 'string' ? p : p.url) !== photo.url
-                                );
-                                handleFieldSave("privatePhotos", newPrivate);
-                              } else {
-                                const newPublic = (profile.publicPhotos || []).filter(p => 
-                                  (typeof p === 'string' ? p : p.url) !== photo.url
-                                );
-                                handleFieldSave("publicPhotos", newPublic);
-                              }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const newPublic = (profile.publicPhotos || []).filter(p => 
+                                (typeof p === 'string' ? p : p.url) !== photo.url
+                              );
+                              handleFieldSave("publicPhotos", newPublic);
                             }}
-                            data-testid={`button-delete-photo-${index}`}
+                            data-testid={`button-delete-public-photo-${index}`}
                           >
                             <X className="h-4 w-4" />
                           </motion.button>
@@ -320,8 +319,11 @@ export default function ProfilePage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="aspect-square bg-muted flex items-center justify-center rounded-md">
-                    <Camera className="h-16 w-16 text-muted-foreground opacity-50" />
+                  <div className="aspect-video bg-muted flex items-center justify-center rounded-md">
+                    <div className="text-center">
+                      <Camera className="h-12 w-12 mx-auto text-muted-foreground opacity-50 mb-2" />
+                      <p className="text-sm text-muted-foreground">Немає публічних фото</p>
+                    </div>
                   </div>
                 )}
               </CardContent>
@@ -378,9 +380,78 @@ export default function ProfilePage() {
                     data-testid="button-add-photo"
                   >
                     <ImagePlus className="h-4 w-4 mr-2" />
-                    {uploadingPhotos ? "Завантаження..." : "Додати публічні фото"}
+                    {uploadingPhotos ? "Завантаження..." : "Додати фото"}
                   </Button>
-                  
+                </div>
+              )}
+            </Card>
+
+            {/* Private Photos Gallery */}
+            <Card className="overflow-hidden border-2 border-pink-500/20 shadow-lg shadow-pink-500/10">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Lock className="h-5 w-5 text-pink-500" />
+                  Приватні фото
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 pt-0">
+                {privatePhotos.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    {privatePhotos.map((photo, index) => (
+                      <motion.div
+                        key={photo.url}
+                        className="relative aspect-square bg-muted rounded-md overflow-hidden cursor-pointer"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: index * 0.05 }}
+                        onClick={() => {
+                          if (!isEditing) {
+                            setFullscreenGalleryType('private');
+                            setFullscreenPhotoIndex(index);
+                            setIsFullscreenOpen(true);
+                          }
+                        }}
+                        data-testid={`private-photo-thumbnail-${index}`}
+                      >
+                        <img
+                          src={photo.url}
+                          alt={`Private Photo ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+
+                        {/* Delete button (in edit mode) */}
+                        {isEditing && (
+                          <motion.button
+                            whileTap={{ scale: 0.9 }}
+                            className="absolute top-2 right-2 bg-red-500/90 backdrop-blur-sm rounded-full p-1.5 text-white hover:bg-red-600"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const newPrivate = (profile.privatePhotos || []).filter(p => 
+                                (typeof p === 'string' ? p : p.url) !== photo.url
+                              );
+                              handleFieldSave("privatePhotos", newPrivate);
+                            }}
+                            data-testid={`button-delete-private-photo-${index}`}
+                          >
+                            <X className="h-4 w-4" />
+                          </motion.button>
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="aspect-video bg-muted flex items-center justify-center rounded-md">
+                    <div className="text-center">
+                      <Lock className="h-12 w-12 mx-auto text-pink-500 opacity-50 mb-2" />
+                      <p className="text-sm text-muted-foreground">Немає приватних фото</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+
+              {/* Add Private Photo Button (in edit mode) */}
+              {isEditing && (
+                <div className="p-4 space-y-2">
                   <input
                     type="file"
                     accept="image/*"
@@ -428,7 +499,7 @@ export default function ProfilePage() {
                     data-testid="button-add-private-photo"
                   >
                     <Lock className="h-4 w-4 mr-2" />
-                    {uploadingPrivatePhotos ? "Завантаження..." : "Додати приватні фото"}
+                    {uploadingPrivatePhotos ? "Завантаження..." : "Додати фото"}
                   </Button>
                 </div>
               )}
@@ -1294,122 +1365,120 @@ export default function ProfilePage() {
 
       {/* Fullscreen Photo Viewer */}
       <AnimatePresence>
-        {isFullscreenOpen && allPhotos.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] bg-black flex items-center justify-center"
-            onClick={(e) => {
-              // Close if clicking on the background (not on the image)
-              if (e.target === e.currentTarget) {
-                setIsFullscreenOpen(false);
-              }
-            }}
-            data-testid="fullscreen-viewer"
-          >
-            {/* Close Button */}
-            <button
-              onClick={() => setIsFullscreenOpen(false)}
-              className="absolute top-4 right-4 z-10 bg-black/50 backdrop-blur-sm hover:bg-black/70 rounded-full p-3 transition-colors"
-              data-testid="button-close-fullscreen"
+        {isFullscreenOpen && (() => {
+          const currentGallery = fullscreenGalleryType === 'public' ? publicPhotos : privatePhotos;
+          return currentGallery.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-[100] bg-black flex items-center justify-center"
+              onClick={(e) => {
+                // Close if clicking on the background (not on the image)
+                if (e.target === e.currentTarget) {
+                  setIsFullscreenOpen(false);
+                }
+              }}
+              data-testid="fullscreen-viewer"
             >
-              <X className="h-6 w-6 text-white" />
-            </button>
+              {/* Close Button */}
+              <button
+                onClick={() => setIsFullscreenOpen(false)}
+                className="absolute top-4 right-4 z-10 bg-black/50 backdrop-blur-sm hover:bg-black/70 rounded-full p-3 transition-colors"
+                data-testid="button-close-fullscreen"
+              >
+                <X className="h-6 w-6 text-white" />
+              </button>
 
-            {/* Photo Counter */}
-            <div className="absolute top-4 left-4 z-10 bg-black/50 backdrop-blur-sm rounded-full px-4 py-2">
-              <span className="text-white text-sm font-medium">
-                {fullscreenPhotoIndex + 1} / {allPhotos.length}
-              </span>
-            </div>
-
-            {/* Private Badge */}
-            {allPhotos[fullscreenPhotoIndex]?.isPrivate && (
-              <div className="absolute top-20 left-4 z-10 bg-pink-500/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-2">
-                <Lock className="h-4 w-4 text-white" />
-                <span className="text-white text-sm font-medium">Приватне фото</span>
+              {/* Gallery Type Badge */}
+              <div className={`absolute top-4 left-4 z-10 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2 ${
+                fullscreenGalleryType === 'private' ? 'bg-pink-500/90' : 'bg-black/50'
+              }`}>
+                {fullscreenGalleryType === 'private' && <Lock className="h-4 w-4 text-white" />}
+                <span className="text-white text-sm font-medium">
+                  {fullscreenGalleryType === 'private' ? 'Приватні' : 'Загальнодоступні'} ({fullscreenPhotoIndex + 1} / {currentGallery.length})
+                </span>
               </div>
-            )}
 
-            {/* Previous Button */}
-            {allPhotos.length > 1 && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setFullscreenPhotoIndex((prev) => 
-                    prev === 0 ? allPhotos.length - 1 : prev - 1
-                  );
-                }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-black/50 backdrop-blur-sm hover:bg-black/70 rounded-full p-3 transition-colors"
-                data-testid="button-prev-photo"
-              >
-                <ChevronLeft className="h-8 w-8 text-white" />
-              </button>
-            )}
-
-            {/* Photo - clicking on left/right sides navigates */}
-            <div className="relative w-full h-full flex items-center justify-center">
-              {/* Left click area */}
-              {allPhotos.length > 1 && (
-                <div
-                  className="absolute left-0 top-0 bottom-0 w-1/3 cursor-w-resize z-[5]"
+              {/* Previous Button */}
+              {currentGallery.length > 1 && (
+                <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setFullscreenPhotoIndex((prev) => 
-                      prev === 0 ? allPhotos.length - 1 : prev - 1
+                      prev === 0 ? currentGallery.length - 1 : prev - 1
                     );
                   }}
-                  data-testid="click-area-prev"
-                />
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-black/50 backdrop-blur-sm hover:bg-black/70 rounded-full p-3 transition-colors"
+                  data-testid="button-prev-photo"
+                >
+                  <ChevronLeft className="h-8 w-8 text-white" />
+                </button>
               )}
 
-              {/* Center image */}
-              <motion.img
-                key={fullscreenPhotoIndex}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.2 }}
-                src={allPhotos[fullscreenPhotoIndex]?.url}
-                alt={`Photo ${fullscreenPhotoIndex + 1}`}
-                className="max-w-full max-h-full object-contain"
-                data-testid="fullscreen-image"
-              />
+              {/* Photo - clicking on left/right sides navigates */}
+              <div className="relative w-full h-full flex items-center justify-center">
+                {/* Left click area */}
+                {currentGallery.length > 1 && (
+                  <div
+                    className="absolute left-0 top-0 bottom-0 w-1/3 cursor-w-resize z-[5]"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFullscreenPhotoIndex((prev) => 
+                        prev === 0 ? currentGallery.length - 1 : prev - 1
+                      );
+                    }}
+                    data-testid="click-area-prev"
+                  />
+                )}
 
-              {/* Right click area */}
-              {allPhotos.length > 1 && (
-                <div
-                  className="absolute right-0 top-0 bottom-0 w-1/3 cursor-e-resize z-[5]"
+                {/* Center image */}
+                <motion.img
+                  key={`${fullscreenGalleryType}-${fullscreenPhotoIndex}`}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.2 }}
+                  src={currentGallery[fullscreenPhotoIndex]?.url}
+                  alt={`${fullscreenGalleryType === 'private' ? 'Private' : 'Public'} Photo ${fullscreenPhotoIndex + 1}`}
+                  className="max-w-full max-h-full object-contain"
+                  data-testid="fullscreen-image"
+                />
+
+                {/* Right click area */}
+                {currentGallery.length > 1 && (
+                  <div
+                    className="absolute right-0 top-0 bottom-0 w-1/3 cursor-e-resize z-[5]"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFullscreenPhotoIndex((prev) => 
+                        prev === currentGallery.length - 1 ? 0 : prev + 1
+                      );
+                    }}
+                    data-testid="click-area-next"
+                  />
+                )}
+              </div>
+
+              {/* Next Button */}
+              {currentGallery.length > 1 && (
+                <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setFullscreenPhotoIndex((prev) => 
-                      prev === allPhotos.length - 1 ? 0 : prev + 1
+                      prev === currentGallery.length - 1 ? 0 : prev + 1
                     );
                   }}
-                  data-testid="click-area-next"
-                />
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-black/50 backdrop-blur-sm hover:bg-black/70 rounded-full p-3 transition-colors"
+                  data-testid="button-next-photo"
+                >
+                  <ChevronRight className="h-8 w-8 text-white" />
+                </button>
               )}
-            </div>
-
-            {/* Next Button */}
-            {allPhotos.length > 1 && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setFullscreenPhotoIndex((prev) => 
-                    prev === allPhotos.length - 1 ? 0 : prev + 1
-                  );
-                }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-black/50 backdrop-blur-sm hover:bg-black/70 rounded-full p-3 transition-colors"
-                data-testid="button-next-photo"
-              >
-                <ChevronRight className="h-8 w-8 text-white" />
-              </button>
-            )}
-          </motion.div>
-        )}
+            </motion.div>
+          );
+        })()}
       </AnimatePresence>
     </div>
   );
