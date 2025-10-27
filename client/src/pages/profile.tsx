@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   User, Heart, MapPin, Ruler, Weight, Calendar,
-  Edit2, ChevronLeft, ChevronRight, X,
+  Edit2, ChevronLeft, ChevronRight, X, Check,
   Camera, Info, Phone, Globe, DollarSign, Shield,
   Sparkles, Activity, Languages, Mail, Clock, Save,
   Trash2, ImagePlus, Lock, LockOpen
@@ -167,32 +167,49 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900/10 via-background to-blue-900/10">
-      {/* Floating Action Button */}
-      <div className="fixed bottom-20 right-6 z-40">
-        <motion.div
-          whileTap={{ scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-        >
-          <Button
-            size="lg"
-            className="rounded-full shadow-lg shadow-primary/50 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
-            onClick={() => setIsEditing(!isEditing)}
-            data-testid="button-edit-profile"
-          >
-            {isEditing ? (
-              <>
-                <Save className="mr-2 h-5 w-5" />
-                Завершити
-              </>
-            ) : (
-              <>
-                <Edit2 className="mr-2 h-5 w-5" />
-                Редагувати
-              </>
-            )}
-          </Button>
-        </motion.div>
-      </div>
+      {/* Floating Action Buttons - Only in Edit Mode */}
+      <AnimatePresence>
+        {isEditing && (
+          <div className="fixed bottom-20 right-6 z-40 flex flex-col gap-3">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 20 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            >
+              <Button
+                size="icon"
+                className="rounded-full h-14 w-14 shadow-lg shadow-green-500/50 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                onClick={() => {
+                  setIsEditing(false);
+                }}
+                data-testid="button-save-profile"
+              >
+                <Check className="h-6 w-6" />
+              </Button>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 20 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17, delay: 0.05 }}
+            >
+              <Button
+                size="icon"
+                className="rounded-full h-14 w-14 shadow-lg shadow-red-500/50 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600"
+                onClick={() => {
+                  setIsEditing(false);
+                }}
+                data-testid="button-cancel-profile"
+              >
+                <X className="h-6 w-6" />
+              </Button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Main Content */}
       <motion.div
