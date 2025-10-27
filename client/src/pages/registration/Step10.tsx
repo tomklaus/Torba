@@ -157,6 +157,16 @@ const BDSM_ROLES = [
   { name: "Цікавлюся / Вивчаю (Curious / Learning)", description: "Я новачок у світі BDSM, але мені цікаво спробувати" },
 ];
 
+// 14. Ставлення до сперми
+const CUM_ATTITUDE = [
+  { name: "Обожнюю! Ковтаю з насолодою", description: "Це вершина кайфу для мене" },
+  { name: "Дуже позитивно", description: "Люблю, коли сперма на тілі чи обличчі — це гаряче й інтимно" },
+  { name: "Позитивно", description: "Не проти, якщо це з приємним партнером, додає гостроти" },
+  { name: "Нейтрально", description: "Залежить від настрою, можу прийняти, але не фанатію" },
+  { name: "Негативно", description: "Не люблю, уникаю, якщо можливо, але можу терпіти" },
+  { name: "Категорично проти", description: "Повністю відштовхує, ніколи не контактую з цим" },
+];
+
 export default function Step10({ form }: Step10Props) {
   // Watch all multi-select fields
   const favoritePositions = form.watch("favoritePositions") || [];
@@ -166,6 +176,7 @@ export default function Step10({ form }: Step10Props) {
   const afterSex = form.watch("afterSex") || [];
   const fetishes = form.watch("fetishes") || [];
   const bdsmRoles = form.watch("bdsmRoles") || [];
+  const cumAttitude = form.watch("cumAttitude") || [];
 
   // Toggle helpers
   const toggleItem = (fieldName: string, item: string, currentArray: string[]) => {
@@ -615,6 +626,40 @@ export default function Step10({ form }: Step10Props) {
         </div>
         <div className="text-xs text-muted-foreground">
           Обрано: {bdsmRoles.length}
+        </div>
+      </div>
+
+      {/* 14. Ставлення до сперми */}
+      <div className="space-y-3">
+        <div>
+          <FormLabel>Як ви ставитеся до сперми?</FormLabel>
+          <FormDescription>Оберіть варіанти, що відповідають вашому ставленню (можна обрати кілька)</FormDescription>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {CUM_ATTITUDE.map((option) => {
+            const isSelected = cumAttitude.includes(option.name);
+            return (
+              <button
+                key={option.name}
+                type="button"
+                onClick={() => toggleItem("cumAttitude", option.name, cumAttitude)}
+                className={`p-3 text-left rounded-md border transition-colors ${
+                  isSelected
+                    ? "bg-primary/10 border-primary"
+                    : "bg-card border-border hover-elevate"
+                }`}
+                data-testid={`tag-cumattitude-${option.name.toLowerCase().replace(/\s+/g, "-").replace(/!/g, "").replace(/\./g, "")}`}
+              >
+                <Badge variant={isSelected ? "default" : "secondary"} className="mb-1">
+                  {option.name}
+                </Badge>
+                <p className="text-xs text-muted-foreground">{option.description}</p>
+              </button>
+            );
+          })}
+        </div>
+        <div className="text-xs text-muted-foreground">
+          Обрано: {cumAttitude.length}
         </div>
       </div>
     </div>

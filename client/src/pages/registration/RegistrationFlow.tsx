@@ -106,6 +106,7 @@ const registrationSchema = z.object({
   afterSex: z.array(z.string()).optional(),
   fetishes: z.array(z.string()).optional(),
   bdsmRoles: z.array(z.string()).optional(),
+  cumAttitude: z.array(z.string()).optional(),
 });
 
 type RegistrationData = z.infer<typeof registrationSchema>;
@@ -179,6 +180,7 @@ export default function RegistrationFlow() {
       afterSex: [],
       fetishes: [],
       bdsmRoles: [],
+      cumAttitude: [],
     },
     mode: "onChange",
   });

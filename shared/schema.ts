@@ -107,6 +107,7 @@ export const profiles = pgTable("profiles", {
   afterSex: jsonb("after_sex").notNull().default(sql`'[]'`).$type<string[]>(), // Обійми/Розмова, Швидкий душ, Ніч разом, Нічого
   fetishes: jsonb("fetishes").notNull().default(sql`'[]'`).$type<string[]>(), // Ведмеді, Шкіра, Уніформа, тощо
   bdsmRoles: jsonb("bdsm_roles").notNull().default(sql`'[]'`).$type<string[]>(), // Домінант, Сабмісив, Світч, тощо
+  cumAttitude: jsonb("cum_attitude").notNull().default(sql`'[]'`).$type<string[]>(), // Ставлення до сперми
   
   // Системні поля
   isComplete: boolean("is_complete").notNull().default(false), // Чи завершена реєстрація
