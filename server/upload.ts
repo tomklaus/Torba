@@ -2,21 +2,23 @@ import sharp from "sharp";
 import FormData from "form-data";
 import { fetch } from "undici";
 import * as tf from "@tensorflow/tfjs-node";
-import { createRequire } from "module";
+import { NsfwSpy } from "@nsfwspy/node";
 import type { PhotoWithNsfw } from "@shared/schema";
+import path from "path";
+import { fileURLToPath } from "url";
 
-// Use createRequire for nsfwjs (CommonJS module in ESM context)
-const require = createRequire(import.meta.url);
-const nsfwjs = require("nsfwjs");
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // NSFW model instance
-let nsfwModel: any | null = null;
+let nsfwModel: NsfwSpy | null = null;
 
 async function loadNsfwModel() {
   if (!nsfwModel) {
-    console.log("[NSFW] Loading model...");
-    nsfwModel = await nsfwjs.load();
-    console.log("[NSFW] Model loaded successfully");
+    console.log("[NSFW] Loading NsfwSpy model...");
+    const modelPath = path.join(__dirname, "../models/nsfwspy/model.json");
+    nsfwModel = new NsfwSpy(`file://${modelPath}`);
+    await nsfwModel.load();
+    console.log("[NSFW] NsfwSpy model loaded successfully (96% accuracy, trained on 537k images)");
   }
   return nsfwModel;
 }
@@ -100,46 +102,50 @@ async function uploadToImgbb(buffer: Buffer, mimeType: string): Promise<string> 
   return data.data.url;
 }
 
-// Moderate image with NSFW detection
+// Moderate image with NSFW detection using NsfwSpy
 async function moderateImage(buffer: Buffer, mimeType: string): Promise<Omit<PhotoWithNsfw, "url">> {
   const model = await loadNsfwModel();
   
-  // Convert buffer to tensor
-  let image = await tf.node.decodeImage(buffer, 3);
+  // For GIFs, extract middle frame first
+  let processBuffer = buffer;
   
-  // For GIFs (4D tensor with multiple frames), extract middle frame
-  if (image.shape.length === 4) {
-    const numFrames = image.shape[0];
-    const middleFrame = Math.floor(numFrames / 2);
+  if (mimeType === "image/gif") {
+    const image = await tf.node.decodeImage(buffer, 3);
     
-    console.log(`[NSFW] GIF detected with ${numFrames} frames, using frame ${middleFrame} for moderation`);
-    
-    // Extract single frame: slice([frameIndex, 0, 0, 0], [1, height, width, channels])
-    const singleFrame = image.slice([middleFrame, 0, 0, 0], [1, -1, -1, -1]);
-    image.dispose();
-    
-    // Squeeze to remove the batch dimension
-    image = tf.squeeze(singleFrame, [0]) as tf.Tensor3D;
-    singleFrame.dispose();
+    if (image.shape.length === 4) {
+      const numFrames = image.shape[0];
+      const middleFrame = Math.floor(numFrames / 2);
+      
+      console.log(`[NSFW] GIF detected with ${numFrames} frames, extracting frame ${middleFrame} for moderation`);
+      
+      // Extract single frame
+      const singleFrame = image.slice([middleFrame, 0, 0, 0], [1, -1, -1, -1]);
+      const frame3D = tf.squeeze(singleFrame, [0]) as tf.Tensor3D;
+      
+      // Convert tensor back to buffer (JPEG format for NsfwSpy)
+      const encodedImage = await tf.node.encodeJpeg(frame3D as any);
+      processBuffer = Buffer.from(encodedImage.buffer);
+      
+      image.dispose();
+      singleFrame.dispose();
+      frame3D.dispose();
+    } else {
+      image.dispose();
+    }
   }
   
-  const predictions = await model.classify(image as tf.Tensor3D);
-  image.dispose();
+  // Classify using NsfwSpy (returns: { pornography, sexy, hentai, neutral })
+  const result = await model.classifyImageFromByteArray(processBuffer);
 
-  // Convert predictions array to scores object
-  const scores: Record<string, number> = {};
-  for (const pred of predictions) {
-    scores[pred.className] = pred.probability;
-  }
+  console.log("[NSFW] NsfwSpy moderation results:", result);
 
-  console.log("[NSFW] Moderation results:", scores);
-
+  // Map NsfwSpy categories to our schema (NsfwSpy doesn't have "Drawing" category)
   return {
-    drawingScore: scores.Drawing || 0,
-    hentaiScore: scores.Hentai || 0,
-    neutralScore: scores.Neutral || 0,
-    pornScore: scores.Porn || 0,
-    sexyScore: scores.Sexy || 0,
+    drawingScore: 0, // NsfwSpy doesn't classify drawings separately
+    hentaiScore: result.hentai || 0,
+    neutralScore: result.neutral || 0,
+    pornScore: result.pornography || 0,
+    sexyScore: result.sexy || 0,
   };
 }
 
