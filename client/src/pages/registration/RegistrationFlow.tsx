@@ -243,6 +243,29 @@ export default function RegistrationFlow() {
     }
   };
 
+  // Функція для завантаження фото на imgbb.com
+  const uploadPhotos = async (photos: any[]): Promise<PhotoWithNsfw[]> => {
+    const uploadPromises = photos.map(async (photo) => {
+      const formData = new FormData();
+      formData.append("photo", photo.file as File);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Помилка завантаження фото");
+      }
+
+      const photoData: PhotoWithNsfw = await response.json();
+      return photoData;
+    });
+
+    return await Promise.all(uploadPromises);
+  };
+
   const handleSubmit = async (data: RegistrationData) => {
     const userId = localStorage.getItem("userId");
     
@@ -255,6 +278,12 @@ export default function RegistrationFlow() {
     setSubmitError("");
 
     try {
+      // Завантажити всі фото на imgbb.com перед створенням профілю
+      const uploadedPublicPhotos = await uploadPhotos(data.publicPhotos);
+      const uploadedPrivatePhotos = data.privatePhotos.length > 0 
+        ? await uploadPhotos(data.privatePhotos) 
+        : [];
+
       // Підготовка даних для API
       const profileData = {
         userId,
@@ -291,9 +320,9 @@ export default function RegistrationFlow() {
         paymentMethods: data.paymentMethods || [],
         transportCosts: data.transportCosts || null,
         
-        // Фото
-        publicPhotos: data.publicPhotos,
-        privatePhotos: data.privatePhotos || [],
+        // Фото (вже завантажені на imgbb.com)
+        publicPhotos: uploadedPublicPhotos,
+        privatePhotos: uploadedPrivatePhotos,
         
         // Крок 8: Додаткові поля
         aboutMe: data.aboutMe || null,

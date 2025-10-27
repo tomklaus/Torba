@@ -4,7 +4,7 @@
 Progressive Web Application для LGBTQ+ спільноти України з фокусом на гей-знакомства. Додаток об'єднує функціонал популярних платформ (Grindr, Hornet) з безкоштовним доступом до преміум функцій.
 
 ## Поточний стан
-**Етап:** MVP Development - ✅ Photo Upload Complete, Extended Registration Added
+**Етап:** MVP Development - ✅ Full 10-Step Registration Complete with Real Photo Upload
 **Дата останнього оновлення:** 27 жовтня 2025
 
 **Completed Features:**
@@ -12,14 +12,19 @@ Progressive Web Application для LGBTQ+ спільноти України з �
 - ✅ 10-step registration with all fields from specification
   - Крок 1: Обов'язкові поля (ім'я, дата, місто, параметри, роль, цілі)
   - Крок 2: Налаштування комерції
-  - Кроки 3-6: Комерційні налаштування (4 блоки)
-  - Крок 7: Фото галереї (публічні/приватні з NSFW модерацією)
-  - Крок 8: Додаткові поля (про себе, інтереси, ВІЛ-статус, мови тощо)
-  - Крок 9: Контактна інформація (соцмережі, email, phone)
-  - Крок 10: Сексуальний профіль (досвід, пози, активності)
-- ✅ Real photo upload: Sharp compression, ImgBB cloud storage, NSFW.js moderation
-- ✅ Full API integration (auth/check, profiles CRUD)
-- ✅ Data persistence to PostgreSQL
+  - Кроки 3-6: Комерційні налаштування (4 блоки, умовні)
+  - Крок 7: Фото галереї (публічні/приватні з локальним preview + batch upload на submit)
+  - Крок 8: Додаткові поля (про себе, інтереси, ВІЛ-статус, мови тощо) - опціонально
+  - Крок 9: Контактна інформація (соцмережі, email, phone) - опціонально
+  - Крок 10: Сексуальний профіль (досвід, пози, активності) - опціонально
+- ✅ **NEW: Real photo upload system**:
+  - Local preview with File objects (deletable before upload)
+  - Batch upload to ImgBB.com on registration completion
+  - Sharp compression (800px max, skips GIFs)
+  - NsfwSpy.js moderation (96% accuracy, MobileNetV2, 537k images dataset)
+  - GIF support (extracts middle frame for NSFW analysis)
+- ✅ Full API integration (auth/check, profiles CRUD, upload)
+- ✅ Data persistence to PostgreSQL with all 10 steps
 - ✅ Error handling and loading states throughout
 - ✅ PWA manifest and service worker
 - ✅ Responsive design (mobile + desktop)
