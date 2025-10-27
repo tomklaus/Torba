@@ -951,10 +951,10 @@ export default function ProfilePage() {
                     <div>
                       <p className="text-base text-muted-foreground mb-2">Досвід:</p>
                       <EditableBadgeList
-                        values={profile.sexExperience ? [profile.sexExperience] : []}
-                        onSave={(values) => handleFieldSave("sexExperience", values[0] || "")}
+                        values={profile.sexExperience ? valuesToLabels("sexExperience", [profile.sexExperience]) : []}
+                        onSave={(values) => handleFieldSave("sexExperience", labelsToValues("sexExperience", values)[0] || "")}
                         isEditing={isEditing}
-                        options={["Початківець", "Середній", "Досвідчений", "Експерт"]}
+                        options={getAllLabels("sexExperience")}
                         label="Досвід"
                         multiSelect={false}
                       />
@@ -962,10 +962,10 @@ export default function ProfilePage() {
                     <div>
                       <p className="text-base text-muted-foreground mb-2">Презервативи:</p>
                       <EditableBadgeList
-                        values={profile.condomAttitude ? [profile.condomAttitude] : []}
-                        onSave={(values) => handleFieldSave("condomAttitude", values[0] || "")}
+                        values={profile.condomAttitude ? valuesToLabels("condomAttitude", [profile.condomAttitude]) : []}
+                        onSave={(values) => handleFieldSave("condomAttitude", labelsToValues("condomAttitude", values)[0] || "")}
                         isEditing={isEditing}
-                        options={["Завжди", "Зазвичай", "Іноді", "Ніколи"]}
+                        options={getAllLabels("condomAttitude")}
                         label="Презервативи"
                         multiSelect={false}
                       />
@@ -973,10 +973,10 @@ export default function ProfilePage() {
                     <div>
                       <p className="text-base text-muted-foreground mb-2">Обрізання:</p>
                       <EditableBadgeList
-                        values={profile.circumcision ? [profile.circumcision] : []}
-                        onSave={(values) => handleFieldSave("circumcision", values[0] || "")}
+                        values={profile.circumcision ? valuesToLabels("circumcision", [profile.circumcision]) : []}
+                        onSave={(values) => handleFieldSave("circumcision", labelsToValues("circumcision", values)[0] || "")}
                         isEditing={isEditing}
-                        options={["Обрізаний", "Необрізаний"]}
+                        options={getAllLabels("circumcision")}
                         label="Обрізання"
                         multiSelect={false}
                       />
@@ -984,10 +984,10 @@ export default function ProfilePage() {
                     <div>
                       <p className="text-base text-muted-foreground mb-2">Бажана частота:</p>
                       <EditableBadgeList
-                        values={profile.sexFrequency ? [profile.sexFrequency] : []}
-                        onSave={(values) => handleFieldSave("sexFrequency", values[0] || "")}
+                        values={profile.sexFrequency ? valuesToLabels("sexFrequency", [profile.sexFrequency]) : []}
+                        onSave={(values) => handleFieldSave("sexFrequency", labelsToValues("sexFrequency", values)[0] || "")}
                         isEditing={isEditing}
-                        options={["Щоденно", "Кілька разів на тиждень", "Раз на тиждень", "Кілька разів на місяць", "Раз на місяць"]}
+                        options={getAllLabels("sexFrequency")}
                         label="Частота"
                         multiSelect={false}
                       />
@@ -995,10 +995,10 @@ export default function ProfilePage() {
                     <div>
                       <p className="text-base text-muted-foreground mb-2">Груповий секс:</p>
                       <EditableBadgeList
-                        values={profile.groupSex ? [profile.groupSex] : []}
-                        onSave={(values) => handleFieldSave("groupSex", values[0] || "")}
+                        values={profile.groupSex ? valuesToLabels("groupSex", [profile.groupSex]) : []}
+                        onSave={(values) => handleFieldSave("groupSex", labelsToValues("groupSex", values)[0] || "")}
                         isEditing={isEditing}
-                        options={["Люблю", "Іноді", "Ні", "Хочу але ще не робив", "Спостерігач"]}
+                        options={getAllLabels("groupSex")}
                         label="Груповий секс"
                         multiSelect={false}
                       />
@@ -1006,10 +1006,10 @@ export default function ProfilePage() {
                     <div>
                       <p className="text-base text-muted-foreground mb-2">Речовини:</p>
                       <EditableBadgeList
-                        values={profile.substancesAttitude ? [profile.substancesAttitude] : []}
-                        onSave={(values) => handleFieldSave("substancesAttitude", values[0] || "")}
+                        values={profile.substancesAttitude ? valuesToLabels("substancesAttitude", [profile.substancesAttitude]) : []}
+                        onSave={(values) => handleFieldSave("substancesAttitude", labelsToValues("substancesAttitude", values)[0] || "")}
                         isEditing={isEditing}
-                        options={["Ні (тверезий)", "Іноді (легкі поперси)", "Так (сильніші)"]}
+                        options={getAllLabels("substancesAttitude")}
                         label="Речовини"
                         multiSelect={false}
                       />
@@ -1022,10 +1022,10 @@ export default function ProfilePage() {
                   <div>
                     <p className="text-base text-muted-foreground mb-2">Улюблені пози:</p>
                     <EditableBadgeList
-                      values={profile.favoritePositions || []}
-                      onSave={(values) => handleFieldSave("favoritePositions", values)}
+                      values={profile.favoritePositions ? valuesToLabels("favoritePositions", profile.favoritePositions) : []}
+                      onSave={(values) => handleFieldSave("favoritePositions", labelsToValues("favoritePositions", values))}
                       isEditing={isEditing}
-                      options={["Місіонерська", "Ззаду", "Наїзник", "На боці", "Стоячи"]}
+                      options={getAllLabels("favoritePositions")}
                       label="Пози"
                       multiSelect={true}
                     />
@@ -1034,10 +1034,10 @@ export default function ProfilePage() {
                   <div>
                     <p className="text-base text-muted-foreground mb-2">Улюблені активності:</p>
                     <EditableBadgeList
-                      values={profile.favoriteActivities || []}
-                      onSave={(values) => handleFieldSave("favoriteActivities", values)}
+                      values={profile.favoriteActivities ? valuesToLabels("favoriteActivities", profile.favoriteActivities) : []}
+                      onSave={(values) => handleFieldSave("favoriteActivities", labelsToValues("favoriteActivities", values))}
                       isEditing={isEditing}
-                      options={["Оральний", "Анальний", "Лизання ануса", "69", "Фістинг", "Масаж простати", "Стимуляція сосків", "Ручна стимуляція", "Секс з іграшками", "Легке зв'язування"]}
+                      options={getAllLabels("favoriteActivities")}
                       label="Активності"
                       multiSelect={true}
                     />
@@ -1046,10 +1046,10 @@ export default function ProfilePage() {
                   <div>
                     <p className="text-base text-muted-foreground mb-2">Іграшки/Аксесуари:</p>
                     <EditableBadgeList
-                      values={profile.toysAccessories || []}
-                      onSave={(values) => handleFieldSave("toysAccessories", values)}
+                      values={profile.toysAccessories ? valuesToLabels("toysAccessories", profile.toysAccessories) : []}
+                      onSave={(values) => handleFieldSave("toysAccessories", labelsToValues("toysAccessories", values))}
                       isEditing={isEditing}
-                      options={["Вібратори", "Анальні пробки", "Наручники", "Мотузки", "Підвіс", "Анальні намиста", "Фалоімітатори", "Масажери простати", "Кільця для пеніса", "Маски/Пов'язки"]}
+                      options={getAllLabels("toysAccessories")}
                       label="Іграшки"
                       multiSelect={true}
                     />
@@ -1058,10 +1058,10 @@ export default function ProfilePage() {
                   <div>
                     <p className="text-base text-muted-foreground mb-2">Місце зустрічі:</p>
                     <EditableBadgeList
-                      values={profile.meetingPlaces || []}
-                      onSave={(values) => handleFieldSave("meetingPlaces", values)}
+                      values={profile.meetingPlaces ? valuesToLabels("meetingPlaces", profile.meetingPlaces) : []}
+                      onSave={(values) => handleFieldSave("meetingPlaces", labelsToValues("meetingPlaces", values))}
                       isEditing={isEditing}
-                      options={["Дома", "Готель", "Сауна/Клуб", "Природа"]}
+                      options={getAllLabels("meetingPlaces")}
                       label="Місця"
                       multiSelect={true}
                     />
@@ -1070,10 +1070,10 @@ export default function ProfilePage() {
                   <div>
                     <p className="text-base text-muted-foreground mb-2">Після сексу:</p>
                     <EditableBadgeList
-                      values={profile.afterSex || []}
-                      onSave={(values) => handleFieldSave("afterSex", values)}
+                      values={profile.afterSex ? valuesToLabels("afterSex", profile.afterSex) : []}
+                      onSave={(values) => handleFieldSave("afterSex", labelsToValues("afterSex", values))}
                       isEditing={isEditing}
-                      options={["Обійми/Розмова", "Швидкий душ", "Ніч разом", "Нічого"]}
+                      options={getAllLabels("afterSex")}
                       label="Після сексу"
                       multiSelect={true}
                     />
@@ -1082,10 +1082,10 @@ export default function ProfilePage() {
                   <div>
                     <p className="text-base text-muted-foreground mb-2">Фетиші/вподобання:</p>
                     <EditableBadgeList
-                      values={profile.fetishes || []}
-                      onSave={(values) => handleFieldSave("fetishes", values)}
+                      values={profile.fetishes ? valuesToLabels("fetishes", profile.fetishes) : []}
+                      onSave={(values) => handleFieldSave("fetishes", labelsToValues("fetishes", values))}
                       isEditing={isEditing}
-                      options={["Bears", "Leather", "Uniform", "Sportswear", "Daddies", "Jocks", "Twinks", "BDSM", "Cruising", "Foot Fetish", "Group Sex", "Latex/Rubber", "Underwear Fetish", "Voyeurism", "Exhibitionism"]}
+                      options={getAllLabels("fetishes")}
                       label="Фетиші"
                       multiSelect={true}
                     />
@@ -1094,10 +1094,10 @@ export default function ProfilePage() {
                   <div>
                     <p className="text-base text-muted-foreground mb-2">Роль у BDSM:</p>
                     <EditableBadgeList
-                      values={profile.bdsmRoles || []}
-                      onSave={(values) => handleFieldSave("bdsmRoles", values)}
+                      values={profile.bdsmRoles ? valuesToLabels("bdsmRoles", profile.bdsmRoles) : []}
+                      onSave={(values) => handleFieldSave("bdsmRoles", labelsToValues("bdsmRoles", values))}
                       isEditing={isEditing}
-                      options={["Dom", "Master", "Sadist", "Sub", "Slave", "Masochist", "Switch", "Kinky/Experimental", "Curious/Learning"]}
+                      options={getAllLabels("bdsmRoles")}
                       label="BDSM"
                       multiSelect={true}
                     />
