@@ -39,6 +39,7 @@ export default function ProfilePage() {
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
   const [fullscreenPhotoIndex, setFullscreenPhotoIndex] = useState(0);
   const [fullscreenGalleryType, setFullscreenGalleryType] = useState<'public' | 'private'>('public');
+  const [isPrivateGalleryExpanded, setIsPrivateGalleryExpanded] = useState(false);
   
   // For demo: user viewing their own profile always has access
   // In production, this would check if user has been granted access to view this private gallery
@@ -476,9 +477,13 @@ export default function ProfilePage() {
               )}
             </Card>
 
-            {/* Private Photos Gallery */}
+            {/* Private Photos Gallery - Collapsible */}
             <Card className="overflow-hidden border-2 border-pink-500/20 shadow-lg shadow-pink-500/10">
-              <CardHeader className="pb-3">
+              <CardHeader 
+                className="pb-3 cursor-pointer hover-elevate"
+                onClick={() => setIsPrivateGalleryExpanded(!isPrivateGalleryExpanded)}
+                data-testid="button-toggle-private-gallery"
+              >
                 <CardTitle className="flex items-center gap-2 text-lg">
                   {hasPrivateGalleryAccess ? (
                     <LockOpen className="h-5 w-5 text-green-500" />
@@ -486,139 +491,160 @@ export default function ProfilePage() {
                     <Lock className="h-5 w-5 text-pink-500" />
                   )}
                   Приватні фото
+                  <Badge variant="secondary" className="ml-auto">
+                    {privatePhotos.length} фото
+                  </Badge>
+                  <motion.div
+                    animate={{ rotate: isPrivateGalleryExpanded ? 180 : 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </motion.div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-4 pt-0">
-                {privatePhotos.length > 0 ? (
-                  <div className="grid grid-cols-2 gap-2">
-                    {privatePhotos.map((photo, index) => (
-                      <motion.div
-                        key={photo.url}
-                        className={`relative aspect-square bg-muted rounded-md overflow-hidden ${
-                          hasPrivateGalleryAccess || isEditing ? 'cursor-pointer' : 'cursor-default'
-                        }`}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.05 }}
-                        onClick={() => {
-                          if (!isEditing && hasPrivateGalleryAccess) {
-                            setFullscreenGalleryType('private');
-                            setFullscreenPhotoIndex(index);
-                            setIsFullscreenOpen(true);
-                          }
-                        }}
-                        data-testid={`private-photo-thumbnail-${index}`}
-                      >
-                        <img
-                          src={photo.url}
-                          alt={`Private Photo ${index + 1}`}
-                          className={`w-full h-full object-cover ${
-                            !hasPrivateGalleryAccess && !isEditing ? 'blur-md' : ''
-                          }`}
-                        />
-
-                        {/* Lock overlay when no access */}
-                        {!hasPrivateGalleryAccess && !isEditing && (
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
-                            <Lock className="h-8 w-8 text-white" />
-                          </div>
-                        )}
-
-                        {/* Delete button (in edit mode) */}
-                        {isEditing && (
-                          <motion.button
-                            whileTap={{ scale: 0.9 }}
-                            className="absolute top-2 right-2 bg-red-500/90 backdrop-blur-sm rounded-full p-1.5 text-white hover:bg-red-600"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const newPrivate = (profile.privatePhotos || []).filter(p => 
-                                (typeof p === 'string' ? p : p.url) !== photo.url
-                              );
-                              handleFieldSave("privatePhotos", newPrivate);
-                            }}
-                            data-testid={`button-delete-private-photo-${index}`}
-                          >
-                            <X className="h-4 w-4" />
-                          </motion.button>
-                        )}
-                      </motion.div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="aspect-video bg-muted flex items-center justify-center rounded-md">
-                    <div className="text-center">
-                      {hasPrivateGalleryAccess ? (
-                        <LockOpen className="h-12 w-12 mx-auto text-green-500 opacity-50 mb-2" />
-                      ) : (
-                        <Lock className="h-12 w-12 mx-auto text-pink-500 opacity-50 mb-2" />
-                      )}
-                      <p className="text-sm text-muted-foreground">Немає приватних фото</p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-
-              {/* Add Private Photo Button (in edit mode) */}
-              {isEditing && (
-                <div className="p-4 space-y-2">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    id="private-photo-upload-input"
-                    data-testid="input-private-photo-upload"
-                    onChange={async (e) => {
-                      const files = e.target.files;
-                      if (!files || files.length === 0) return;
-
-                      try {
-                        setUploadingPrivatePhotos(true);
-                        const uploadedPhotos = [];
-
-                        for (const file of Array.from(files)) {
-                          const formData = new FormData();
-                          formData.append("photo", file);
-
-                          const response = await fetch("/api/upload", {
-                            method: "POST",
-                            body: formData,
-                          });
-                          
-                          if (!response.ok) throw new Error("Upload failed");
-                          
-                          const photoData = await response.json();
-                          uploadedPhotos.push(photoData);
-                        }
-
-                        const updatedPrivate = [...(profile.privatePhotos || []), ...uploadedPhotos];
-                        await handleFieldSave("privatePhotos", updatedPrivate);
-                        
-                        setUploadingPrivatePhotos(false);
-                        e.target.value = "";
-                      } catch (error) {
-                        console.error("Private photo upload failed:", error);
-                        setUploadingPrivatePhotos(false);
-                        toast({
-                          title: "Помилка",
-                          description: "Не вдалося завантажити приватні фото",
-                          variant: "destructive",
-                        });
-                      }
-                    }}
-                  />
-                  <Button
-                    variant="outline"
-                    className="w-full border-pink-500/50 text-pink-400"
-                    onClick={() => document.getElementById("private-photo-upload-input")?.click()}
-                    disabled={uploadingPrivatePhotos}
-                    data-testid="button-add-private-photo"
+              
+              <AnimatePresence>
+                {isPrivateGalleryExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
                   >
-                    <Lock className="h-4 w-4 mr-2" />
-                    {uploadingPrivatePhotos ? "Завантаження..." : "Додати фото"}
-                  </Button>
-                </div>
-              )}
+                    <CardContent className="p-4 pt-0">
+                      {privatePhotos.length > 0 ? (
+                        <div className="grid grid-cols-2 gap-2">
+                          {privatePhotos.map((photo, index) => (
+                            <motion.div
+                              key={photo.url}
+                              className={`relative aspect-square bg-muted rounded-md overflow-hidden ${
+                                hasPrivateGalleryAccess || isEditing ? 'cursor-pointer' : 'cursor-default'
+                              }`}
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: index * 0.05 }}
+                              onClick={() => {
+                                if (!isEditing && hasPrivateGalleryAccess) {
+                                  setFullscreenGalleryType('private');
+                                  setFullscreenPhotoIndex(index);
+                                  setIsFullscreenOpen(true);
+                                }
+                              }}
+                              data-testid={`private-photo-thumbnail-${index}`}
+                            >
+                              <img
+                                src={photo.url}
+                                alt={`Private Photo ${index + 1}`}
+                                className={`w-full h-full object-cover ${
+                                  !hasPrivateGalleryAccess && !isEditing ? 'blur-md' : ''
+                                }`}
+                              />
+
+                              {/* Lock overlay when no access */}
+                              {!hasPrivateGalleryAccess && !isEditing && (
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
+                                  <Lock className="h-8 w-8 text-white" />
+                                </div>
+                              )}
+
+                              {/* Delete button (in edit mode) */}
+                              {isEditing && (
+                                <motion.button
+                                  whileTap={{ scale: 0.9 }}
+                                  className="absolute top-2 right-2 bg-red-500/90 backdrop-blur-sm rounded-full p-1.5 text-white hover:bg-red-600"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const newPrivate = (profile.privatePhotos || []).filter(p => 
+                                      (typeof p === 'string' ? p : p.url) !== photo.url
+                                    );
+                                    handleFieldSave("privatePhotos", newPrivate);
+                                  }}
+                                  data-testid={`button-delete-private-photo-${index}`}
+                                >
+                                  <X className="h-4 w-4" />
+                                </motion.button>
+                              )}
+                            </motion.div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="aspect-video bg-muted flex items-center justify-center rounded-md">
+                          <div className="text-center">
+                            {hasPrivateGalleryAccess ? (
+                              <LockOpen className="h-12 w-12 mx-auto text-green-500 opacity-50 mb-2" />
+                            ) : (
+                              <Lock className="h-12 w-12 mx-auto text-pink-500 opacity-50 mb-2" />
+                            )}
+                            <p className="text-sm text-muted-foreground">Немає приватних фото</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Add Private Photo Button (in edit mode) */}
+                      {isEditing && (
+                        <div className="mt-4 space-y-2">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            id="private-photo-upload-input"
+                            data-testid="input-private-photo-upload"
+                            onChange={async (e) => {
+                              const files = e.target.files;
+                              if (!files || files.length === 0) return;
+
+                              try {
+                                setUploadingPrivatePhotos(true);
+                                const uploadedPhotos = [];
+
+                                for (const file of Array.from(files)) {
+                                  const formData = new FormData();
+                                  formData.append("photo", file);
+
+                                  const response = await fetch("/api/upload", {
+                                    method: "POST",
+                                    body: formData,
+                                  });
+                                  
+                                  if (!response.ok) throw new Error("Upload failed");
+                                  
+                                  const photoData = await response.json();
+                                  uploadedPhotos.push(photoData);
+                                }
+
+                                const updatedPrivate = [...(profile.privatePhotos || []), ...uploadedPhotos];
+                                await handleFieldSave("privatePhotos", updatedPrivate);
+                                
+                                setUploadingPrivatePhotos(false);
+                                e.target.value = "";
+                              } catch (error) {
+                                console.error("Private photo upload failed:", error);
+                                setUploadingPrivatePhotos(false);
+                                toast({
+                                  title: "Помилка",
+                                  description: "Не вдалося завантажити приватні фото",
+                                  variant: "destructive",
+                                });
+                              }
+                            }}
+                          />
+                          <Button
+                            variant="outline"
+                            className="w-full border-pink-500/50 text-pink-400"
+                            onClick={() => document.getElementById("private-photo-upload-input")?.click()}
+                            disabled={uploadingPrivatePhotos}
+                            data-testid="button-add-private-photo"
+                          >
+                            <Lock className="h-4 w-4 mr-2" />
+                            {uploadingPrivatePhotos ? "Завантаження..." : "Додати фото"}
+                          </Button>
+                        </div>
+                      )}
+                    </CardContent>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </Card>
 
 
