@@ -19,7 +19,6 @@ import type { Profile } from "@shared/schema";
 export default function ProfilePage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [isEditing, setIsEditing] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
   // Check authentication
@@ -151,20 +150,11 @@ export default function ProfilePage() {
           <Button
             size="lg"
             className="rounded-full shadow-lg shadow-primary/50 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
-            onClick={() => setIsEditing(!isEditing)}
-            data-testid="button-toggle-edit"
+            onClick={() => setLocation("/profile/edit")}
+            data-testid="button-edit-profile"
           >
-            {isEditing ? (
-              <>
-                <X className="mr-2 h-5 w-5" />
-                Скасувати
-              </>
-            ) : (
-              <>
-                <Edit2 className="mr-2 h-5 w-5" />
-                Редагувати
-              </>
-            )}
+            <Edit2 className="mr-2 h-5 w-5" />
+            Редагувати
           </Button>
         </motion.div>
         
@@ -922,28 +912,6 @@ export default function ProfilePage() {
             )}
           </motion.div>
         </div>
-
-        {/* Edit Mode Placeholder */}
-        <AnimatePresence>
-          {isEditing && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="mt-6"
-            >
-              <Card className="border-primary">
-                <CardContent className="pt-6 text-center">
-                  <Edit2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                  <p className="text-muted-foreground">
-                    Режим редагування буде доступний в наступному етапі
-                  </p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </motion.div>
     </div>
   );
