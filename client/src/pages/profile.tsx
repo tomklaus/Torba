@@ -18,6 +18,12 @@ import { useToast } from "@/hooks/use-toast";
 import { EditableText, EditableNumber, EditableBadgeList } from "@/components/EditableField";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Profile } from "@shared/schema";
+import { 
+  valuesToLabels, 
+  labelsToValues, 
+  getAllLabels, 
+  valueToLabel 
+} from "@/lib/optionsMappers";
 
 export default function ProfilePage() {
   const [, setLocation] = useLocation();
@@ -480,10 +486,10 @@ export default function ProfilePage() {
                 <div className="space-y-2">
                   <div className="text-sm text-muted-foreground">Тип тіла:</div>
                   <EditableBadgeList
-                    values={profile.bodyType ? [profile.bodyType] : []}
-                    onSave={(values) => handleFieldSave("bodyType", values[0] || "")}
+                    values={profile.bodyType ? valuesToLabels("bodyType", [profile.bodyType]) : []}
+                    onSave={(values) => handleFieldSave("bodyType", labelsToValues("bodyType", values)[0] || "")}
                     isEditing={isEditing}
-                    options={["Худий", "Атлетичний", "Середній", "М'язистий", "Кремезний", "Повний"]}
+                    options={getAllLabels("bodyType")}
                     label="Тип тіла"
                     multiSelect={false}
                   />
@@ -515,10 +521,10 @@ export default function ProfilePage() {
                 <div>
                   <span className="text-sm text-muted-foreground">Статус стосунків:</span>
                   <EditableBadgeList
-                    values={profile.relationshipStatus ? [profile.relationshipStatus] : []}
-                    onSave={(values) => handleFieldSave("relationshipStatus", values[0] || "")}
+                    values={profile.relationshipStatus ? valuesToLabels("relationshipStatus", [profile.relationshipStatus]) : []}
+                    onSave={(values) => handleFieldSave("relationshipStatus", labelsToValues("relationshipStatus", values)[0] || "")}
                     isEditing={isEditing}
-                    options={["Самотній", "У стосунках", "Одружений", "У відкритих стосунках", "Складно", "Не шукаю стосунків"]}
+                    options={getAllLabels("relationshipStatus")}
                     label="Статус"
                     multiSelect={false}
                   />
@@ -526,10 +532,10 @@ export default function ProfilePage() {
                 <div>
                   <span className="text-sm text-muted-foreground">ВІЛ-статус:</span>
                   <EditableBadgeList
-                    values={profile.hivStatus ? [profile.hivStatus] : []}
-                    onSave={(values) => handleFieldSave("hivStatus", values[0] || "")}
+                    values={profile.hivStatus ? valuesToLabels("hivStatus", [profile.hivStatus]) : []}
+                    onSave={(values) => handleFieldSave("hivStatus", labelsToValues("hivStatus", values)[0] || "")}
                     isEditing={isEditing}
-                    options={["Негативний", "Позитивний", "Невизначений", "Не розголошую"]}
+                    options={getAllLabels("hivStatus")}
                     label="ВІЛ-статус"
                     multiSelect={false}
                   />
@@ -537,10 +543,10 @@ export default function ProfilePage() {
                 <div>
                   <span className="text-sm text-muted-foreground">Алкоголь:</span>
                   <EditableBadgeList
-                    values={profile.alcoholUse ? [profile.alcoholUse] : []}
-                    onSave={(values) => handleFieldSave("alcoholUse", values[0] || "")}
+                    values={profile.alcoholUse ? valuesToLabels("alcoholUse", [profile.alcoholUse]) : []}
+                    onSave={(values) => handleFieldSave("alcoholUse", labelsToValues("alcoholUse", values)[0] || "")}
                     isEditing={isEditing}
-                    options={["Ніколи", "Рідко", "Інколи", "Часто"]}
+                    options={getAllLabels("alcoholUse")}
                     label="Алкоголь"
                     multiSelect={false}
                   />
@@ -548,10 +554,10 @@ export default function ProfilePage() {
                 <div>
                   <span className="text-sm text-muted-foreground">Куріння:</span>
                   <EditableBadgeList
-                    values={profile.smoking ? [profile.smoking] : []}
-                    onSave={(values) => handleFieldSave("smoking", values[0] || "")}
+                    values={profile.smoking ? valuesToLabels("smoking", [profile.smoking]) : []}
+                    onSave={(values) => handleFieldSave("smoking", labelsToValues("smoking", values)[0] || "")}
                     isEditing={isEditing}
-                    options={["Ніколи", "Рідко", "Інколи", "Часто"]}
+                    options={getAllLabels("smoking")}
                     label="Куріння"
                     multiSelect={false}
                   />
@@ -840,10 +846,10 @@ export default function ProfilePage() {
                     </CardHeader>
                     <CardContent>
                       <EditableBadgeList
-                        values={profile.locationFormats || []}
-                        onSave={(values) => handleFieldSave("locationFormats", values)}
+                        values={valuesToLabels("locationFormats", profile.locationFormats || [])}
+                        onSave={(values) => handleFieldSave("locationFormats", labelsToValues("locationFormats", values))}
                         isEditing={isEditing}
-                        options={["У мене", "У клієнта", "Готель", "Інше"]}
+                        options={getAllLabels("locationFormats")}
                         label="Локація"
                         multiSelect={true}
                       />
@@ -856,10 +862,10 @@ export default function ProfilePage() {
                     </CardHeader>
                     <CardContent>
                       <EditableBadgeList
-                        values={profile.travelGeography || []}
-                        onSave={(values) => handleFieldSave("travelGeography", values)}
+                        values={valuesToLabels("travelGeography", profile.travelGeography || [])}
+                        onSave={(values) => handleFieldSave("travelGeography", labelsToValues("travelGeography", values))}
                         isEditing={isEditing}
-                        options={["Місто", "Область", "Україна", "Європа", "Світ"]}
+                        options={getAllLabels("travelGeography")}
                         label="Поїздки"
                         multiSelect={true}
                       />
@@ -879,10 +885,10 @@ export default function ProfilePage() {
                     <div>
                       <p className="text-sm text-muted-foreground mb-2">Доступність:</p>
                       <EditableBadgeList
-                        values={profile.availability || []}
-                        onSave={(values) => handleFieldSave("availability", values)}
+                        values={valuesToLabels("availability", profile.availability || [])}
+                        onSave={(values) => handleFieldSave("availability", labelsToValues("availability", values))}
                         isEditing={isEditing}
-                        options={["Ранок", "День", "Вечір", "Ніч", "Вихідні", "Будні"]}
+                        options={getAllLabels("availability")}
                         label="Доступність"
                         multiSelect={true}
                       />
@@ -890,10 +896,10 @@ export default function ProfilePage() {
                     <div>
                       <span className="text-sm text-muted-foreground">Мінімальне попередження:</span>
                       <EditableBadgeList
-                        values={profile.minNotice ? [profile.minNotice] : []}
-                        onSave={(values) => handleFieldSave("minNotice", values[0] || "")}
+                        values={profile.minNotice ? valuesToLabels("minNotice", [profile.minNotice]) : []}
+                        onSave={(values) => handleFieldSave("minNotice", labelsToValues("minNotice", values)[0] || "")}
                         isEditing={isEditing}
-                        options={["30 хв", "1 година", "2 години", "3 години", "День"]}
+                        options={getAllLabels("minNotice")}
                         label="Попередження"
                         multiSelect={false}
                       />
@@ -901,10 +907,10 @@ export default function ProfilePage() {
                     <div>
                       <span className="text-sm text-muted-foreground">Мінімальна тривалість:</span>
                       <EditableBadgeList
-                        values={profile.minDuration ? [profile.minDuration] : []}
-                        onSave={(values) => handleFieldSave("minDuration", values[0] || "")}
+                        values={profile.minDuration ? valuesToLabels("minDuration", [profile.minDuration]) : []}
+                        onSave={(values) => handleFieldSave("minDuration", labelsToValues("minDuration", values)[0] || "")}
                         isEditing={isEditing}
-                        options={["30 хв", "1 година", "2 години", "3 години", "Ніч"]}
+                        options={getAllLabels("minDuration")}
                         label="Тривалість"
                         multiSelect={false}
                       />
@@ -954,7 +960,7 @@ export default function ProfilePage() {
                       {profile.photoVideoConsent && (
                         <div className="text-sm">
                           <span className="text-muted-foreground">Фото/відео: </span>
-                          <Badge variant="outline" className="text-xs">{profile.photoVideoConsent}</Badge>
+                          <Badge variant="outline" className="text-xs">{valueToLabel("photoVideoConsent", profile.photoVideoConsent)}</Badge>
                         </div>
                       )}
                       {profile.myLimits && (
@@ -989,7 +995,7 @@ export default function ProfilePage() {
                           <div className="flex gap-2 flex-wrap">
                             {profile.paymentMethods.map((method: string, i: number) => (
                               <Badge key={i} variant="secondary" className="text-xs">
-                                {method}
+                                {valueToLabel("paymentMethods", method)}
                               </Badge>
                             ))}
                           </div>
@@ -1010,7 +1016,7 @@ export default function ProfilePage() {
                       {profile.transportCosts && (
                         <div className="text-sm">
                           <span className="text-muted-foreground">Транспортні витрати: </span>
-                          <span>{profile.transportCosts}</span>
+                          <span>{valueToLabel("transportCosts", profile.transportCosts)}</span>
                         </div>
                       )}
                     </CardContent>
