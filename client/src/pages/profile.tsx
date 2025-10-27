@@ -10,9 +10,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { 
   User, Heart, MapPin, Ruler, Weight, Calendar,
   Edit2, LogOut, ChevronLeft, ChevronRight, X,
-  Camera, Info, Phone, Globe
+  Camera, Info, Phone, Globe, DollarSign, Shield,
+  Sparkles, Activity, Languages, Mail, Clock
 } from "lucide-react";
-import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Profile } from "@shared/schema";
 
@@ -57,7 +57,6 @@ export default function ProfilePage() {
       setLocation("/");
     },
     onError: () => {
-      // Logout anyway on client side
       localStorage.clear();
       setLocation("/");
     },
@@ -138,6 +137,9 @@ export default function ProfilePage() {
     },
   };
 
+  const isCommerce = profile.commerceType === "yes" || profile.commerceType === "commerce_only";
+  const age = new Date().getFullYear() - new Date(profile.birthDate).getFullYear();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900/10 via-background to-blue-900/10">
       {/* Floating Action Buttons */}
@@ -193,13 +195,21 @@ export default function ProfilePage() {
       >
         {/* Header */}
         <motion.div variants={cardVariants} className="mb-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-              {profile.name}, {new Date().getFullYear() - new Date(profile.birthDate).getFullYear()}
+              {profile.name}, {age}
             </h1>
-            <Badge variant="secondary" className="text-sm">
-              {userEmail}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="text-sm">
+                {userEmail}
+              </Badge>
+              {isCommerce && (
+                <Badge variant="default" className="text-sm bg-gradient-to-r from-purple-500 to-blue-500">
+                  <DollarSign className="h-3 w-3 mr-1" />
+                  Комерційний профіль
+                </Badge>
+              )}
+            </div>
           </div>
         </motion.div>
 
@@ -212,7 +222,6 @@ export default function ProfilePage() {
               <CardContent className="p-0">
                 {allPhotos.length > 0 ? (
                   <div className="relative aspect-square bg-muted">
-                    {/* Shimmer effect container */}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent animate-shimmer" />
                     
                     <AnimatePresence mode="wait">
@@ -238,7 +247,6 @@ export default function ProfilePage() {
                       />
                     </AnimatePresence>
 
-                    {/* Navigation buttons */}
                     {allPhotos.length > 1 && (
                       <>
                         {currentPhotoIndex > 0 && (
@@ -263,7 +271,6 @@ export default function ProfilePage() {
                           </motion.button>
                         )}
                         
-                        {/* Photo counter */}
                         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-sm px-3 py-1 rounded-full text-white text-sm">
                           {currentPhotoIndex + 1} / {allPhotos.length}
                         </div>
@@ -289,7 +296,7 @@ export default function ProfilePage() {
               <CardContent className="space-y-3">
                 <div className="flex items-center gap-2 text-sm">
                   <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">{profile.city}</span>
+                  <span className="font-medium">{profile.customCity || profile.city}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -305,13 +312,56 @@ export default function ProfilePage() {
                     <Weight className="h-4 w-4 text-muted-foreground" />
                     <span>{profile.weight} кг</span>
                   </div>
+                  <div className="col-span-2 flex items-center gap-2">
+                    <Activity className="h-4 w-4 text-muted-foreground" />
+                    <span>{profile.penisSize} см</span>
+                  </div>
                 </div>
-                <div className="flex gap-2 flex-wrap mt-3">
-                  <Badge variant="secondary">{profile.bodyType}</Badge>
-                  <Badge variant="secondary">{profile.sexRole}</Badge>
+                <Separator />
+                <div className="flex gap-2 flex-wrap">
+                  <Badge variant="secondary">{profile.bodyType || "Не вказано"}</Badge>
+                  <Badge variant="default">{profile.sexRole}</Badge>
                 </div>
               </CardContent>
             </Card>
+
+            {/* Relationship & Lifestyle */}
+            {(profile.relationshipStatus || profile.alcoholUse || profile.smoking || profile.hivStatus) && (
+              <Card className="border-primary/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Heart className="h-5 w-5 text-primary" />
+                    Стиль життя
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {profile.relationshipStatus && (
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">Статус: </span>
+                      <span>{profile.relationshipStatus}</span>
+                    </div>
+                  )}
+                  {profile.hivStatus && (
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">ВІЛ-статус: </span>
+                      <Badge variant="outline" className="text-xs">{profile.hivStatus}</Badge>
+                    </div>
+                  )}
+                  {profile.alcoholUse && (
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">Алкоголь: </span>
+                      <span>{profile.alcoholUse}</span>
+                    </div>
+                  )}
+                  {profile.smoking && (
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">Куріння: </span>
+                      <span>{profile.smoking}</span>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </motion.div>
 
           {/* Right Column: Additional Info */}
@@ -337,41 +387,82 @@ export default function ProfilePage() {
               </Card>
             )}
 
-            {/* About */}
-            {profile.aboutMe && (
-              <Card className="border-primary/20">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Info className="h-5 w-5 text-primary" />
-                    Про себе
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-foreground whitespace-pre-wrap">{profile.aboutMe}</p>
-                </CardContent>
-              </Card>
-            )}
+            {/* About & Looking For */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {profile.aboutMe && (
+                <Card className="border-primary/20">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Info className="h-5 w-5 text-primary" />
+                      Про себе
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-foreground whitespace-pre-wrap text-sm">{profile.aboutMe}</p>
+                  </CardContent>
+                </Card>
+              )}
 
-            {/* Interests */}
-            {profile.interests && profile.interests.length > 0 && (
-              <Card className="border-primary/20">
-                <CardHeader>
-                  <CardTitle>Інтереси</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex gap-2 flex-wrap">
-                    {profile.interests.map((interest: string, i: number) => (
-                      <Badge key={i} variant="secondary">
-                        {interest}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+              {profile.lookingFor && (
+                <Card className="border-primary/20">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                      Шукаю
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-foreground whitespace-pre-wrap text-sm">{profile.lookingFor}</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Interests & Languages */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {profile.interests && profile.interests.length > 0 && (
+                <Card className="border-primary/20">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                      Інтереси
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex gap-2 flex-wrap">
+                      {profile.interests.map((interest: string, i: number) => (
+                        <Badge key={i} variant="secondary" className="text-xs">
+                          {interest}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {profile.languages && profile.languages.length > 0 && (
+                <Card className="border-primary/20">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Languages className="h-5 w-5 text-primary" />
+                      Мови
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex gap-2 flex-wrap">
+                      {profile.languages.map((lang: string, i: number) => (
+                        <Badge key={i} variant="secondary" className="text-xs">
+                          {lang}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
 
             {/* Contact Info */}
-            {(profile.telegram || profile.instagram || profile.contactEmail || profile.phoneNumber) && (
+            {(profile.telegram || profile.instagram || profile.contactEmail || profile.phoneNumber || profile.spotify || profile.tiktok || profile.twitter) && (
               <Card className="border-primary/20">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -379,7 +470,7 @@ export default function ProfilePage() {
                     Контакти
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {profile.telegram && (
                     <div className="flex items-center gap-2 text-sm">
                       <Globe className="h-4 w-4 text-muted-foreground" />
@@ -394,9 +485,30 @@ export default function ProfilePage() {
                       <span className="font-medium">{profile.instagram}</span>
                     </div>
                   )}
-                  {profile.contactEmail && (
+                  {profile.spotify && (
                     <div className="flex items-center gap-2 text-sm">
                       <Globe className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">Spotify:</span>
+                      <span className="font-medium">{profile.spotify}</span>
+                    </div>
+                  )}
+                  {profile.tiktok && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Globe className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">TikTok:</span>
+                      <span className="font-medium">{profile.tiktok}</span>
+                    </div>
+                  )}
+                  {profile.twitter && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Globe className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">Twitter:</span>
+                      <span className="font-medium">{profile.twitter}</span>
+                    </div>
+                  )}
+                  {profile.contactEmail && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
                       <span className="text-muted-foreground">Email:</span>
                       <span className="font-medium">{profile.contactEmail}</span>
                     </div>
@@ -412,19 +524,309 @@ export default function ProfilePage() {
               </Card>
             )}
 
-            {/* Sexual Profile Preview (если заповнено) */}
-            {(profile.sexExperience || profile.favoritePositions?.length) && (
-              <Card className="border-primary/20">
-                <CardHeader>
-                  <CardTitle>Сексуальний профіль</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {profile.sexExperience && (
-                    <div>
-                      <span className="text-sm text-muted-foreground">Досвід: </span>
-                      <Badge variant="secondary">{profile.sexExperience}</Badge>
-                    </div>
+            {/* Commerce Settings */}
+            {isCommerce && (
+              <>
+                {/* Financial */}
+                {(profile.rate1h || profile.rate2h || profile.rateNight) && (
+                  <Card className="border-primary/20 bg-gradient-to-br from-purple-500/5 to-blue-500/5">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <DollarSign className="h-5 w-5 text-primary" />
+                        Тарифи
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {profile.rate1h && (
+                        <div className="text-center p-3 bg-card rounded-lg border">
+                          <p className="text-sm text-muted-foreground mb-1">1 година</p>
+                          <p className="text-2xl font-bold text-primary">{profile.rate1h} ₴</p>
+                        </div>
+                      )}
+                      {profile.rate2h && (
+                        <div className="text-center p-3 bg-card rounded-lg border">
+                          <p className="text-sm text-muted-foreground mb-1">2 години</p>
+                          <p className="text-2xl font-bold text-primary">{profile.rate2h} ₴</p>
+                        </div>
+                      )}
+                      {profile.rateNight && (
+                        <div className="text-center p-3 bg-card rounded-lg border">
+                          <p className="text-sm text-muted-foreground mb-1">Ніч</p>
+                          <p className="text-2xl font-bold text-primary">{profile.rateNight} ₴</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Service Details & Commerce Role */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {profile.serviceFormats && profile.serviceFormats.length > 0 && (
+                    <Card className="border-primary/20">
+                      <CardHeader>
+                        <CardTitle className="text-base">Формати послуг</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex gap-2 flex-wrap">
+                          {profile.serviceFormats.map((format: string, i: number) => (
+                            <Badge key={i} variant="outline" className="text-xs">
+                              {format}
+                            </Badge>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
                   )}
+
+                  {profile.commerceSexRole && (
+                    <Card className="border-primary/20">
+                      <CardHeader>
+                        <CardTitle className="text-base">Комерційна роль</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <Badge variant="default">{profile.commerceSexRole}</Badge>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+
+                {/* Location Formats & Travel */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {profile.locationFormats && profile.locationFormats.length > 0 && (
+                    <Card className="border-primary/20">
+                      <CardHeader>
+                        <CardTitle className="text-base">Формати локації</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex gap-2 flex-wrap">
+                          {profile.locationFormats.map((loc: string, i: number) => (
+                            <Badge key={i} variant="outline" className="text-xs">
+                              {loc}
+                            </Badge>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {profile.travelGeography && profile.travelGeography.length > 0 && (
+                    <Card className="border-primary/20">
+                      <CardHeader>
+                        <CardTitle className="text-base">Географія поїздок</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex gap-2 flex-wrap">
+                          {profile.travelGeography.map((place: string, i: number) => (
+                            <Badge key={i} variant="outline" className="text-xs">
+                              {place}
+                            </Badge>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+
+                {/* Availability & Conditions */}
+                {(profile.availability?.length || profile.minNotice || profile.meetingConditions?.length) && (
+                  <Card className="border-primary/20">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Clock className="h-5 w-5 text-primary" />
+                        Графік та умови
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {profile.availability && profile.availability.length > 0 && (
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-2">Доступність:</p>
+                          <div className="flex gap-2 flex-wrap">
+                            {profile.availability.map((time: string, i: number) => (
+                              <Badge key={i} variant="secondary" className="text-xs">
+                                {time}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {profile.minNotice && (
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">Мінімальне попередження: </span>
+                          <span>{profile.minNotice}</span>
+                        </div>
+                      )}
+                      {profile.minDuration && (
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">Мінімальна тривалість: </span>
+                          <span>{profile.minDuration}</span>
+                        </div>
+                      )}
+                      {profile.meetingConditions && profile.meetingConditions.length > 0 && (
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-2">Умови зустрічі:</p>
+                          <div className="flex gap-2 flex-wrap">
+                            {profile.meetingConditions.map((cond: string, i: number) => (
+                              <Badge key={i} variant="outline" className="text-xs">
+                                {cond}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Safety & Health */}
+                {(profile.healthSafety?.length || profile.lastStdTest || profile.myLimits || profile.photoVideoConsent || profile.comfortConditions) && (
+                  <Card className="border-primary/20">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="h-5 w-5 text-primary" />
+                        Безпека і здоров'я
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {profile.healthSafety && profile.healthSafety.length > 0 && (
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-2">Здоров'я та безпека:</p>
+                          <div className="flex gap-2 flex-wrap">
+                            {profile.healthSafety.map((item: string, i: number) => (
+                              <Badge key={i} variant="secondary" className="text-xs">
+                                {item}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {profile.lastStdTest && (
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">Останнє тестування: </span>
+                          <span>{profile.lastStdTest}</span>
+                        </div>
+                      )}
+                      {profile.photoVideoConsent && (
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">Фото/відео: </span>
+                          <Badge variant="outline" className="text-xs">{profile.photoVideoConsent}</Badge>
+                        </div>
+                      )}
+                      {profile.myLimits && (
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">Мої межі:</p>
+                          <p className="text-sm whitespace-pre-wrap">{profile.myLimits}</p>
+                        </div>
+                      )}
+                      {profile.comfortConditions && (
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">Умови комфорту:</p>
+                          <p className="text-sm whitespace-pre-wrap">{profile.comfortConditions}</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Payment & Fees */}
+                {(profile.paymentMethods?.length || profile.travelFee || profile.cancellationFee || profile.transportCosts) && (
+                  <Card className="border-primary/20">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <DollarSign className="h-5 w-5 text-primary" />
+                        Оплата та додаткові збори
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {profile.paymentMethods && profile.paymentMethods.length > 0 && (
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-2">Способи оплати:</p>
+                          <div className="flex gap-2 flex-wrap">
+                            {profile.paymentMethods.map((method: string, i: number) => (
+                              <Badge key={i} variant="secondary" className="text-xs">
+                                {method}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {profile.travelFee && (
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">Вартість виїзду: </span>
+                          <span className="font-medium">{profile.travelFee} ₴</span>
+                        </div>
+                      )}
+                      {profile.cancellationFee && (
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">Штраф за скасування: </span>
+                          <span className="font-medium">{profile.cancellationFee} ₴</span>
+                        </div>
+                      )}
+                      {profile.transportCosts && (
+                        <div className="text-sm">
+                          <span className="text-muted-foreground">Транспортні витрати: </span>
+                          <span>{profile.transportCosts}</span>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            )}
+
+            {/* Sexual Profile */}
+            {(profile.sexExperience || profile.favoritePositions?.length || profile.favoriteActivities?.length || 
+              profile.toysAccessories?.length || profile.fetishes?.length || profile.bdsmRoles?.length) && (
+              <Card className="border-primary/20 bg-gradient-to-br from-pink-500/5 to-purple-500/5">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Heart className="h-5 w-5 text-primary" />
+                    Сексуальний профіль
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Experience & Preferences */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {profile.sexExperience && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Досвід:</p>
+                        <Badge variant="secondary">{profile.sexExperience}</Badge>
+                      </div>
+                    )}
+                    {profile.condomAttitude && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Презервативи:</p>
+                        <Badge variant="secondary">{profile.condomAttitude}</Badge>
+                      </div>
+                    )}
+                    {profile.circumcision && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Обрізання:</p>
+                        <Badge variant="secondary">{profile.circumcision}</Badge>
+                      </div>
+                    )}
+                    {profile.sexFrequency && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Бажана частота:</p>
+                        <Badge variant="secondary">{profile.sexFrequency}</Badge>
+                      </div>
+                    )}
+                    {profile.groupSex && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Груповий секс:</p>
+                        <Badge variant="secondary">{profile.groupSex}</Badge>
+                      </div>
+                    )}
+                    {profile.substancesAttitude && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Речовини:</p>
+                        <Badge variant="secondary">{profile.substancesAttitude}</Badge>
+                      </div>
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  {/* Multi-select fields */}
                   {profile.favoritePositions && profile.favoritePositions.length > 0 && (
                     <div>
                       <p className="text-sm text-muted-foreground mb-2">Улюблені пози:</p>
@@ -432,6 +834,84 @@ export default function ProfilePage() {
                         {profile.favoritePositions.map((pos: string, i: number) => (
                           <Badge key={i} variant="outline" className="text-xs">
                             {pos}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.favoriteActivities && profile.favoriteActivities.length > 0 && (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Улюблені активності:</p>
+                      <div className="flex gap-2 flex-wrap">
+                        {profile.favoriteActivities.map((act: string, i: number) => (
+                          <Badge key={i} variant="outline" className="text-xs">
+                            {act}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.toysAccessories && profile.toysAccessories.length > 0 && (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Іграшки/Аксесуари:</p>
+                      <div className="flex gap-2 flex-wrap">
+                        {profile.toysAccessories.map((toy: string, i: number) => (
+                          <Badge key={i} variant="outline" className="text-xs">
+                            {toy}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.meetingPlaces && profile.meetingPlaces.length > 0 && (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Місце зустрічі:</p>
+                      <div className="flex gap-2 flex-wrap">
+                        {profile.meetingPlaces.map((place: string, i: number) => (
+                          <Badge key={i} variant="outline" className="text-xs">
+                            {place}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.afterSex && profile.afterSex.length > 0 && (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Після сексу:</p>
+                      <div className="flex gap-2 flex-wrap">
+                        {profile.afterSex.map((after: string, i: number) => (
+                          <Badge key={i} variant="outline" className="text-xs">
+                            {after}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.fetishes && profile.fetishes.length > 0 && (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Фетиші/вподобання:</p>
+                      <div className="flex gap-2 flex-wrap">
+                        {profile.fetishes.map((fetish: string, i: number) => (
+                          <Badge key={i} variant="default" className="text-xs bg-gradient-to-r from-purple-500 to-pink-500">
+                            {fetish}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.bdsmRoles && profile.bdsmRoles.length > 0 && (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Роль у BDSM:</p>
+                      <div className="flex gap-2 flex-wrap">
+                        {profile.bdsmRoles.map((role: string, i: number) => (
+                          <Badge key={i} variant="default" className="text-xs bg-gradient-to-r from-purple-600 to-blue-600">
+                            {role}
                           </Badge>
                         ))}
                       </div>
