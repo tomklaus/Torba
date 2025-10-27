@@ -323,7 +323,12 @@ export default function ProfilePage() {
               <CardContent className="space-y-3">
                 <div className="flex items-center gap-2 text-sm">
                   <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-medium">{profile.customCity || profile.city}</span>
+                  <EditableText
+                    value={profile.customCity || profile.city || ""}
+                    onSave={(value) => handleFieldSave("customCity", value)}
+                    isEditing={isEditing}
+                    placeholder="Місто"
+                  />
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -333,86 +338,146 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div className="flex items-center gap-2">
                     <Ruler className="h-4 w-4 text-muted-foreground" />
-                    <span>{profile.height} см</span>
+                    <EditableNumber
+                      value={profile.height || 0}
+                      onSave={(value) => handleFieldSave("height", value)}
+                      isEditing={isEditing}
+                      placeholder="Зріст"
+                      min={100}
+                      max={250}
+                      unit="см"
+                    />
                   </div>
                   <div className="flex items-center gap-2">
                     <Weight className="h-4 w-4 text-muted-foreground" />
-                    <span>{profile.weight} кг</span>
+                    <EditableNumber
+                      value={profile.weight || 0}
+                      onSave={(value) => handleFieldSave("weight", value)}
+                      isEditing={isEditing}
+                      placeholder="Вага"
+                      min={40}
+                      max={200}
+                      unit="кг"
+                    />
                   </div>
                   <div className="col-span-2 flex items-center gap-2">
                     <Activity className="h-4 w-4 text-muted-foreground" />
-                    <span>{profile.penisSize} см</span>
+                    <EditableNumber
+                      value={profile.penisSize || 0}
+                      onSave={(value) => handleFieldSave("penisSize", value)}
+                      isEditing={isEditing}
+                      placeholder="Розмір"
+                      min={5}
+                      max={40}
+                      unit="см"
+                    />
                   </div>
                 </div>
                 <Separator />
-                <div className="flex gap-2 flex-wrap">
-                  <Badge variant="secondary">{profile.bodyType || "Не вказано"}</Badge>
-                  <Badge variant="default">{profile.sexRole}</Badge>
+                <div className="space-y-2">
+                  <div className="text-sm text-muted-foreground">Тип тіла:</div>
+                  <EditableBadgeList
+                    values={profile.bodyType ? [profile.bodyType] : []}
+                    onSave={(values) => handleFieldSave("bodyType", values[0] || "")}
+                    isEditing={isEditing}
+                    options={["Худий", "Атлетичний", "Середній", "М'язистий", "Кремезний", "Повний"]}
+                    label="Тип тіла"
+                    multiSelect={false}
+                  />
+                </div>
+                <Separator />
+                <div className="space-y-2">
+                  <div className="text-sm text-muted-foreground">Роль:</div>
+                  <EditableBadgeList
+                    values={profile.sexRole ? [profile.sexRole] : []}
+                    onSave={(values) => handleFieldSave("sexRole", values[0] || "")}
+                    isEditing={isEditing}
+                    options={["Актив", "Пасив", "Універсал", "Сайд"]}
+                    label="Сексуальна роль"
+                    multiSelect={false}
+                  />
                 </div>
               </CardContent>
             </Card>
 
             {/* Relationship & Lifestyle */}
-            {(profile.relationshipStatus || profile.alcoholUse || profile.smoking || profile.hivStatus) && (
-              <Card className="border-primary/20">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Heart className="h-5 w-5 text-primary" />
-                    Стиль життя
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {profile.relationshipStatus && (
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Статус: </span>
-                      <span>{profile.relationshipStatus}</span>
-                    </div>
-                  )}
-                  {profile.hivStatus && (
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">ВІЛ-статус: </span>
-                      <Badge variant="outline" className="text-xs">{profile.hivStatus}</Badge>
-                    </div>
-                  )}
-                  {profile.alcoholUse && (
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Алкоголь: </span>
-                      <span>{profile.alcoholUse}</span>
-                    </div>
-                  )}
-                  {profile.smoking && (
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Куріння: </span>
-                      <span>{profile.smoking}</span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Heart className="h-5 w-5 text-primary" />
+                  Стиль життя
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div>
+                  <span className="text-sm text-muted-foreground">Статус стосунків:</span>
+                  <EditableBadgeList
+                    values={profile.relationshipStatus ? [profile.relationshipStatus] : []}
+                    onSave={(values) => handleFieldSave("relationshipStatus", values[0] || "")}
+                    isEditing={isEditing}
+                    options={["Самотній", "У стосунках", "Одружений", "У відкритих стосунках", "Складно", "Не шукаю стосунків"]}
+                    label="Статус"
+                    multiSelect={false}
+                  />
+                </div>
+                <div>
+                  <span className="text-sm text-muted-foreground">ВІЛ-статус:</span>
+                  <EditableBadgeList
+                    values={profile.hivStatus ? [profile.hivStatus] : []}
+                    onSave={(values) => handleFieldSave("hivStatus", values[0] || "")}
+                    isEditing={isEditing}
+                    options={["Негативний", "Позитивний", "Невизначений", "Не розголошую"]}
+                    label="ВІЛ-статус"
+                    multiSelect={false}
+                  />
+                </div>
+                <div>
+                  <span className="text-sm text-muted-foreground">Алкоголь:</span>
+                  <EditableBadgeList
+                    values={profile.alcoholUse ? [profile.alcoholUse] : []}
+                    onSave={(values) => handleFieldSave("alcoholUse", values[0] || "")}
+                    isEditing={isEditing}
+                    options={["Ніколи", "Рідко", "Інколи", "Часто"]}
+                    label="Алкоголь"
+                    multiSelect={false}
+                  />
+                </div>
+                <div>
+                  <span className="text-sm text-muted-foreground">Куріння:</span>
+                  <EditableBadgeList
+                    values={profile.smoking ? [profile.smoking] : []}
+                    onSave={(values) => handleFieldSave("smoking", values[0] || "")}
+                    isEditing={isEditing}
+                    options={["Ніколи", "Рідко", "Інколи", "Часто"]}
+                    label="Куріння"
+                    multiSelect={false}
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </motion.div>
 
           {/* Right Column: Additional Info */}
           <motion.div variants={cardVariants} className="lg:col-span-2 space-y-6">
             {/* Dating Goals */}
-            {profile.datingGoals && profile.datingGoals.length > 0 && (
-              <Card className="border-primary/20">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Heart className="h-5 w-5 text-primary" />
-                    Цілі знайомства
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex gap-2 flex-wrap">
-                    {profile.datingGoals.map((goal: string, i: number) => (
-                      <Badge key={i} variant="outline" className="text-sm">
-                        {goal}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Heart className="h-5 w-5 text-primary" />
+                  Цілі знайомства
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <EditableBadgeList
+                  values={profile.datingGoals || []}
+                  onSave={(values) => handleFieldSave("datingGoals", values)}
+                  isEditing={isEditing}
+                  options={["Дружба", "Спілкування", "Побачення", "Серйозні стосунки", "Секс", "Мережування"]}
+                  label="Цілі знайомства"
+                  multiSelect={true}
+                />
+              </CardContent>
+            </Card>
 
             {/* About & Looking For */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
