@@ -1,10 +1,14 @@
 import { UseFormReturn } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Upload, X, Image as ImageIcon, Sparkles, Lock, Loader2 } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Sparkles, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
-import type { PhotoWithNsfw } from "@shared/schema";
+import { useEffect } from "react";
+
+interface PhotoPreview {
+  file: File;
+  previewUrl: string;
+}
 
 interface Step7Props {
   form: UseFormReturn<any>;
@@ -12,12 +16,21 @@ interface Step7Props {
 
 export default function Step7({ form }: Step7Props) {
   const { toast } = useToast();
-  const publicPhotos = form.watch("publicPhotos") || [];
-  const privatePhotos = form.watch("privatePhotos") || [];
-  const [uploadingPublic, setUploadingPublic] = useState(false);
-  const [uploadingPrivate, setUploadingPrivate] = useState(false);
+  const publicPhotos: PhotoPreview[] = form.watch("publicPhotos") || [];
+  const privatePhotos: PhotoPreview[] = form.watch("privatePhotos") || [];
 
-  const handleFileSelect = async (
+  // Cleanup object URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      [...publicPhotos, ...privatePhotos].forEach(photo => {
+        if (photo.previewUrl) {
+          URL.revokeObjectURL(photo.previewUrl);
+        }
+      });
+    };
+  }, []);
+
+  const handleFileSelect = (
     e: React.ChangeEvent<HTMLInputElement>,
     type: "public" | "private"
   ) => {
@@ -35,67 +48,41 @@ export default function Step7({ form }: Step7Props) {
       return;
     }
 
-    // Set uploading state
-    if (type === "public") {
-      setUploadingPublic(true);
-    } else {
-      setUploadingPrivate(true);
-    }
+    // Create preview URLs for selected files
+    const newPhotos: PhotoPreview[] = files.map(file => ({
+      file,
+      previewUrl: URL.createObjectURL(file)
+    }));
 
-    try {
-      // Upload each file to /api/upload
-      const uploadPromises = files.map(async (file) => {
-        const formData = new FormData();
-        formData.append("photo", file);
+    // Add to form
+    const fieldName = type === "public" ? "publicPhotos" : "privatePhotos";
+    form.setValue(fieldName, [...currentPhotos, ...newPhotos]);
 
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
+    toast({
+      title: "Фото обрано",
+      description: `Обрано ${newPhotos.length} фото. Вони завантажаться при завершенні реєстрації.`,
+    });
 
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || "Помилка завантаження");
-        }
-
-        const photoData: PhotoWithNsfw = await response.json();
-        return photoData;
-      });
-
-      const uploadedPhotos = await Promise.all(uploadPromises);
-
-      // Add to form
-      const fieldName = type === "public" ? "publicPhotos" : "privatePhotos";
-      form.setValue(fieldName, [...currentPhotos, ...uploadedPhotos]);
-
-      toast({
-        title: "Фото завантажено",
-        description: `Успішно завантажено ${uploadedPhotos.length} фото`,
-      });
-    } catch (error: any) {
-      console.error("Upload error:", error);
-      toast({
-        title: "Помилка завантаження",
-        description: error.message || "Не вдалося завантажити фото",
-        variant: "destructive",
-      });
-    } finally {
-      // Clear uploading state
-      if (type === "public") {
-        setUploadingPublic(false);
-      } else {
-        setUploadingPrivate(false);
-      }
-      // Clear input
-      e.target.value = "";
-    }
+    // Clear input
+    e.target.value = "";
   };
 
   const removePhoto = (index: number, type: "public" | "private") => {
     const fieldName = type === "public" ? "publicPhotos" : "privatePhotos";
-    const current = form.getValues(fieldName) || [];
-    const newPhotos = current.filter((_: string, i: number) => i !== index);
+    const current: PhotoPreview[] = form.getValues(fieldName) || [];
+    
+    // Revoke object URL before removing
+    if (current[index]) {
+      URL.revokeObjectURL(current[index].previewUrl);
+    }
+    
+    const newPhotos = current.filter((_, i: number) => i !== index);
     form.setValue(fieldName, newPhotos);
+    
+    toast({
+      title: "Фото видалено",
+      description: "Фото успішно видалено з галереї",
+    });
   };
 
   return (
@@ -136,16 +123,16 @@ export default function Step7({ form }: Step7Props) {
               Публічна галерея (1-6 фото) *
             </FormLabel>
             <FormDescription>
-              Мінімум 1 фото обов'язково, максимум 6
+              Мінімум 1 фото обов'язково, максимум 6. Фото завантажаться при завершенні реєстрації.
             </FormDescription>
             
             {/* Превью фото */}
             {publicPhotos.length > 0 && (
               <div className="grid grid-cols-3 gap-3 mb-4">
-                {publicPhotos.map((photo: PhotoWithNsfw, index: number) => (
+                {publicPhotos.map((photo: PhotoPreview, index: number) => (
                   <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-border group">
                     <img
-                      src={photo.url}
+                      src={photo.previewUrl}
                       alt={`Public photo ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
@@ -166,26 +153,15 @@ export default function Step7({ form }: Step7Props) {
 
             {publicPhotos.length < 6 && (
               <FormControl>
-                <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg ${uploadingPublic ? 'cursor-wait' : 'cursor-pointer hover-elevate'} transition-all`}>
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover-elevate transition-all">
                   <div className="flex flex-col items-center gap-2">
-                    {uploadingPublic ? (
-                      <>
-                        <Loader2 className="h-8 w-8 text-purple-400 animate-spin" />
-                        <span className="text-sm text-muted-foreground">
-                          Завантаження...
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="h-8 w-8 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">
-                          Натисніть для завантаження фото
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {publicPhotos.length}/6 фото
-                        </span>
-                      </>
-                    )}
+                    <Upload className="h-8 w-8 text-purple-400" />
+                    <span className="text-sm text-muted-foreground">
+                      Натисніть для вибору фото
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {publicPhotos.length}/6 фото
+                    </span>
                   </div>
                   <input
                     type="file"
@@ -193,7 +169,6 @@ export default function Step7({ form }: Step7Props) {
                     multiple
                     className="hidden"
                     onChange={(e) => handleFileSelect(e, "public")}
-                    disabled={uploadingPublic}
                     data-testid="input-public-photos"
                   />
                 </label>
@@ -214,16 +189,16 @@ export default function Step7({ form }: Step7Props) {
               Приватна галерея (0-6 фото)
             </FormLabel>
             <FormDescription>
-              Відкривається після надання дозволу за запитом іншого користувача
+              Відкривається після надання дозволу за запитом іншого користувача. Фото завантажаться при завершенні реєстрації.
             </FormDescription>
             
             {/* Превью фото */}
             {privatePhotos.length > 0 && (
               <div className="grid grid-cols-3 gap-3 mb-4">
-                {privatePhotos.map((photo: PhotoWithNsfw, index: number) => (
+                {privatePhotos.map((photo: PhotoPreview, index: number) => (
                   <div key={index} className="relative aspect-square rounded-lg overflow-hidden border border-border group">
                     <img
-                      src={photo.url}
+                      src={photo.previewUrl}
                       alt={`Private photo ${index + 1}`}
                       className="w-full h-full object-cover blur-sm group-hover:blur-none transition-all"
                     />
@@ -247,26 +222,15 @@ export default function Step7({ form }: Step7Props) {
 
             {privatePhotos.length < 6 && (
               <FormControl>
-                <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg ${uploadingPrivate ? 'cursor-wait' : 'cursor-pointer hover-elevate'} transition-all`}>
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover-elevate transition-all">
                   <div className="flex flex-col items-center gap-2">
-                    {uploadingPrivate ? (
-                      <>
-                        <Loader2 className="h-8 w-8 text-purple-400 animate-spin" />
-                        <span className="text-sm text-muted-foreground">
-                          Завантаження...
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">
-                          Натисніть для завантаження приватних фото
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {privatePhotos.length}/6 фото
-                        </span>
-                      </>
-                    )}
+                    <Lock className="h-8 w-8 text-blue-400" />
+                    <span className="text-sm text-muted-foreground">
+                      Натисніть для вибору фото
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {privatePhotos.length}/6 фото
+                    </span>
                   </div>
                   <input
                     type="file"
@@ -274,7 +238,6 @@ export default function Step7({ form }: Step7Props) {
                     multiple
                     className="hidden"
                     onChange={(e) => handleFileSelect(e, "private")}
-                    disabled={uploadingPrivate}
                     data-testid="input-private-photos"
                   />
                 </label>
