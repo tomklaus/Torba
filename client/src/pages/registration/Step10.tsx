@@ -110,7 +110,8 @@ const TOYS_ACCESSORIES = [
 
 // 10. Місце зустрічі
 const MEETING_PLACES = [
-  { name: "Дома", description: "Ваша/його квартира" },
+  { name: "У тебе вдома", description: "У квартирі партнера" },
+  { name: "У мене вдома", description: "У моїй квартирі" },
   { name: "Готель", description: "Нейтральне місце" },
   { name: "Сауна/Клуб", description: "Публічне" },
   { name: "Природа", description: "Парк/ліс" },
@@ -118,10 +119,10 @@ const MEETING_PLACES = [
 
 // 11. Після сексу
 const AFTER_SEX = [
-  { name: "Обійми/Розмова", description: "Чутливий для найкращих" },
-  { name: "Швидкий душ", description: "Практичний" },
-  { name: "Ніч разом", description: "Романтичний" },
-  { name: "Нічого", description: "Встаю і йду" },
+  { name: "Обіймів/розмов", description: "Емоційний контакт" },
+  { name: "Продовжити зустріч", description: "Більше часу разом" },
+  { name: "Швидкий душ", description: "Практичний підхід" },
+  { name: "Завершити зустріч", description: "Швидке прощання" },
 ];
 
 // 12. Фетиші/вподобання (15 варіантів)
@@ -518,7 +519,7 @@ export default function Step10({ form }: Step10Props) {
       {/* 11. Після сексу */}
       <div className="space-y-3">
         <div>
-          <FormLabel>Після сексу</FormLabel>
+          <FormLabel>Після сексу я хочу:</FormLabel>
           <FormDescription>Ставлення до емоційного догляду після акту</FormDescription>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
