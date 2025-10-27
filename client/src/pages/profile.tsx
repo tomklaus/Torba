@@ -891,7 +891,7 @@ export default function ProfilePage() {
                   )}
 
                   {/* Payment & Fees */}
-                  {(profile.paymentMethods?.length || profile.travelFee || profile.cancellationFee || profile.transportCosts) && (
+                  {(profile.paymentMethods?.length || (profile.travelFee && profile.travelFee > 0) || (profile.cancellationFee && profile.cancellationFee > 0) || profile.transportCosts) && (
                     <>
                       <Separator />
                       <div>
@@ -909,13 +909,13 @@ export default function ProfilePage() {
                               </div>
                             </div>
                           )}
-                          {profile.travelFee && (
+                          {profile.travelFee && profile.travelFee > 0 && (
                             <div className="text-base">
                               <span className="text-muted-foreground">Вартість виїзду: </span>
                               <span className="font-medium">{profile.travelFee} ₴</span>
                             </div>
                           )}
-                          {profile.cancellationFee && (
+                          {profile.cancellationFee && profile.cancellationFee > 0 && (
                             <div className="text-base">
                               <span className="text-muted-foreground">Штраф за скасування: </span>
                               <span className="font-medium">{profile.cancellationFee} ₴</span>
