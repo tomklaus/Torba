@@ -36,6 +36,8 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
   const [uploadingPrivatePhotos, setUploadingPrivatePhotos] = useState(false);
+  const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
+  const [fullscreenPhotoIndex, setFullscreenPhotoIndex] = useState(0);
 
   // Check authentication
   const userId = localStorage.getItem("userId");
@@ -265,10 +267,17 @@ export default function ProfilePage() {
                     {allPhotos.map((photo, index) => (
                       <motion.div
                         key={photo.url}
-                        className="relative aspect-square bg-muted rounded-md overflow-hidden"
+                        className="relative aspect-square bg-muted rounded-md overflow-hidden cursor-pointer"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: index * 0.05 }}
+                        onClick={() => {
+                          if (!isEditing) {
+                            setFullscreenPhotoIndex(index);
+                            setIsFullscreenOpen(true);
+                          }
+                        }}
+                        data-testid={`photo-thumbnail-${index}`}
                       >
                         <img
                           src={photo.url}
@@ -1282,6 +1291,126 @@ export default function ProfilePage() {
           </motion.div>
         </div>
       </motion.div>
+
+      {/* Fullscreen Photo Viewer */}
+      <AnimatePresence>
+        {isFullscreenOpen && allPhotos.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[100] bg-black flex items-center justify-center"
+            onClick={(e) => {
+              // Close if clicking on the background (not on the image)
+              if (e.target === e.currentTarget) {
+                setIsFullscreenOpen(false);
+              }
+            }}
+            data-testid="fullscreen-viewer"
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setIsFullscreenOpen(false)}
+              className="absolute top-4 right-4 z-10 bg-black/50 backdrop-blur-sm hover:bg-black/70 rounded-full p-3 transition-colors"
+              data-testid="button-close-fullscreen"
+            >
+              <X className="h-6 w-6 text-white" />
+            </button>
+
+            {/* Photo Counter */}
+            <div className="absolute top-4 left-4 z-10 bg-black/50 backdrop-blur-sm rounded-full px-4 py-2">
+              <span className="text-white text-sm font-medium">
+                {fullscreenPhotoIndex + 1} / {allPhotos.length}
+              </span>
+            </div>
+
+            {/* Private Badge */}
+            {allPhotos[fullscreenPhotoIndex]?.isPrivate && (
+              <div className="absolute top-20 left-4 z-10 bg-pink-500/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-2">
+                <Lock className="h-4 w-4 text-white" />
+                <span className="text-white text-sm font-medium">Приватне фото</span>
+              </div>
+            )}
+
+            {/* Previous Button */}
+            {allPhotos.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFullscreenPhotoIndex((prev) => 
+                    prev === 0 ? allPhotos.length - 1 : prev - 1
+                  );
+                }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-black/50 backdrop-blur-sm hover:bg-black/70 rounded-full p-3 transition-colors"
+                data-testid="button-prev-photo"
+              >
+                <ChevronLeft className="h-8 w-8 text-white" />
+              </button>
+            )}
+
+            {/* Photo - clicking on left/right sides navigates */}
+            <div className="relative w-full h-full flex items-center justify-center">
+              {/* Left click area */}
+              {allPhotos.length > 1 && (
+                <div
+                  className="absolute left-0 top-0 bottom-0 w-1/3 cursor-w-resize z-[5]"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFullscreenPhotoIndex((prev) => 
+                      prev === 0 ? allPhotos.length - 1 : prev - 1
+                    );
+                  }}
+                  data-testid="click-area-prev"
+                />
+              )}
+
+              {/* Center image */}
+              <motion.img
+                key={fullscreenPhotoIndex}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.2 }}
+                src={allPhotos[fullscreenPhotoIndex]?.url}
+                alt={`Photo ${fullscreenPhotoIndex + 1}`}
+                className="max-w-full max-h-full object-contain"
+                data-testid="fullscreen-image"
+              />
+
+              {/* Right click area */}
+              {allPhotos.length > 1 && (
+                <div
+                  className="absolute right-0 top-0 bottom-0 w-1/3 cursor-e-resize z-[5]"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFullscreenPhotoIndex((prev) => 
+                      prev === allPhotos.length - 1 ? 0 : prev + 1
+                    );
+                  }}
+                  data-testid="click-area-next"
+                />
+              )}
+            </div>
+
+            {/* Next Button */}
+            {allPhotos.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setFullscreenPhotoIndex((prev) => 
+                    prev === allPhotos.length - 1 ? 0 : prev + 1
+                  );
+                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-black/50 backdrop-blur-sm hover:bg-black/70 rounded-full p-3 transition-colors"
+                data-testid="button-next-photo"
+              >
+                <ChevronRight className="h-8 w-8 text-white" />
+              </button>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
