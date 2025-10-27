@@ -288,13 +288,6 @@ export default function ProfilePage() {
               </Badge>
             )}
             
-            {/* Body Type */}
-            {profile.bodyType && (
-              <Badge variant="outline">
-                {valuesToLabels("bodyType", [profile.bodyType])[0]}
-              </Badge>
-            )}
-            
             {/* Sex Role */}
             {profile.sexRole && (
               <Badge variant="outline">
