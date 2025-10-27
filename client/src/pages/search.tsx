@@ -115,7 +115,7 @@ export default function SearchPage() {
                       <div className="flex gap-4">
                         <Avatar className="w-20 h-20 rounded-md flex-shrink-0">
                           {mainPhoto ? (
-                            <AvatarImage src={mainPhoto.url} alt={profile.name} />
+                            <AvatarImage src={mainPhoto.url} alt={profile.name} className="object-cover" />
                           ) : null}
                           <AvatarFallback className="rounded-md bg-gradient-to-br from-primary/20 to-primary/5 text-xl">
                             {profile.name.charAt(0).toUpperCase()}
@@ -162,12 +162,6 @@ export default function SearchPage() {
                               </Badge>
                             )}
                           </div>
-
-                          {profile.aboutMe && (
-                            <p className="text-sm text-muted-foreground mt-3 line-clamp-2">
-                              {profile.aboutMe}
-                            </p>
-                          )}
                         </div>
                       </div>
                     </CardContent>
