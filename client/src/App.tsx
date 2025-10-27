@@ -7,7 +7,6 @@ import NotFound from "@/pages/not-found";
 import LoginPage from "@/pages/login";
 import RegistrationFlow from "@/pages/registration/RegistrationFlow";
 import ProfilePage from "@/pages/profile";
-import EditProfilePage from "@/pages/edit-profile";
 
 function Router() {
   return (
@@ -15,7 +14,6 @@ function Router() {
       <Route path="/" component={LoginPage} />
       <Route path="/register" component={RegistrationFlow} />
       <Route path="/profile" component={ProfilePage} />
-      <Route path="/profile/edit" component={EditProfilePage} />
       <Route component={NotFound} />
     </Switch>
   );

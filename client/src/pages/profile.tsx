@@ -14,12 +14,14 @@ import {
   Sparkles, Activity, Languages, Mail, Clock
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { EditProfileDialog } from "@/components/EditProfileDialog";
 import type { Profile } from "@shared/schema";
 
 export default function ProfilePage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   // Check authentication
   const userId = localStorage.getItem("userId");
@@ -150,7 +152,7 @@ export default function ProfilePage() {
           <Button
             size="lg"
             className="rounded-full shadow-lg shadow-primary/50 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
-            onClick={() => setLocation("/profile/edit")}
+            onClick={() => setIsEditDialogOpen(true)}
             data-testid="button-edit-profile"
           >
             <Edit2 className="mr-2 h-5 w-5" />
@@ -913,6 +915,14 @@ export default function ProfilePage() {
           </motion.div>
         </div>
       </motion.div>
+
+      {/* Edit Profile Dialog */}
+      <EditProfileDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        profile={profile}
+        userId={userId!}
+      />
     </div>
   );
 }
