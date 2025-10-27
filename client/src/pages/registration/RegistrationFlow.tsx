@@ -62,22 +62,14 @@ const registrationSchema = z.object({
   paymentMethods: z.array(z.string()).optional(),
   transportCosts: z.string().optional(),
   
-  // Крок 7 - PhotoWithNsfw objects (url + NSFW scores)
+  // Крок 7 - PhotoPreview objects (file + previewUrl, will be uploaded on submit)
   publicPhotos: z.array(z.object({
-    url: z.string(),
-    drawingScore: z.number(),
-    hentaiScore: z.number(),
-    neutralScore: z.number(),
-    pornScore: z.number(),
-    sexyScore: z.number(),
+    file: z.any(), // File object
+    previewUrl: z.string(),
   })).min(1, "Додайте хоча б 1 фото"),
   privatePhotos: z.array(z.object({
-    url: z.string(),
-    drawingScore: z.number(),
-    hentaiScore: z.number(),
-    neutralScore: z.number(),
-    pornScore: z.number(),
-    sexyScore: z.number(),
+    file: z.any(), // File object
+    previewUrl: z.string(),
   })).default([]),
   
   // Крок 8: Додаткові опціональні поля
