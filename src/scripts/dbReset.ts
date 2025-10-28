@@ -29,7 +29,7 @@ async function confirmDanger(): Promise<boolean> {
   if (process.env.CI === "true" || process.argv.includes("--yes")) return true;
 
   console.log("\n⚠️  You are about to DROP and RECREATE database tables!\n");
-  console.log("This will permanently delete data in tables: profiles, users (and text_entries if present).\n");
+  console.log("This will permanently delete all data in tables: profiles, users.\n");
   return new Promise((resolve) => {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     rl.question('Type "RESET" to confirm: ', (answer) => {

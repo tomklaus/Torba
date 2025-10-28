@@ -58,6 +58,33 @@ Lightweight migration helpers ensure required extensions and tables exist (idemp
 
 - `npm run db:migrate` — ensures extensions/tables exist
 - `npm run db:reset` — drops and recreates tables (destructive; prompts for confirmation)
+- `npm run db:seed` — creates a test user for development (username: `test_user`, email: `test@example.com`)
+
+### Database schema
+
+The database contains two main tables:
+
+**users** table:
+- `id` (varchar, UUID primary key)
+- `username` (varchar(255), unique, not null) — auto-generated as `guest_<randomId>` if not provided
+- `email` (text, unique, nullable)
+- `created_at` (timestamp)
+
+**profiles** table:
+- Contains all user profile information from the 10-step registration flow
+- Foreign key to `users(id)` with CASCADE delete
+- Includes fields for personal info, commerce settings, photos, contacts, and sexual profile
+
+On first boot, the server automatically:
+1. Creates required PostgreSQL extensions (pgcrypto for UUID generation)
+2. Creates tables if they don't exist
+3. Migrates existing schemas (adds missing columns, adjusts constraints)
+4. Validates and logs the database state
+
+Schema validation logs show:
+- List of existing tables
+- Column structure of the users table
+- Record counts for users and profiles
 
 ## Project structure
 

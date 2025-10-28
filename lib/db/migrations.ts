@@ -22,9 +22,33 @@ export async function ensureTables(client: QueryClient) {
   await client.query(`
     CREATE TABLE IF NOT EXISTS users (
       id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
-      email text NOT NULL UNIQUE,
+      username varchar(255) UNIQUE NOT NULL,
+      email text UNIQUE,
       created_at timestamptz NOT NULL DEFAULT NOW()
     );
+  `);
+  
+  // Add username column if it doesn't exist (for existing databases)
+  await client.query(`
+    DO $
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'users' AND column_name = 'username'
+      ) THEN
+        ALTER TABLE users ADD COLUMN username varchar(255) UNIQUE NOT NULL DEFAULT 'guest_' || gen_random_uuid()::text;
+      END IF;
+    END$;
+  `);
+  
+  // Make email nullable if it's not (for schema migration)
+  await client.query(`
+    DO $
+    BEGIN
+      ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
+    EXCEPTION
+      WHEN others THEN NULL;
+    END$;
   `);
 
   // profiles table
@@ -112,9 +136,9 @@ export async function ensureTables(client: QueryClient) {
     );
   `);
 
-  // Optional: performance: ensure an index exists on email
+  // Optional: performance: ensure indexes exist
   await client.query(`
-    DO $$
+    DO $
     BEGIN
       IF NOT EXISTS (
         SELECT 1 FROM pg_class c
@@ -123,6 +147,61 @@ export async function ensureTables(client: QueryClient) {
       ) THEN
         CREATE INDEX users_email_idx ON users(email);
       END IF;
-    END$$;
+    END$;
   `);
+  
+  await client.query(`
+    DO $
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relname = 'users_username_idx' AND n.nspname = 'public'
+      ) THEN
+        CREATE INDEX users_username_idx ON users(username);
+      END IF;
+    END$;
+  `);
+}
+
+export async function validateSchema(client: QueryClient) {
+  // List all tables in public schema
+  const tablesResult = await client.query(`
+    SELECT tablename 
+    FROM pg_tables 
+    WHERE schemaname = 'public'
+    ORDER BY tablename;
+  `);
+  
+  const tables = tablesResult.rows?.map((r: any) => r.tablename) || [];
+  console.log(`[DB] Existing tables: ${tables.join(', ') || '(none)'}`);
+  
+  // Check users table structure
+  if (tables.includes('users')) {
+    const columnsResult = await client.query(`
+      SELECT column_name, data_type, is_nullable, column_default
+      FROM information_schema.columns
+      WHERE table_name = 'users'
+      ORDER BY ordinal_position;
+    `);
+    
+    console.log('[DB] users table columns:', 
+      columnsResult.rows?.map((r: any) => 
+        `${r.column_name}(${r.data_type}, ${r.is_nullable === 'YES' ? 'nullable' : 'not null'})`
+      ).join(', ') || '(none)'
+    );
+  }
+  
+  // Count records in key tables
+  for (const table of ['users', 'profiles']) {
+    if (tables.includes(table)) {
+      try {
+        const countResult = await client.query(`SELECT COUNT(*) as count FROM ${table}`);
+        const count = countResult.rows?.[0]?.count || 0;
+        console.log(`[DB] ${table}: ${count} record(s)`);
+      } catch (err) {
+        console.warn(`[DB] Could not count ${table}:`, err);
+      }
+    }
+  }
 }

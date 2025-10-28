@@ -79,9 +79,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.setHeader("Content-Type", "application/json");
 
     try {
-      // Validate request body
+      // Validate request body - email and optional username
       const authSchema = z.object({
         email: z.string().email("Невірний формат email"),
+        username: z.string().min(3).max(255).optional(),
       });
       
       const validation = authSchema.safeParse(req.body);
@@ -89,7 +90,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: validation.error.errors[0].message });
       }
 
-      const { email } = validation.data;
+      const { email, username } = validation.data;
       
       // Wrap DB operations in try/catch to ensure resilience
       let user;
@@ -126,9 +127,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // User doesn't exist - create new user
       let newUser;
       try {
-        newUser = await storage.createUser({ email });
+        newUser = await storage.createUser({ email, username });
       } catch (dbError: any) {
         console.error("[Auth Check] DB error creating user:", dbError?.message || dbError);
+        
+        // Handle username conflict specifically
+        if (dbError?.message?.includes('username')) {
+          return res.status(409).json({ 
+            message: "Ім'я користувача вже зайняте. Спробуйте інше." 
+          });
+        }
+        
         const { status, message } = mapApiError(dbError, "Помилка створення користувача");
         return res.status(status).json({ message });
       }

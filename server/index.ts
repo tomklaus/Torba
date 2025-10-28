@@ -91,10 +91,11 @@ app.get(['/manifest.json', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.
   // Ensure DB extensions/tables exist (idempotent, fast)
   try {
     const { pool } = await import("./db");
-    const { ensureExtensions, ensureTables } = await import("../lib/db/migrations");
+    const { ensureExtensions, ensureTables, validateSchema } = await import("../lib/db/migrations");
     await ensureExtensions(pool as any);
     await ensureTables(pool as any);
     console.log("[DB] Schema ensured");
+    await validateSchema(pool as any);
   } catch (err: any) {
     console.warn("[DB] Skipping schema bootstrap (non-fatal):", err?.message || err);
   }
