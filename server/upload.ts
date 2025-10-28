@@ -1,25 +1,6 @@
 import sharp from "sharp";
-import * as tf from "@tensorflow/tfjs-node";
-import { NsfwSpy } from "@nsfwspy/node";
 import type { PhotoWithNsfw } from "@shared/schema";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// NSFW model instance
-let nsfwModel: NsfwSpy | null = null;
-
-async function loadNsfwModel() {
-  if (!nsfwModel) {
-    console.log("[NSFW] Loading NsfwSpy model...");
-    const modelPath = path.join(__dirname, "../models/nsfwspy/model.json");
-    nsfwModel = new NsfwSpy(`file://${modelPath}`);
-    await nsfwModel.load();
-    console.log("[NSFW] NsfwSpy model loaded successfully (96% accuracy, trained on 537k images)");
-  }
-  return nsfwModel;
-}
+import { getTf, getNsfwModel, initializeTFAndModel } from "./nsfw";
 
 // Compress image to max 800px on longest side
 async function compressImage(buffer: Buffer, mimeType: string): Promise<Buffer> {
@@ -102,7 +83,8 @@ async function uploadToImgbb(buffer: Buffer, mimeType: string): Promise<string> 
 
 // Moderate image with NSFW detection using NsfwSpy
 async function moderateImage(buffer: Buffer, mimeType: string): Promise<Omit<PhotoWithNsfw, "url">> {
-  const model = await loadNsfwModel();
+  const model = await getNsfwModel();
+  const tf = await getTf();
   
   // For GIFs, extract middle frame first
   let processBuffer = buffer;
@@ -118,10 +100,10 @@ async function moderateImage(buffer: Buffer, mimeType: string): Promise<Omit<Pho
       
       // Extract single frame
       const singleFrame = image.slice([middleFrame, 0, 0, 0], [1, -1, -1, -1]);
-      const frame3D = tf.squeeze(singleFrame, [0]) as tf.Tensor3D;
+      const frame3D = tf.squeeze(singleFrame, [0]) as any;
       
       // Convert tensor back to buffer (JPEG format for NsfwSpy)
-      const encodedImage = await tf.node.encodeJpeg(frame3D as any);
+      const encodedImage = await tf.node.encodeJpeg(frame3D);
       processBuffer = Buffer.from(encodedImage.buffer);
       
       image.dispose();
@@ -172,7 +154,7 @@ export async function uploadPhoto(
 // Initialize upload module (preload NSFW model)
 export async function initializeUpload() {
   try {
-    await loadNsfwModel();
+    await initializeTFAndModel();
     console.log("[Upload] Module initialized with NSFW moderation");
   } catch (error) {
     console.error("[Upload] Failed to initialize:", error);
