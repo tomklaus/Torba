@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initializeUpload } from "./upload";
+import { mapApiError } from "./apiError";
 import fs from "fs";
 import path from "path";
 
@@ -101,11 +102,14 @@ app.get(['/manifest.json', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
+    const { status, message } = mapApiError(err, "Internal Server Error");
+    console.error("[Error]", {
+      status,
+      message,
+      code: err?.code,
+      detail: err?.detail,
+    });
     res.status(status).json({ message });
-    throw err;
   });
 
   // importantly only setup vite in development and after

@@ -32,19 +32,63 @@ function createPool(): InstanceType<typeof Pool> {
 
   const connectionString = withSslmodeRequire(rawUrl);
 
-  // Configure SSL automatically for non-local hosts
+  // Determine SSL configuration with sensible defaults for Railway
   let ssl: false | { rejectUnauthorized: boolean } = false;
+  let reason = "default";
   try {
     const u = new URL(connectionString);
     const host = u.hostname;
-    const sslmode = u.searchParams.get("sslmode");
+    const sslmodeParam = (u.searchParams.get("sslmode") || "").toLowerCase();
+    const envPgSslMode = (process.env.PGSSLMODE || "").toLowerCase();
+    const envDbSsl = (process.env.DATABASE_SSL || "").toLowerCase();
+
     const isLocal =
       host === "localhost" ||
       host === "127.0.0.1" ||
       host === "::1" ||
       host.endsWith(".local");
-    if (!isLocal && sslmode !== "disable") {
-      ssl = { rejectUnauthorized: false };
+
+    // Environment overrides take precedence
+    if (envPgSslMode) {
+      if (envPgSslMode === "disable") {
+        ssl = false;
+        reason = "PGSSLMODE=disable";
+      } else if (["require", "allow", "prefer"].includes(envPgSslMode)) {
+        ssl = { rejectUnauthorized: false };
+        reason = `PGSSLMODE=${envPgSslMode}`;
+      } else if (["verify-ca", "verifyfull", "verify-full"].includes(envPgSslMode)) {
+        ssl = { rejectUnauthorized: true };
+        reason = `PGSSLMODE=${envPgSslMode}`;
+      }
+    } else if (envDbSsl) {
+      if (["0", "false", "off", "disable", "no"].includes(envDbSsl)) {
+        ssl = false;
+        reason = "DATABASE_SSL=disable";
+      } else {
+        // treat any truthy value as require
+        ssl = { rejectUnauthorized: false };
+        reason = `DATABASE_SSL=${envDbSsl}`;
+      }
+    } else {
+      // Auto-detect based on host/connection string
+      if (isLocal || sslmodeParam === "disable") {
+        ssl = false;
+        reason = isLocal ? "local host" : "sslmode=disable";
+      } else {
+        // Managed PG providers (e.g., Railway) typically require TLS with self-signed certs
+        ssl = { rejectUnauthorized: false };
+        reason = "non-local host";
+      }
+    }
+
+    if (ssl) {
+      console.log(
+        `[DB] SSL enabled for host ${host} (${reason}); rejectUnauthorized=${String(
+          (ssl as any).rejectUnauthorized,
+        )}`,
+      );
+    } else {
+      console.log(`[DB] SSL disabled for host ${host} (${reason})`);
     }
   } catch {
     // ignore parsing errors; fallback to default
