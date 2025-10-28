@@ -1,10 +1,11 @@
 // Simple service worker for PWA
-const CACHE_NAME = 'dating-pwa-v1';
+const CACHE_NAME = 'dating-pwa-v2';
 const urlsToCache = [
   '/',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',
+  '/apple-touch-icon.png',
 ];
 
 self.addEventListener('install', (event) => {

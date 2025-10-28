@@ -29,20 +29,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth endpoints
   // GET /api/auth/check - returns authentication status without modifying state
   app.get("/api/auth/check", async (_req, res) => {
-    // Set response headers for no caching
     res.setHeader("Cache-Control", "no-store");
     res.setHeader("Content-Type", "application/json");
 
+    let timeoutId: NodeJS.Timeout | null = null;
+    const timeoutPromise = new Promise((_, reject) => {
+      const error = new Error("database connectivity timeout");
+      (error as any).code = "ETIMEDOUT";
+      timeoutId = setTimeout(() => reject(error), 2_000);
+    });
+
     try {
-      // For GET requests, return a simple unauthenticated response
-      // This prevents 500s when clients check auth status
+      await Promise.race([pool.query("select 1"), timeoutPromise]);
+
       return res.json({
         authenticated: false,
         message: "Використовуйте POST запит з email для авторизації",
       });
     } catch (error: any) {
+      const { status, message } = mapApiError(error, "Сервіс тимчасово недоступний");
+
+      if (status === 503) {
+        console.warn("[Auth Check GET] Database unavailable:", error?.message || error);
+        res.setHeader("Retry-After", "5");
+        return res.status(503).json({
+          authenticated: false,
+          status: "degraded",
+          reason: "database_unavailable",
+          message,
+        });
+      }
+
       console.error("[Auth Check GET] Unexpected error:", error?.message || error);
-      return res.json({ authenticated: false });
+      return res.status(status).json({
+        authenticated: false,
+        message,
+      });
+    } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     }
   });
 
