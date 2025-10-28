@@ -1,17 +1,29 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import { useServiceStatus } from "@/components/ServiceStatusProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { isValidEmail } from "@/lib/utils";
-import { Loader2, Sparkles } from "lucide-react";
+import { AlertTriangle, Loader2, Sparkles } from "lucide-react";
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { isServiceAvailable, message: serviceStatusMessage } = useServiceStatus();
+  const serviceUnavailable = !isServiceAvailable;
+  const unavailableMessage =
+    serviceStatusMessage ?? "Сервіс тимчасово недоступний. Спробуйте трохи пізніше.";
+
+  useEffect(() => {
+    if (!serviceUnavailable && error === unavailableMessage) {
+      setError("");
+    }
+  }, [serviceUnavailable, error, unavailableMessage]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,6 +31,11 @@ export default function LoginPage() {
 
     if (!email || !isValidEmail(email)) {
       setError("Введіть коректну email адресу");
+      return;
+    }
+
+    if (serviceUnavailable) {
+      setError(unavailableMessage);
       return;
     }
 
@@ -70,49 +87,60 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
-                Email адреса
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-12 text-base"
-                disabled={loading}
-                autoFocus
-                data-testid="input-email"
-              />
-              {error && (
-                <p className="text-sm text-destructive" data-testid="text-error">
-                  {error}
-                </p>
-              )}
-            </div>
+          <div className="space-y-6">
+            {serviceUnavailable && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>{unavailableMessage}</AlertDescription>
+              </Alert>
+            )}
 
-            <Button
-              type="submit"
-              className="w-full h-12 text-base font-medium bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-              disabled={loading}
-              data-testid="button-submit"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Завантаження...
-                </>
-              ) : (
-                "Продовжити"
-              )}
-            </Button>
-          </form>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium">
+                  Email адреса
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="h-12 text-base"
+                  disabled={loading || serviceUnavailable}
+                  autoFocus
+                  data-testid="input-email"
+                />
+                {error && (
+                  <p className="text-sm text-destructive" data-testid="text-error">
+                    {error}
+                  </p>
+                )}
+              </div>
 
-          <p className="text-xs text-muted-foreground text-center mt-6">
-            Це тестова версія. Авторизація тільки через email.
-          </p>
+              <Button
+                type="submit"
+                className="w-full h-12 text-base font-medium bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                disabled={loading || serviceUnavailable}
+                data-testid="button-submit"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Завантаження...
+                  </>
+                ) : serviceUnavailable ? (
+                  "Сервіс недоступний"
+                ) : (
+                  "Продовжити"
+                )}
+              </Button>
+            </form>
+
+            <p className="text-xs text-muted-foreground text-center">
+              Це тестова версія. Авторизація тільки через email.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
