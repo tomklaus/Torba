@@ -5,8 +5,26 @@ import { storage } from "./storage";
 import { insertUserSchema, insertProfileSchema, updateProfileSchema } from "@shared/schema";
 import { uploadPhoto } from "./upload";
 import { z } from "zod";
+import { pool } from "./db";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check
+  app.get("/api/health", async (_req, res) => {
+    const node = process.version;
+    let db: "connected" | "unavailable" = "unavailable";
+    try {
+      const timeoutMs = 2000;
+      await Promise.race([
+        pool.query("select 1"),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), timeoutMs)),
+      ]);
+      db = "connected";
+    } catch (_err) {
+      db = "unavailable";
+    }
+    res.json({ status: "ok", node, db });
+  });
+
   // Auth endpoints
   app.post("/api/auth/check", async (req, res) => {
     try {

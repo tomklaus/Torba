@@ -1,6 +1,4 @@
 import sharp from "sharp";
-import FormData from "form-data";
-import { fetch } from "undici";
 import * as tf from "@tensorflow/tfjs-node";
 import { NsfwSpy } from "@nsfwspy/node";
 import type { PhotoWithNsfw } from "@shared/schema";
