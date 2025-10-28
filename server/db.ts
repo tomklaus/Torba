@@ -10,12 +10,12 @@ type GlobalWithDb = typeof globalThis & {
 
 const globalForDb = globalThis as GlobalWithDb;
 
-function withSslmodeRequire(url: string): string {
+// Strip any sslmode params from DATABASE_URL to prevent conflicts
+// with our explicit ssl config object
+function stripSslmodeParam(url: string): string {
   try {
     const u = new URL(url);
-    if (!u.searchParams.has("sslmode")) {
-      u.searchParams.set("sslmode", "require");
-    }
+    u.searchParams.delete("sslmode");
     return u.toString();
   } catch {
     return url;
@@ -30,10 +30,11 @@ function createPool(): InstanceType<typeof Pool> {
     );
   }
 
-  const connectionString = withSslmodeRequire(rawUrl);
+  // Strip conflicting sslmode params to ensure our explicit ssl config takes precedence
+  const connectionString = stripSslmodeParam(rawUrl);
 
   // Determine SSL configuration with sensible defaults for Railway
-  let ssl: false | { rejectUnauthorized: boolean } = false;
+  let ssl: false | { rejectUnauthorized: boolean; checkServerIdentity?: () => undefined } = false;
   let reason = "default";
   try {
     const u = new URL(connectionString);
@@ -54,10 +55,16 @@ function createPool(): InstanceType<typeof Pool> {
         ssl = false;
         reason = "PGSSLMODE=disable";
       } else if (["require", "allow", "prefer"].includes(envPgSslMode)) {
-        ssl = { rejectUnauthorized: false };
+        ssl = { 
+          rejectUnauthorized: false,
+          checkServerIdentity: () => undefined
+        };
         reason = `PGSSLMODE=${envPgSslMode}`;
       } else if (["verify-ca", "verifyfull", "verify-full"].includes(envPgSslMode)) {
-        ssl = { rejectUnauthorized: true };
+        ssl = { 
+          rejectUnauthorized: true,
+          checkServerIdentity: () => undefined
+        };
         reason = `PGSSLMODE=${envPgSslMode}`;
       }
     } else if (envDbSsl) {
@@ -66,7 +73,10 @@ function createPool(): InstanceType<typeof Pool> {
         reason = "DATABASE_SSL=disable";
       } else {
         // treat any truthy value as require
-        ssl = { rejectUnauthorized: false };
+        ssl = { 
+          rejectUnauthorized: false,
+          checkServerIdentity: () => undefined
+        };
         reason = `DATABASE_SSL=${envDbSsl}`;
       }
     } else {
@@ -76,7 +86,10 @@ function createPool(): InstanceType<typeof Pool> {
         reason = isLocal ? "local host" : "sslmode=disable";
       } else {
         // Managed PG providers (e.g., Railway) typically require TLS with self-signed certs
-        ssl = { rejectUnauthorized: false };
+        ssl = { 
+          rejectUnauthorized: false,
+          checkServerIdentity: () => undefined
+        };
         reason = "non-local host";
       }
     }
@@ -85,13 +98,14 @@ function createPool(): InstanceType<typeof Pool> {
       console.log(
         `[DB] SSL enabled for host ${host} (${reason}); rejectUnauthorized=${String(
           (ssl as any).rejectUnauthorized,
-        )}`,
+        )}, checkServerIdentity=bypassed`,
       );
     } else {
       console.log(`[DB] SSL disabled for host ${host} (${reason})`);
     }
-  } catch {
-    // ignore parsing errors; fallback to default
+  } catch (err: any) {
+    console.warn(`[DB] Failed to parse connection string for SSL detection:`, err?.message || err);
+    // fallback to default
   }
 
   const pool = new Pool({ connectionString, ssl: ssl || undefined });
@@ -100,17 +114,22 @@ function createPool(): InstanceType<typeof Pool> {
   void (async () => {
     try {
       await Promise.race([
-        pool.query("select 1"),
+        pool.query("SELECT 1"),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("timeout")), 3000),
+          setTimeout(() => reject(new Error("connection timeout")), 5000),
         ),
       ]);
-      console.log("[DB] Postgres TCP connectivity check: OK");
+      console.log("[DB] Connected successfully to PostgreSQL");
     } catch (err: any) {
-      console.warn(
+      console.error(
         "[DB] Connectivity check failed (non-fatal):",
         err?.message || err,
       );
+      if (err?.message?.includes("certificate")) {
+        console.error(
+          "[DB] SSL certificate error detected. If using Railway, ensure DATABASE_URL is correct and ssl config is properly applied.",
+        );
+      }
     }
   })();
 

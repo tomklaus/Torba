@@ -13,12 +13,12 @@ import { ensureExtensions, ensureTables } from "../../lib/db/migrations";
 
 const { Client } = pg;
 
-function withSslmodeRequire(url: string): string {
+// Strip any sslmode params from DATABASE_URL to prevent conflicts
+// with our explicit ssl config object
+function stripSslmodeParam(url: string): string {
   try {
     const u = new URL(url);
-    if (!u.searchParams.has("sslmode")) {
-      u.searchParams.set("sslmode", "require");
-    }
+    u.searchParams.delete("sslmode");
     return u.toString();
   } catch {
     return url;
@@ -51,10 +51,36 @@ async function main() {
     process.exit(1);
   }
 
-  const connectionString = withSslmodeRequire(rawUrl);
+  // Strip conflicting sslmode params to ensure our explicit ssl config takes precedence
+  const connectionString = stripSslmodeParam(rawUrl);
+  
+  // Determine SSL config based on hostname
+  let ssl: false | { rejectUnauthorized: boolean; checkServerIdentity?: () => undefined } = false;
+  try {
+    const u = new URL(connectionString);
+    const isLocal = 
+      u.hostname === "localhost" ||
+      u.hostname === "127.0.0.1" ||
+      u.hostname === "::1" ||
+      u.hostname.endsWith(".local");
+    
+    if (!isLocal) {
+      ssl = { 
+        rejectUnauthorized: false,
+        checkServerIdentity: () => undefined
+      };
+    }
+  } catch {
+    // If URL parsing fails, fallback to env check
+    ssl = process.env.NODE_ENV === "production" ? { 
+      rejectUnauthorized: false,
+      checkServerIdentity: () => undefined
+    } : false;
+  }
+
   const client = new Client({
     connectionString,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : undefined,
+    ssl: ssl || undefined,
   });
 
   try {
