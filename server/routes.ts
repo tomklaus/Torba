@@ -27,7 +27,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Auth endpoints
+  // GET /api/auth/check - returns authentication status without modifying state
+  app.get("/api/auth/check", async (_req, res) => {
+    // Set response headers for no caching
+    res.setHeader("Cache-Control", "no-store");
+    res.setHeader("Content-Type", "application/json");
+
+    try {
+      // For GET requests, return a simple unauthenticated response
+      // This prevents 500s when clients check auth status
+      return res.json({
+        authenticated: false,
+        message: "Використовуйте POST запит з email для авторизації",
+      });
+    } catch (error: any) {
+      console.error("[Auth Check GET] Unexpected error:", error?.message || error);
+      return res.json({ authenticated: false });
+    }
+  });
+
+  // POST /api/auth/check - validates email and creates/fetches user
   app.post("/api/auth/check", async (req, res) => {
+    // Set response headers for no caching
+    res.setHeader("Cache-Control", "no-store");
+    res.setHeader("Content-Type", "application/json");
+
     try {
       // Validate request body
       const authSchema = z.object({
@@ -40,11 +64,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { email } = validation.data;
-      const user = await storage.getUserByEmail(email);
+      
+      // Wrap DB operations in try/catch to ensure resilience
+      let user;
+      try {
+        user = await storage.getUserByEmail(email);
+      } catch (dbError: any) {
+        console.error("[Auth Check] DB error fetching user:", dbError?.message || dbError);
+        const { status, message } = mapApiError(dbError, "База даних недоступна");
+        return res.status(status).json({ message });
+      }
       
       if (user) {
         // User exists - check if profile is complete
-        const profile = await storage.getProfileByUserId(user.id);
+        let profile;
+        try {
+          profile = await storage.getProfileByUserId(user.id);
+        } catch (dbError: any) {
+          console.error("[Auth Check] DB error fetching profile:", dbError?.message || dbError);
+          // If profile fetch fails, assume profile is incomplete
+          return res.json({
+            exists: true,
+            userId: user.id,
+            profileComplete: false,
+          });
+        }
+        
         return res.json({
           exists: true,
           userId: user.id,
@@ -53,16 +98,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // User doesn't exist - create new user
-      const newUser = await storage.createUser({ email });
+      let newUser;
+      try {
+        newUser = await storage.createUser({ email });
+      } catch (dbError: any) {
+        console.error("[Auth Check] DB error creating user:", dbError?.message || dbError);
+        const { status, message } = mapApiError(dbError, "Помилка створення користувача");
+        return res.status(status).json({ message });
+      }
+      
       return res.json({
         exists: false,
         userId: newUser.id,
         profileComplete: false,
       });
     } catch (error: any) {
-      console.error("Auth check error:", error);
-      const { status, message } = mapApiError(error, "Помилка сервера");
-      return res.status(status).json({ message });
+      // Catch-all for any unexpected errors
+      console.error("[Auth Check] Unexpected error:", error?.message || error, error?.stack);
+      // Always return 503 for unexpected errors instead of 500
+      return res.status(503).json({ 
+        message: "Тимчасова помилка сервера. Спробуйте ще раз." 
+      });
     }
   });
 
