@@ -69,6 +69,17 @@ app.get(['/sw-dev.js', '/service-worker.js'], (req, res, next) => {
     console.error("[Init] Failed to initialize upload module:", err);
   });
 
+  // Ensure DB extensions/tables exist (idempotent, fast)
+  try {
+    const { pool } = await import("./db");
+    const { ensureExtensions, ensureTables } = await import("../lib/db/migrations");
+    await ensureExtensions(pool as any);
+    await ensureTables(pool as any);
+    console.log("[DB] Schema ensured");
+  } catch (err: any) {
+    console.warn("[DB] Skipping schema bootstrap (non-fatal):", err?.message || err);
+  }
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
