@@ -1,4 +1,4 @@
-// File: C:\Users\Parents\Desktop\Torba\app\api\text\[id]\route.js
+// File: /home/engine/project/app/api/text/[id]/route.js
 import * as entry from '../../../../../../app/api/text/[id]/route.js'
 import type { NextRequest } from 'next/server.js'
 

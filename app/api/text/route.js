@@ -23,9 +23,11 @@ export async function GET() {
 }
 
 export async function POST(request) {
+  let content = '';
   try {
     await initializeTable();
-    const { content } = await request.json();
+    const body = await request.json();
+    content = body?.content;
     
     if (!content || content.trim() === '') {
       return NextResponse.json({ error: 'Content is required' }, { status: 400 });
@@ -37,19 +39,19 @@ export async function POST(request) {
     if (!newEntry) {
       return NextResponse.json({
         id: Date.now(),
-        content: content,
+        content,
         created_at: new Date().toISOString()
       });
     }
     
     return NextResponse.json(newEntry);
   } catch (error) {
-    console.error('Error saving text:', error.message);
+    console.error('Error saving text:', error.message || error);
     // For local development, return mock data instead of error
     if (process.env.NODE_ENV !== 'production') {
       return NextResponse.json({
         id: Date.now(),
-        content: content,
+        content: content || '',
         created_at: new Date().toISOString()
       });
     }
