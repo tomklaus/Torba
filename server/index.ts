@@ -63,6 +63,24 @@ app.get(['/sw-dev.js', '/service-worker.js'], (req, res, next) => {
   }
 });
 
+// Middleware to serve PWA assets (manifest, icons) from public folder
+app.get(['/manifest.json', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'], (req, res, next) => {
+  const filename = req.path.substring(1); // Remove leading slash
+  const filepath = path.join(process.cwd(), 'public', filename);
+  
+  if (fs.existsSync(filepath)) {
+    const contentTypes: Record<string, string> = {
+      '.json': 'application/manifest+json; charset=utf-8',
+      '.png': 'image/png',
+    };
+    const ext = path.extname(filename);
+    res.setHeader('Content-Type', contentTypes[ext] || 'application/octet-stream');
+    fs.createReadStream(filepath).pipe(res);
+  } else {
+    next();
+  }
+});
+
 (async () => {
   // Initialize upload module (preload NSFW model)
   initializeUpload().catch(err => {
