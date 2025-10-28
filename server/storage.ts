@@ -1,6 +1,7 @@
 import { type User, type InsertUser, type Profile, type InsertProfile, users, profiles } from "@shared/schema";
 import { db } from "./db";
 import { eq, ne } from "drizzle-orm";
+import { randomBytes } from "crypto";
 
 export interface IStorage {
   // User methods
@@ -16,6 +17,12 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  // Generate a unique username
+  private generateUsername(): string {
+    const randomId = randomBytes(4).toString('hex');
+    return `guest_${randomId}`;
+  }
+
   // User methods
   async getUserById(id: string): Promise<User | undefined> {
     const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
@@ -28,8 +35,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(user: InsertUser): Promise<User> {
-    const result = await db.insert(users).values(user).returning();
-    return result[0];
+    // Generate username if not provided
+    const username = user.username || this.generateUsername();
+    
+    // Try to create user with generated username, retry if collision
+    let attempts = 0;
+    const maxAttempts = 5;
+    
+    while (attempts < maxAttempts) {
+      try {
+        const result = await db.insert(users).values({
+          ...user,
+          username: attempts === 0 ? username : this.generateUsername(),
+        }).returning();
+        return result[0];
+      } catch (error: any) {
+        // If unique constraint violation on username, retry with new username
+        if (error?.code === '23505' && error?.constraint?.includes('username')) {
+          attempts++;
+          if (attempts >= maxAttempts) {
+            throw new Error('Failed to generate unique username after multiple attempts');
+          }
+          continue;
+        }
+        // Re-throw other errors
+        throw error;
+      }
+    }
+    
+    throw new Error('Failed to create user');
   }
 
   async getAllUsersWithProfiles(excludeUserId?: string): Promise<Array<User & { profile: Profile | null }>> {

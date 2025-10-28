@@ -16,7 +16,8 @@ export type PhotoWithNsfw = {
 // Users table - для авторізації
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: text("email").notNull().unique(),
+  username: varchar("username", { length: 255 }).unique().notNull(),
+  email: text("email").unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -118,7 +119,8 @@ export const profiles = pgTable("profiles", {
 // Schemas для валідації
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
-});
+  username: true,
+}).partial({ email: true, username: true });
 
 export const insertProfileSchema = createInsertSchema(profiles).omit({
   id: true,
