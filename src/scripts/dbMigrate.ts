@@ -7,8 +7,10 @@
  * Usage: npm run db:migrate
  */
 
-import { Client } from "pg";
+import pg from "pg";
 import { ensureExtensions, ensureTables } from "../../lib/db/migrations";
+
+const { Client } = pg;
 
 function withSslmodeRequire(url: string): string {
   try {
