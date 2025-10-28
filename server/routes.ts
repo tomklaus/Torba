@@ -6,6 +6,7 @@ import { insertUserSchema, insertProfileSchema, updateProfileSchema } from "@sha
 import { uploadPhoto } from "./upload";
 import { z } from "zod";
 import { pool } from "./db";
+import { mapApiError } from "./apiError";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check
@@ -60,7 +61,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       console.error("Auth check error:", error);
-      return res.status(500).json({ message: "Помилка сервера" });
+      const { status, message } = mapApiError(error, "Помилка сервера");
+      return res.status(status).json({ message });
     }
   });
 
@@ -89,7 +91,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json(users);
     } catch (error: any) {
       console.error("Users fetch error:", error);
-      return res.status(500).json({ message: "Помилка отримання користувачів" });
+      const { status, message } = mapApiError(error, "Помилка отримання користувачів");
+      return res.status(status).json({ message });
     }
   });
 
@@ -126,7 +129,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(201).json(profile);
     } catch (error: any) {
       console.error("Profile creation error:", error);
-      return res.status(500).json({ message: "Помилка створення профілю" });
+      const { status, message } = mapApiError(error, "Помилка створення профілю");
+      return res.status(status).json({ message });
     }
   });
 
@@ -142,7 +146,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json(profile);
     } catch (error: any) {
       console.error("Profile fetch error:", error);
-      return res.status(500).json({ message: "Помилка отримання профілю" });
+      const { status, message } = mapApiError(error, "Помилка отримання профілю");
+      return res.status(status).json({ message });
     }
   });
 
@@ -175,7 +180,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json(updatedProfile);
     } catch (error: any) {
       console.error("Profile update error:", error);
-      return res.status(500).json({ message: "Помилка оновлення профілю" });
+      const { status, message } = mapApiError(error, "Помилка оновлення профілю");
+      return res.status(status).json({ message });
     }
   });
 
