@@ -17,8 +17,10 @@ Railway runs your server in a regular Node.js environment. PostgreSQL is reachab
 Copy `.env.example` to `.env` and configure:
 
 - `DATABASE_URL` — your Postgres connection string.
-  - For production (Railway), include `?sslmode=require` if needed.
-  - The server auto-enables `ssl: { rejectUnauthorized: false }` for non-local hosts.
+  - **Important**: Do NOT include `?sslmode=` parameters. The server handles SSL configuration explicitly.
+  - For production (Railway), the server automatically enables SSL with self-signed certificate support.
+  - SSL config: `{ rejectUnauthorized: false, checkServerIdentity: () => undefined }` for non-local hosts.
+  - For local development, SSL is automatically disabled.
 - `IMGBB_API_KEY` — API key for ImgBB image hosting.
 - `TF_CPP_MIN_LOG_LEVEL` (optional) — set to `2` to reduce TensorFlow native logs.
 
