@@ -115,8 +115,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       // Catch-all for any unexpected errors
       console.error("[Auth Check] Unexpected error:", error?.message || error, error?.stack);
-      // Always return 503 for unexpected errors instead of 500
-      return res.status(503).json({ 
+      // Return 500 for unexpected non-DB errors
+      return res.status(500).json({ 
         message: "Тимчасова помилка сервера. Спробуйте ще раз." 
       });
     }
