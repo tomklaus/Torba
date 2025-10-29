@@ -3,8 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initializeUpload } from "./upload";
 import { mapApiError } from "./apiError";
-import fs from "fs";
-import path from "path";
+import { registerPwaAssetRoutes, registerServiceWorkerAssetRoutes } from "./pwaAssets";
 
 const app = express();
 
@@ -22,7 +21,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
   const start = Date.now();
-  const path = req.path;
+  const requestPath = req.path;
   let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
   const originalResJson = res.json;
@@ -33,8 +32,8 @@ app.use((req, res, next) => {
 
   res.on("finish", () => {
     const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+    if (requestPath.startsWith("/api")) {
+      let logLine = `${req.method} ${requestPath} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
@@ -50,37 +49,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Middleware to serve Service Worker files with correct MIME type
-app.get(['/sw-dev.js', '/service-worker.js'], (req, res, next) => {
-  const filename = req.path.substring(1); // Remove leading slash
-  const filepath = path.join(process.cwd(), 'public', filename);
-  
-  if (fs.existsSync(filepath)) {
-    res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-    res.setHeader('Service-Worker-Allowed', '/');
-    fs.createReadStream(filepath).pipe(res);
-  } else {
-    next();
-  }
-});
-
-// Middleware to serve PWA assets (manifest, icons) from public folder
-app.get(['/manifest.json', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png'], (req, res, next) => {
-  const filename = req.path.substring(1); // Remove leading slash
-  const filepath = path.join(process.cwd(), 'public', filename);
-  
-  if (fs.existsSync(filepath)) {
-    const contentTypes: Record<string, string> = {
-      '.json': 'application/manifest+json; charset=utf-8',
-      '.png': 'image/png',
-    };
-    const ext = path.extname(filename);
-    res.setHeader('Content-Type', contentTypes[ext] || 'application/octet-stream');
-    fs.createReadStream(filepath).pipe(res);
-  } else {
-    next();
-  }
-});
+registerServiceWorkerAssetRoutes(app);
+registerPwaAssetRoutes(app);
 
 (async () => {
   // Initialize upload module (preload NSFW model)
