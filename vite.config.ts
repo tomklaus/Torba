@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import { DIST_PUBLIC_DIR } from "./shared/paths";
 
 export default defineConfig({
   plugins: [
@@ -28,7 +29,7 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: DIST_PUBLIC_DIR,
     emptyOutDir: true,
   },
   server: {

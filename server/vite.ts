@@ -3,8 +3,9 @@ import fs from "fs";
 import path from "path";
 import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
-import viteConfig from "../vite.config";
 import { nanoid } from "nanoid";
+import { DIST_PUBLIC_DIR } from "../shared/paths";
+import viteConfig from "../vite.config";
 
 const viteLogger = createLogger();
 
@@ -68,18 +69,46 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(import.meta.dirname, "public");
-
-  if (!fs.existsSync(distPath)) {
+  if (!fs.existsSync(DIST_PUBLIC_DIR)) {
     throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
+      `Could not find the build directory: ${DIST_PUBLIC_DIR}, make sure to build the client first`,
     );
   }
 
-  app.use(express.static(distPath));
+  const indexHtmlPath = path.resolve(DIST_PUBLIC_DIR, "index.html");
 
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+  app.use(
+    express.static(DIST_PUBLIC_DIR, {
+      setHeaders(res, filePath) {
+        if (filePath.endsWith(".js")) {
+          res.setHeader("Content-Type", "application/javascript; charset=utf-8");
+        }
+      },
+    }),
+  );
+
+  app.get("*", (req, res, next) => {
+    if (req.method !== "GET") {
+      return next();
+    }
+
+    let pathname: string;
+
+    try {
+      const url = new URL(req.originalUrl, `http://${req.headers.host ?? "localhost"}`);
+      pathname = url.pathname;
+    } catch (_error) {
+      pathname = req.path;
+    }
+
+    if (path.extname(pathname)) {
+      return next();
+    }
+
+    res.sendFile(indexHtmlPath, (error) => {
+      if (error) {
+        next(error);
+      }
+    });
   });
 }
