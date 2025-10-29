@@ -1,0 +1,66 @@
+[1mdiff --git a/lib/db/migrations.ts b/lib/db/migrations.ts[m
+[1mindex 9e44d1c..18ba77d 100644[m
+[1m--- a/lib/db/migrations.ts[m
+[1m+++ b/lib/db/migrations.ts[m
+[36m@@ -30,7 +30,7 @@[m [mexport async function ensureTables(client: QueryClient) {[m
+   [m
+   // Add username column if it doesn't exist (for existing databases)[m
+   await client.query(`[m
+[31m-    DO $[m
+[32m+[m[32m    DO $$ LANGUAGE plpgsql[m
+     BEGIN[m
+       IF NOT EXISTS ([m
+         SELECT 1 FROM information_schema.columns [m
+[36m@@ -38,17 +38,17 @@[m [mexport async function ensureTables(client: QueryClient) {[m
+       ) THEN[m
+         ALTER TABLE users ADD COLUMN username varchar(255) UNIQUE NOT NULL DEFAULT 'guest_' || gen_random_uuid()::text;[m
+       END IF;[m
+[31m-    END$;[m
+[32m+[m[32m    END $$[m
+   `);[m
+   [m
+   // Make email nullable if it's not (for schema migration)[m
+   await client.query(`[m
+[31m-    DO $[m
+[32m+[m[32m    DO $$ LANGUAGE plpgsql[m
+     BEGIN[m
+       ALTER TABLE users ALTER COLUMN email DROP NOT NULL;[m
+     EXCEPTION[m
+       WHEN others THEN NULL;[m
+[31m-    END$;[m
+[32m+[m[32m    END $$;[m
+   `);[m
+ [m
+   // profiles table[m
+[36m@@ -138,7 +138,7 @@[m [mexport async function ensureTables(client: QueryClient) {[m
+ [m
+   // Optional: performance: ensure indexes exist[m
+   await client.query(`[m
+[31m-    DO $[m
+[32m+[m[32m    DO $$ LANGUAGE plpgsql[m
+     BEGIN[m
+       IF NOT EXISTS ([m
+         SELECT 1 FROM pg_class c[m
+[36m@@ -147,11 +147,11 @@[m [mexport async function ensureTables(client: QueryClient) {[m
+       ) THEN[m
+         CREATE INDEX users_email_idx ON users(email);[m
+       END IF;[m
+[31m-    END$;[m
+[32m+[m[32m    END $$;[m
+   `);[m
+   [m
+   await client.query(`[m
+[31m-    DO $[m
+[32m+[m[32m    DO $$ LANGUAGE plpgsql[m
+     BEGIN[m
+       IF NOT EXISTS ([m
+         SELECT 1 FROM pg_class c[m
+[36m@@ -160,7 +160,7 @@[m [mexport async function ensureTables(client: QueryClient) {[m
+       ) THEN[m
+         CREATE INDEX users_username_idx ON users(username);[m
+       END IF;[m
+[31m-    END$;[m
+[32m+[m[32m    END $$;[m
+   `);[m
+ }[m
+ [m
