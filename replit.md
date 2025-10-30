@@ -126,6 +126,21 @@ Progressive Web Application для LGBTQ+ спільноти України з �
 - Border radius: 6px (md)
 
 ## Запуск проекту
+
+Перед стартом встановіть залежності для розробки:
+
+```bash
+npm install
+```
+
+Для production деплойментів використовуйте сучасну команду без deprecated `npm config set production`:
+
+```bash
+npm install --omit=dev
+```
+
+Після цього запускайте локальне середовище:
+
 ```bash
 npm run dev  # Запуск frontend + backend
 ```

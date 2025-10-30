@@ -4,6 +4,22 @@ This repository contains a React SPA built with Vite and an Express server. The 
 
 Key technologies: Express, Drizzle ORM (PostgreSQL), pg (TCP), Sharp, @tensorflow/tfjs-node, and NsfwSpy.
 
+## Installation
+
+Install dependencies locally with:
+
+```bash
+npm install
+```
+
+For production builds (Railway, CI/CD, etc.), skip dev dependencies with:
+
+```bash
+npm install --omit=dev
+```
+
+This replaces the deprecated `npm config set production` workflow and suppresses the `npm WARN config production` message during installs.
+
 ## Railway deployment notes
 
 Railway runs your server in a regular Node.js environment. PostgreSQL is reachable via standard TCP — not WebSockets. This project is configured to use the `pg` driver exclusively.
@@ -11,6 +27,10 @@ Railway runs your server in a regular Node.js environment. PostgreSQL is reachab
 - Database client: `pg` Pool over TCP
 - ORM: Drizzle (`drizzle-orm/node-postgres`)
 - Runtime: Node.js (Express server; no Edge runtime)
+
+### Dependency installation
+
+Use `npm install --omit=dev` in Railway build steps to install only runtime dependencies and avoid the deprecated `npm config set production` flag.
 
 ### Environment variables
 
