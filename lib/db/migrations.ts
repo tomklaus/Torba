@@ -30,7 +30,7 @@ export async function ensureTables(client: QueryClient) {
   
   // Add username column if it doesn't exist (for existing databases)
   await client.query(`
-    DO $
+    DO $$ LANGUAGE plpgsql
     BEGIN
       IF NOT EXISTS (
         SELECT 1 FROM information_schema.columns 
@@ -38,17 +38,17 @@ export async function ensureTables(client: QueryClient) {
       ) THEN
         ALTER TABLE users ADD COLUMN username varchar(255) UNIQUE NOT NULL DEFAULT 'guest_' || gen_random_uuid()::text;
       END IF;
-    END$;
+    END $$
   `);
   
   // Make email nullable if it's not (for schema migration)
   await client.query(`
-    DO $
+    DO $$ LANGUAGE plpgsql
     BEGIN
       ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
     EXCEPTION
       WHEN others THEN NULL;
-    END$;
+    END $$;
   `);
 
   // profiles table
@@ -138,7 +138,7 @@ export async function ensureTables(client: QueryClient) {
 
   // Optional: performance: ensure indexes exist
   await client.query(`
-    DO $
+    DO $$ LANGUAGE plpgsql
     BEGIN
       IF NOT EXISTS (
         SELECT 1 FROM pg_class c
@@ -147,11 +147,11 @@ export async function ensureTables(client: QueryClient) {
       ) THEN
         CREATE INDEX users_email_idx ON users(email);
       END IF;
-    END$;
+    END $$;
   `);
   
   await client.query(`
-    DO $
+    DO $$ LANGUAGE plpgsql
     BEGIN
       IF NOT EXISTS (
         SELECT 1 FROM pg_class c
@@ -160,7 +160,7 @@ export async function ensureTables(client: QueryClient) {
       ) THEN
         CREATE INDEX users_username_idx ON users(username);
       END IF;
-    END$;
+    END $$;
   `);
 }
 
