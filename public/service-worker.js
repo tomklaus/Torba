@@ -1,5 +1,5 @@
 // Simple service worker for PWA
-const CACHE_NAME = 'dating-pwa-v2';
+const CACHE_NAME = 'dionis-plus-v1';
 const urlsToCache = [
   '/',
   '/manifest.json',
