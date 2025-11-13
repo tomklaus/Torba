@@ -1,6 +1,6 @@
-import { type User, type InsertUser, type Profile, type InsertProfile, users, profiles } from "@shared/schema";
+import { type User, type InsertUser, type Profile, type InsertProfile, type RegistrationAgreement, users, profiles, registrationAgreements } from "@shared/schema";
 import { db } from "./db";
-import { eq, ne } from "drizzle-orm";
+import { eq, ne, desc } from "drizzle-orm";
 import { randomBytes } from "crypto";
 
 export interface IStorage {
@@ -9,6 +9,11 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   getAllUsersWithProfiles(excludeUserId?: string): Promise<Array<User & { profile: Profile | null }>>;
+  updateUser(userId: string, updates: Partial<User>): Promise<User | undefined>;
+  
+  // Auth methods
+  recordRegistrationAgreement(userId: string, version: string, ipAddress?: string, userAgent?: string): Promise<RegistrationAgreement>;
+  getLatestAgreement(userId: string): Promise<RegistrationAgreement | undefined>;
   
   // Profile methods
   getProfileByUserId(userId: string): Promise<Profile | undefined>;
@@ -83,6 +88,34 @@ export class DatabaseStorage implements IStorage {
       ...row.user,
       profile: row.profile,
     }));
+  }
+
+  async updateUser(userId: string, updates: Partial<User>): Promise<User | undefined> {
+    const result = await db.update(users)
+      .set(updates as any)
+      .where(eq(users.id, userId))
+      .returning();
+    return result[0];
+  }
+
+  // Auth methods
+  async recordRegistrationAgreement(userId: string, version: string, ipAddress?: string, userAgent?: string): Promise<RegistrationAgreement> {
+    const result = await db.insert(registrationAgreements).values({
+      userId,
+      version,
+      ipAddress,
+      userAgent,
+    }).returning();
+    return result[0];
+  }
+
+  async getLatestAgreement(userId: string): Promise<RegistrationAgreement | undefined> {
+    const result = await db.select()
+      .from(registrationAgreements)
+      .where(eq(registrationAgreements.userId, userId))
+      .orderBy(desc(registrationAgreements.acceptedAt))
+      .limit(1);
+    return result[0];
   }
 
   // Profile methods

@@ -18,7 +18,21 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   username: varchar("username", { length: 255 }).unique().notNull(),
   email: text("email").unique(),
+  passwordHash: varchar("password_hash"),
+  termsAcceptedAt: timestamp("terms_accepted_at"),
+  lastLoginAt: timestamp("last_login_at"),
+  loginAttempts: integer("login_attempts").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Registration agreements table - для відслідження версій згод
+export const registrationAgreements = pgTable("registration_agreements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  version: varchar("version", { length: 50 }).notNull(),
+  acceptedAt: timestamp("accepted_at").defaultNow().notNull(),
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
 });
 
 // Profiles table - вся інформація профілю з 7 кроків реєстрації
@@ -234,6 +248,7 @@ export const step10Schema = z.object({
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+export type RegistrationAgreement = typeof registrationAgreements.$inferSelect;
 export type InsertProfile = z.infer<typeof insertProfileSchema>;
 export type Profile = typeof profiles.$inferSelect;
 export type Step1Data = z.infer<typeof step1Schema>;

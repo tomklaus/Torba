@@ -1,15 +1,48 @@
 import express, { type Request, Response, NextFunction } from "express";
+import session from "express-session";
+import pgStore from "connect-pg-simple";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initializeUpload } from "./upload";
 import { mapApiError } from "./apiError";
 import { registerPwaAssetRoutes, registerServiceWorkerAssetRoutes } from "./pwaAssets";
+import { pool } from "./db";
 
 const app = express();
+
+// Session store setup
+const PgStore = pgStore(session);
+const sessionStore = new PgStore({
+  pool: pool,
+  tableName: 'session',
+  createTableIfMissing: true,
+});
+
+// Session middleware
+const isProduction = app.get("env") === "production";
+app.use(session({
+  store: sessionStore,
+  secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    httpOnly: true,
+    secure: isProduction, // Only send over HTTPS in production
+    sameSite: 'strict',
+  },
+}));
 
 declare module 'http' {
   interface IncomingMessage {
     rawBody: unknown
+  }
+}
+
+declare module 'express-session' {
+  interface SessionData {
+    userId?: string;
+    userEmail?: string;
   }
 }
 app.use(express.json({

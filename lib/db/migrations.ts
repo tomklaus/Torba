@@ -24,6 +24,10 @@ export async function ensureTables(client: QueryClient) {
       id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
       username varchar(255) UNIQUE NOT NULL,
       email text UNIQUE,
+      password_hash varchar,
+      terms_accepted_at timestamptz,
+      last_login_at timestamptz,
+      login_attempts integer NOT NULL DEFAULT 0,
       created_at timestamptz NOT NULL DEFAULT NOW()
     );
   `);
@@ -48,6 +52,63 @@ export async function ensureTables(client: QueryClient) {
       ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
     EXCEPTION
       WHEN others THEN NULL;
+    END$;
+  `);
+
+  // Add new auth columns if they don't exist
+  await client.query(`
+    DO $
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'users' AND column_name = 'password_hash'
+      ) THEN
+        ALTER TABLE users ADD COLUMN password_hash varchar;
+      END IF;
+      IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'users' AND column_name = 'terms_accepted_at'
+      ) THEN
+        ALTER TABLE users ADD COLUMN terms_accepted_at timestamptz;
+      END IF;
+      IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'users' AND column_name = 'last_login_at'
+      ) THEN
+        ALTER TABLE users ADD COLUMN last_login_at timestamptz;
+      END IF;
+      IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns 
+        WHERE table_name = 'users' AND column_name = 'login_attempts'
+      ) THEN
+        ALTER TABLE users ADD COLUMN login_attempts integer NOT NULL DEFAULT 0;
+      END IF;
+    END$;
+  `);
+
+  // registration_agreements table
+  await client.query(`
+    CREATE TABLE IF NOT EXISTS registration_agreements (
+      id varchar PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id varchar NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      version varchar(50) NOT NULL,
+      accepted_at timestamptz NOT NULL DEFAULT NOW(),
+      ip_address varchar,
+      user_agent text
+    );
+  `);
+
+  // Create index on user_id for registration_agreements
+  await client.query(`
+    DO $
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relname = 'registration_agreements_user_id_idx' AND n.nspname = 'public'
+      ) THEN
+        CREATE INDEX registration_agreements_user_id_idx ON registration_agreements(user_id);
+      END IF;
     END$;
   `);
 
@@ -193,7 +254,7 @@ export async function validateSchema(client: QueryClient) {
   }
   
   // Count records in key tables
-  for (const table of ['users', 'profiles']) {
+  for (const table of ['users', 'profiles', 'registration_agreements']) {
     if (tables.includes(table)) {
       try {
         const countResult = await client.query(`SELECT COUNT(*) as count FROM ${table}`);
