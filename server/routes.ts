@@ -7,8 +7,27 @@ import { uploadPhoto } from "./upload";
 import { z } from "zod";
 import { pool } from "./db";
 import { mapApiError } from "./apiError";
+import { 
+  hashPassword, 
+  verifyPassword, 
+  validatePasswordStrength, 
+  validateAge, 
+  registrationSchema, 
+  loginSchema,
+  getCurrentAgreementVersion,
+  loginThrottleManager,
+} from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Middleware to check if user is authenticated
+  const requireAuth = (req: any, res: any, next: any) => {
+    const userId = req.session?.userId;
+    if (!userId) {
+      return res.status(401).json({ message: "Потрібна авторизація" });
+    }
+    next();
+  };
+
   // Health check
   app.get("/api/health", async (_req, res) => {
     const node = process.version;
@@ -157,6 +176,178 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // POST /api/auth/register - Register new user with password
+  app.post("/api/auth/register", async (req, res) => {
+    res.setHeader("Cache-Control", "no-store");
+    res.setHeader("Content-Type", "application/json");
+
+    try {
+      // Validate request body
+      const validation = registrationSchema.safeParse(req.body);
+      if (!validation.success) {
+        const errorMessage = validation.error.errors[0]?.message || "Невірні дані реєстрації";
+        return res.status(400).json({ message: errorMessage });
+      }
+
+      const { email, password, birthDate, termsAccepted } = validation.data;
+
+      // Validate age
+      const ageValidation = validateAge(birthDate);
+      if (!ageValidation.isValid) {
+        return res.status(400).json({ message: ageValidation.error });
+      }
+
+      // Validate password strength
+      const passwordStrength = validatePasswordStrength(password);
+      if (!passwordStrength.isValid) {
+        return res.status(400).json({ message: passwordStrength.errors[0] });
+      }
+
+      // Check if email already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({ message: "Цей email вже використовується" });
+      }
+
+      // Hash password
+      const passwordHash = await hashPassword(password);
+
+      // Create user with password
+      const newUser = await storage.createUser({
+        email,
+        username: undefined, // Will be auto-generated
+      });
+
+      // Update user with password hash and terms acceptance
+      const updatedUser = await storage.updateUser(newUser.id, {
+        passwordHash,
+        termsAcceptedAt: new Date(),
+        lastLoginAt: new Date(),
+        loginAttempts: 0,
+      } as any);
+
+      // Record registration agreement
+      const ipAddress = req.ip || req.headers['x-forwarded-for']?.toString();
+      const userAgent = req.headers['user-agent'];
+      await storage.recordRegistrationAgreement(
+        newUser.id,
+        getCurrentAgreementVersion(),
+        ipAddress,
+        userAgent,
+      );
+
+      // Set session
+      (req as any).session.userId = newUser.id;
+      (req as any).session.userEmail = email;
+
+      return res.status(201).json({
+        success: true,
+        userId: newUser.id,
+        email: newUser.email,
+        username: newUser.username,
+      });
+    } catch (error: any) {
+      console.error("[Auth Register] Error:", error?.message || error);
+      const { status, message } = mapApiError(error, "Помилка реєстрації");
+      return res.status(status).json({ message });
+    }
+  });
+
+  // POST /api/auth/login - Login with email and password
+  app.post("/api/auth/login", async (req, res) => {
+    res.setHeader("Cache-Control", "no-store");
+    res.setHeader("Content-Type", "application/json");
+
+    try {
+      // Validate request body
+      const validation = loginSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: validation.error.errors[0]?.message || "Невірні дані" });
+      }
+
+      const { email, password } = validation.data;
+
+      // Check if user exists
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ message: "Невірна електронна адреса або пароль" });
+      }
+
+      // Check if throttled
+      if (loginThrottleManager.isThrottled(user.id)) {
+        const secondsUntilReset = loginThrottleManager.getSecondsUntilReset(user.id);
+        return res.status(429).json({
+          message: `Занадто багато невдалих спроб входу. Спробуйте через ${secondsUntilReset} секунд.`,
+        });
+      }
+
+      // Check if user has password set
+      if (!user.passwordHash) {
+        return res.status(401).json({ message: "Невірна електронна адреса або пароль" });
+      }
+
+      // Verify password
+      const passwordMatch = await verifyPassword(password, user.passwordHash);
+      if (!passwordMatch) {
+        loginThrottleManager.recordAttempt(user.id);
+        return res.status(401).json({ message: "Невірна електронна адреса або пароль" });
+      }
+
+      // Reset login attempts and update last login
+      loginThrottleManager.resetAttempts(user.id);
+      await storage.updateUser(user.id, {
+        lastLoginAt: new Date(),
+        loginAttempts: 0,
+      } as any);
+
+      // Set session
+      (req as any).session.userId = user.id;
+      (req as any).session.userEmail = email;
+
+      return res.json({
+        success: true,
+        userId: user.id,
+        email: user.email,
+        username: user.username,
+      });
+    } catch (error: any) {
+      console.error("[Auth Login] Error:", error?.message || error);
+      const { status, message } = mapApiError(error, "Помилка входу");
+      return res.status(status).json({ message });
+    }
+  });
+
+  // GET /api/auth/session - Check if user is logged in
+  app.get("/api/auth/session", async (req, res) => {
+    res.setHeader("Cache-Control", "no-store");
+    res.setHeader("Content-Type", "application/json");
+
+    try {
+      const userId = (req as any).session?.userId;
+      const userEmail = (req as any).session?.userEmail;
+
+      if (!userId) {
+        return res.json({ authenticated: false });
+      }
+
+      // Verify user still exists
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.json({ authenticated: false });
+      }
+
+      return res.json({
+        authenticated: true,
+        userId: user.id,
+        email: user.email,
+        username: user.username,
+      });
+    } catch (error: any) {
+      console.error("[Auth Session] Error:", error?.message || error);
+      return res.json({ authenticated: false });
+    }
+  });
+
   app.post("/api/auth/logout", async (req, res) => {
     try {
       // Destroy session if exists
@@ -175,7 +366,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Users endpoints
-  app.get("/api/users", async (req, res) => {
+  app.get("/api/users", requireAuth, async (req, res) => {
     try {
       const excludeUserId = req.query.excludeUserId as string | undefined;
       const users = await storage.getAllUsersWithProfiles(excludeUserId);
@@ -188,7 +379,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Profile endpoints
-  app.post("/api/profiles", async (req, res) => {
+  app.post("/api/profiles", requireAuth, async (req, res) => {
     try {
       // Validate request body with insertProfileSchema + userId
       const createProfileSchema = insertProfileSchema.extend({
@@ -204,6 +395,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const { userId, ...profileData } = validation.data;
+
+      // Verify user is creating their own profile
+      const sessionUserId = (req as any).session?.userId;
+      if (sessionUserId !== userId) {
+        return res.status(403).json({ message: "Немає доступу до цього профілю" });
+      }
 
       // Validate user exists
       const user = await storage.getUserById(userId);
@@ -225,7 +422,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/profiles/:userId", async (req, res) => {
+  app.get("/api/profiles/:userId", requireAuth, async (req, res) => {
     try {
       const { userId } = req.params;
       const profile = await storage.getProfileByUserId(userId);
@@ -242,7 +439,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/profiles/:userId", async (req, res) => {
+  app.patch("/api/profiles/:userId", requireAuth, async (req, res) => {
     try {
       const { userId } = req.params;
       

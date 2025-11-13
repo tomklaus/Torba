@@ -41,6 +41,7 @@ Copy `.env.example` to `.env` and configure:
   - For production (Railway), the server automatically enables SSL with self-signed certificate support.
   - SSL config: `{ rejectUnauthorized: false, checkServerIdentity: () => undefined }` for non-local hosts.
   - For local development, SSL is automatically disabled.
+- `SESSION_SECRET` — **Required** for production. Secret key for express-session. Use a strong, random value. Falls back to a default in development (not secure for production).
 - `IMGBB_API_KEY` — API key for ImgBB image hosting.
 - `TF_CPP_MIN_LOG_LEVEL` (optional) — set to `2` to reduce TensorFlow native logs.
 
@@ -48,6 +49,41 @@ Copy `.env.example` to `.env` and configure:
 
 - `GET /api/health` — returns `{ status, node, db }` where `db` is `connected` or `unavailable`.
 - On boot, the server performs a non-fatal Postgres `SELECT 1` health probe and logs the result.
+
+### Authentication
+
+The server provides secure registration and login with session management:
+
+- **Password Policy**: Passwords must be at least 8 characters and include:
+  - Lowercase letters (a-z)
+  - Uppercase letters (A-Z)
+  - Digits (0-9)
+  - Special characters (!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]
+
+- **Registration (`POST /api/auth/register`)**:
+  - Validates email format
+  - Enforces password strength requirements
+  - Verifies user is at least 18 years old via birth date
+  - Records terms acceptance with timestamp
+  - Hashes passwords with bcrypt (never stored in plain text)
+  - Returns `201` on success, `400` for validation errors, `409` if email exists
+
+- **Login (`POST /api/auth/login`)**:
+  - Verifies email and password
+  - Implements throttling: max 5 failed attempts per 15 minutes
+  - Returns `401` for invalid credentials (no details disclosed)
+  - Returns `429` if throttled with reset time
+  - Updates `last_login_at` on successful login
+  - Establishes session cookie (httpOnly, secure in production)
+
+- **Session (`GET /api/auth/session`)**:
+  - Returns authenticated user info if session is valid
+  - Returns `{ authenticated: false }` if not logged in
+
+- **Logout (`POST /api/auth/logout`)**:
+  - Destroys session immediately
+
+Sessions are stored in PostgreSQL via connect-pg-simple with 24-hour expiry.
 
 ### Error handling
 
