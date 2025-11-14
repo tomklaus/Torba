@@ -3,24 +3,16 @@ import MuiAlert, { AlertProps as MuiAlertProps } from '@mui/material/Alert';
 import AlertTitle from '@mui/material/AlertTitle';
 import Box from '@mui/material/Box';
 
-const variantMap: Record<string, MuiAlertProps['severity']> = {
-  default: 'info',
-  destructive: 'error',
-};
-
-export interface AlertProps extends Omit<MuiAlertProps, 'severity'> {
-  variant?: 'default' | 'destructive' | MuiAlertProps['severity'];
+export interface AlertProps extends Omit<MuiAlertProps, 'variant'> {
+  variant?: 'filled' | 'outlined' | 'standard';
 }
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
-  ({ children, variant = 'default', ...props }, ref) => {
-    const severity = variantMap[variant as string] as MuiAlertProps['severity'] || 'info';
-    return (
-      <MuiAlert ref={ref} severity={severity} {...props}>
-        {children}
-      </MuiAlert>
-    );
-  }
+  ({ children, variant = 'standard', ...props }, ref) => (
+    <MuiAlert ref={ref} variant={variant} {...props}>
+      {children}
+    </MuiAlert>
+  )
 );
 
 Alert.displayName = 'Alert';
@@ -37,7 +29,7 @@ const AlertDescription = React.forwardRef<HTMLDivElement, AlertDescriptionProps>
 
 AlertDescription.displayName = 'AlertDescription';
 
-interface AlertTitleProps extends React.HTMLAttributes<HTMLDivElement> {}
+export interface AlertTitleProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const AlertTitleComponent = React.forwardRef<HTMLDivElement, AlertTitleProps>(
   ({ children, ...props }, ref) => (

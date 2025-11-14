@@ -1,15 +1,14 @@
-import { cn } from "@/lib/utils"
+import React from 'react';
+import MuiSkeleton, { SkeletonProps as MuiSkeletonProps } from '@mui/material/Skeleton';
 
-function Skeleton({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn("animate-pulse rounded-md bg-muted", className)}
-      {...props}
-    />
+export interface SkeletonProps extends MuiSkeletonProps {}
+
+const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
+  ({ ...props }, ref) => (
+    <MuiSkeleton ref={ref} {...props} />
   )
-}
+);
 
-export { Skeleton }
+Skeleton.displayName = 'Skeleton';
+
+export { Skeleton };

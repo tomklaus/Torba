@@ -1,12 +1,9 @@
 import React from 'react';
 import MuiCard, { CardProps as MuiCardProps } from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardHeader from '@mui/material/CardHeader';
-import CardActions from '@mui/material/CardActions';
+import CardContent, { CardContentProps as MuiCardContentProps } from '@mui/material/CardContent';
+import CardHeader, { CardHeaderProps as MuiCardHeaderProps } from '@mui/material/CardHeader';
+import CardActions, { CardActionsProps as MuiCardActionsProps } from '@mui/material/CardActions';
 import Box from '@mui/material/Box';
-import { CardContentProps as MuiCardContentProps } from '@mui/material/CardContent';
-import { CardHeaderProps as MuiCardHeaderProps } from '@mui/material/CardHeader';
-import { CardActionsProps as MuiCardActionsProps } from '@mui/material/CardActions';
 
 export interface CardProps extends MuiCardProps {}
 
@@ -20,6 +17,14 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
 
 Card.displayName = 'Card';
 
+export interface CardHeaderProps extends MuiCardHeaderProps {}
+
+const CardHeaderComponent = React.forwardRef<HTMLDivElement, CardHeaderProps>(
+  ({ ...props }, ref) => <CardHeader ref={ref} {...props} />
+);
+
+CardHeaderComponent.displayName = 'CardHeader';
+
 export interface CardContentProps extends MuiCardContentProps {}
 
 const CardContentComponent = React.forwardRef<HTMLDivElement, CardContentProps>(
@@ -31,14 +36,6 @@ const CardContentComponent = React.forwardRef<HTMLDivElement, CardContentProps>(
 );
 
 CardContentComponent.displayName = 'CardContent';
-
-export interface CardHeaderProps extends MuiCardHeaderProps {}
-
-const CardHeaderComponent = React.forwardRef<HTMLDivElement, CardHeaderProps>(
-  ({ ...props }, ref) => <CardHeader ref={ref} {...props} />
-);
-
-CardHeaderComponent.displayName = 'CardHeader';
 
 export interface CardActionsProps extends MuiCardActionsProps {}
 
@@ -89,10 +86,9 @@ CardTitle.displayName = 'CardTitle';
 
 export {
   Card,
-  CardContentComponent as CardContent,
   CardHeaderComponent as CardHeader,
+  CardContentComponent as CardContent,
   CardActionsComponent as CardActions,
-  CardActionsComponent as CardFooter,
   CardDescription,
   CardTitle,
 };
