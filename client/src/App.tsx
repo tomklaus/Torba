@@ -1,8 +1,6 @@
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { ServiceStatusProvider } from "@/components/ServiceStatusProvider";
 import { ServiceStatusBanner } from "@/components/ServiceStatusBanner";
 import { AnimatePresence, motion } from "framer-motion";
@@ -60,11 +58,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ServiceStatusProvider>
-        <TooltipProvider>
-          <Toaster />
-          <ServiceStatusBanner />
-          <Router />
-        </TooltipProvider>
+        <ServiceStatusBanner />
+        <Router />
       </ServiceStatusProvider>
     </QueryClientProvider>
   );
