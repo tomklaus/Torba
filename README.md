@@ -1,48 +1,73 @@
-# Torba Text Storage (Express + Vite)
+# dionis.plus
 
-This repository contains a React SPA built with Vite and an Express server. The server exposes REST endpoints for auth, profile management, and image uploads with NSFW moderation.
+Платформа знайомств для LGBTQ+ спільноти в Україні. Цей монорепозиторій містить React PWA (Progressive Web App) клієнт, побудований з Vite, та Express сервер з підтримкою REST API, автентифікації, управління профілями та завантаження зображень з NSFW модерацією.
 
-Key technologies: Express, Drizzle ORM (PostgreSQL), pg (TCP), Sharp, @tensorflow/tfjs-node, and NsfwSpy.
+**Ключові технології:** Express, React 18, Drizzle ORM (PostgreSQL), pg (TCP), Sharp, @tensorflow/tfjs-node, NsfwSpy, Tailwind CSS v4, Framer Motion.
 
-## Installation
+## Архітектура проєкту
 
-Install dependencies locally with:
+Проєкт організований як монорепозиторій із трьома основними папками:
+
+- **`client/`** — React SPA з PWA функціоналом, побудований з Vite
+- **`server/`** — Express API сервер з роутами, middleware та бізнес-логікою
+- **`shared/`** — Спільна Drizzle схема бази даних і типи TypeScript
+
+Детальніше про архітектуру та потік даних читайте в [`docs/architecture.md`](./docs/architecture.md).
+
+## Встановлення
+
+Встановіть залежності локально командою:
 
 ```bash
 npm install
 ```
 
-For production builds (Railway, CI/CD, etc.), skip dev dependencies with:
+Для продакшн-збірки (Railway, CI/CD тощо), пропустіть dev залежності:
 
 ```bash
 npm install --omit=dev
 ```
 
-This replaces the deprecated `npm config set production` workflow and suppresses the `npm WARN config production` message during installs.
+Це замінює застарілий підхід `npm config set production` та усуває попередження `npm WARN config production` під час встановлення.
 
-## Railway deployment notes
+## Деплой на Railway
 
-Railway runs your server in a regular Node.js environment. PostgreSQL is reachable via standard TCP — not WebSockets. This project is configured to use the `pg` driver exclusively.
+Railway запускає ваш сервер у стандартному Node.js середовищі. PostgreSQL доступний через TCP — не WebSocket. Цей проєкт налаштований виключно на використання драйвера `pg`.
 
-- Database client: `pg` Pool over TCP
-- ORM: Drizzle (`drizzle-orm/node-postgres`)
-- Runtime: Node.js (Express server; no Edge runtime)
+- **База даних:** `pg` Pool через TCP
+- **ORM:** Drizzle (`drizzle-orm/node-postgres`)
+- **Runtime:** Node.js (Express сервер; без Edge runtime)
 
-### Dependency installation
+### Встановлення залежностей
 
-Use `npm install --omit=dev` in Railway build steps to install only runtime dependencies and avoid the deprecated `npm config set production` flag.
+Використовуйте `npm install --omit=dev` у кроках збірки Railway для встановлення лише runtime залежностей без застарілого флагу `npm config set production`.
 
-### Environment variables
+### Змінні оточення
 
-Copy `.env.example` to `.env` and configure:
+Скопіюйте `.env.example` у `.env` та налаштуйте:
 
-- `DATABASE_URL` — your Postgres connection string.
-  - **Important**: Do NOT include `?sslmode=` parameters. The server handles SSL configuration explicitly.
-  - For production (Railway), the server automatically enables SSL with self-signed certificate support.
-  - SSL config: `{ rejectUnauthorized: false, checkServerIdentity: () => undefined }` for non-local hosts.
-  - For local development, SSL is automatically disabled.
-- `IMGBB_API_KEY` — API key for ImgBB image hosting.
-- `TF_CPP_MIN_LOG_LEVEL` (optional) — set to `2` to reduce TensorFlow native logs.
+- **`DATABASE_URL`** — рядок підключення до PostgreSQL.
+  - **Важливо:** НЕ додавайте параметри `?sslmode=`. Сервер керує SSL конфігурацією автоматично.
+  - Для продакшну (Railway) сервер автоматично вмикає SSL з підтримкою самопідписаних сертифікатів.
+  - SSL конфігурація: `{ rejectUnauthorized: false, checkServerIdentity: () => undefined }` для не-локальних хостів.
+  - Для локальної розробки SSL автоматично вимкнений.
+  
+- **`SESSION_SECRET`** — секретний ключ для Express сесій.
+  - Згенеруйте випадковий рядок мінімум 32 символи для продакшну.
+  - Приклад генерації: `openssl rand -base64 32`
+  
+- **`CLIENT_ORIGIN`** — URL клієнтського додатка для CORS.
+  - Локально: `http://localhost:5173`
+  - Railway: `https://your-app-name.up.railway.app`
+  
+- **`SOCKET_ORIGIN`** — URL для WebSocket з'єднань (зазвичай співпадає з `CLIENT_ORIGIN`).
+  
+- **`MAP_PROVIDER_KEY`** — API ключ для провайдера карт (Google Maps, Mapbox тощо).
+  - Необхідний для функціоналу геолокації та відображення карт.
+  
+- **`IMGBB_API_KEY`** — API ключ для ImgBB хостингу зображень.
+
+- **`TF_CPP_MIN_LOG_LEVEL`** (опціонально) — встановіть на `2` щоб зменшити логи TensorFlow.
 
 ### Health and diagnostics
 
@@ -66,49 +91,88 @@ TensorFlow is initialized exactly once using a singleton initializer (`server/ns
 - `TF_CPP_MIN_LOG_LEVEL=2` reduces TensorFlow native logs.
 - The upload pipeline compresses images, uploads to ImgBB, and classifies them with the NSFW model.
 
-## Development
+## Розробка
 
-- `npm run dev` — start Express with Vite in middleware mode (development)
-- `npm run build` — build the client and server
-- `npm start` — run the built server
+### Скрипти для розробки
 
-## Database utilities
+- **`npm run dev`** — запуск Express з Vite у режимі middleware (розробка).
+  - Сервер доступний на `http://localhost:5000`
+  - Vite dev server інтегрований для hot-reload клієнта
+  
+- **`npm run build`** — збірка клієнта та сервера для продакшну.
+  - Клієнт збирається у `dist/public/` (статичні файли)
+  - Сервер збирається у `dist/` (Node.js bundle)
+  
+- **`npm start`** — запуск зібраного сервера у продакшн-режимі.
+  - Сервер роздає статичні файли з `dist/public/`
+  - Railway використовує цю команду для запуску додатка
 
-Lightweight migration helpers ensure required extensions and tables exist (idempotent):
+### Локальна розробка
 
-- `npm run db:migrate` — ensures extensions/tables exist
-- `npm run db:reset` — drops and recreates tables (destructive; prompts for confirmation)
-- `npm run db:seed` — creates a test user for development (username: `test_user`, email: `test@example.com`)
+1. Створіть `.env` файл на основі `.env.example`
+2. Запустіть PostgreSQL локально або використовуйте хмарну БД
+3. Виконайте міграції: `npm run db:migrate`
+4. (Опціонально) Додайте тестові дані: `npm run db:seed`
+5. Запустіть dev сервер: `npm run dev`
+6. Відкрийте браузер на `http://localhost:5000`
 
-### Database schema
+## Утиліти бази даних
 
-The database contains two main tables:
+Легкі хелпери для міграцій гарантують, що необхідні розширення та таблиці існують (ідемпотентні):
 
-**users** table:
+- **`npm run db:migrate`** — гарантує існування розширень/таблиць
+- **`npm run db:reset`** — видаляє та пересоздає таблиці (деструктивно; запитує підтвердження)
+- **`npm run db:seed`** — створює тестового користувача для розробки (username: `test_user`, email: `test@example.com`)
+- **`npm run check`** — перевірка типів TypeScript
+
+### Схема бази даних
+
+База даних містить дві основні таблиці:
+
+**users** (користувачі):
 - `id` (varchar, UUID primary key)
-- `username` (varchar(255), unique, not null) — auto-generated as `guest_<randomId>` if not provided
+- `username` (varchar(255), unique, not null) — автогенерується як `guest_<randomId>` якщо не вказано
 - `email` (text, unique, nullable)
 - `created_at` (timestamp)
 
-**profiles** table:
-- Contains all user profile information from the 10-step registration flow
-- Foreign key to `users(id)` with CASCADE delete
-- Includes fields for personal info, commerce settings, photos, contacts, and sexual profile
+**profiles** (профілі):
+- Містить всю інформацію профілю користувача з 10-крокової реєстрації
+- Foreign key до `users(id)` з CASCADE delete
+- Включає поля для особистої інформації, налаштувань комерції, фото, контактів та сексуального профілю
 
-On first boot, the server automatically:
-1. Creates required PostgreSQL extensions (pgcrypto for UUID generation)
-2. Creates tables if they don't exist
-3. Migrates existing schemas (adds missing columns, adjusts constraints)
-4. Validates and logs the database state
+При першому запуску сервер автоматично:
+1. Створює необхідні PostgreSQL розширення (pgcrypto для генерації UUID)
+2. Створює таблиці якщо вони не існують
+3. Мігрує існуючі схеми (додає відсутні колонки, коригує обмеження)
+4. Валідує та логує стан бази даних
 
-Schema validation logs show:
-- List of existing tables
-- Column structure of the users table
-- Record counts for users and profiles
+Логи валідації схеми показують:
+- Список існуючих таблиць
+- Структуру колонок таблиці users
+- Кількість записів для users та profiles
 
-## Project structure
+## Структура проєкту
 
-- `server/` — Express server, routes, DB, upload and NSFW utilities
-- `shared/` — Drizzle schema and shared types
-- `client/` — React client app
-- `lib/db/migrations.ts` — idempotent DB bootstrap (extensions, tables)
+```
+dionis-plus/
+├── client/              # React PWA клієнт
+│   ├── src/            # Вихідний код React компонентів
+│   └── index.html      # HTML точка входу
+├── server/             # Express API сервер
+│   ├── index.ts        # Точка входу сервера
+│   ├── routes.ts       # API роути
+│   ├── db.ts          # Підключення до БД
+│   ├── upload.ts       # Логіка завантаження зображень
+│   └── nsfw.ts         # NSFW модерація
+├── shared/             # Спільний код (схема БД, типи)
+│   └── schema.ts       # Drizzle ORM схема
+├── lib/                # Утиліти та хелпери
+├── public/             # Статичні ресурси (PWA маніфест, іконки)
+├── dist/               # Вихідні файли збірки
+│   ├── public/         # Зібраний клієнт (статика)
+│   └── index.js        # Зібраний сервер
+└── docs/               # Документація
+    └── architecture.md # Деталі архітектури
+```
+
+Детальніше про архітектуру див. [`docs/architecture.md`](./docs/architecture.md).
